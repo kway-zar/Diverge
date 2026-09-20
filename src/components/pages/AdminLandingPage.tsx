@@ -1,6 +1,6 @@
 import SidebarApp from '../Sidebar.tsx'
 import { useState } from 'react'
-
+import Navbar from '../Navbar.tsx'
 
 function AdminLandingPage() {
   const items = ["Dashboard", "Customers", "Billing", "Tickets", "Analytics", "Plan Management", "Support"]
@@ -26,8 +26,10 @@ function AdminLandingPage() {
 
   return (
     <>
+      <Navbar />
 
       <div className="bg-[#121212] flex flex-row-reverse">
+
         <div className="w-[90vw] overflow-y-auto font-ubuntu text-white flex flex-col items-start mt-15">
 
           {renderContent()}

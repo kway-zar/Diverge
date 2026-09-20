@@ -25,7 +25,7 @@ function SidebarApp({ items, getCurrentState }: SidebarProps) {
   return (
     <>
       <SidebarProvider className="w-max">
-        <Sidebar variant="floating" className="h-[90dvh] my-auto ml-5">
+        <Sidebar variant="floating" className="h-[88dvh] mt-auto mb-5 ml-5">
           <SidebarContent className='gap-2 bg-[#393939] rounded-xl inset-shadow-white inset-shadow-xs text-white backdrop-blur-md pt-4'>
             {items.map((item) => {
               const isActive = activeItem === item;

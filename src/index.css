@@ -38,6 +38,7 @@
   min-height: 100svh;
   flex-direction: column;
   box-sizing: border-box;
+  background-color: #121212;
 }
 
 body {
