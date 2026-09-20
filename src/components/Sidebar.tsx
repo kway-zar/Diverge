@@ -1,1 +1,73 @@
 
+import {
+  Sidebar,
+  SidebarProvider,
+  SidebarTrigger,
+  SidebarGroup,
+  SidebarContent,
+  SidebarFooter
+} from '../components/ui/sidebar'
+
+import { useState } from 'react'
+
+interface SidebarProps {
+  items: string[];
+  getCurrentState: (data: string) => void;
+
+}
+
+
+function SidebarApp({ items, getCurrentState }: SidebarProps) {
+
+  const [activeItem, setActiveItem] = useState(items[0]);
+
+
+
+  return (
+    <>
+      <SidebarProvider className="w-max">
+        <Sidebar variant="floating" className="h-[90dvh] my-auto ml-5">
+          <SidebarContent className='gap-2 bg-[#393939] rounded-xl inset-shadow-white inset-shadow-xs text-white backdrop-blur-md pt-4'>
+            {items.map((item) => {
+              const isActive = activeItem === item;
+              return (
+                <SidebarGroup key={item} onClick={() =>getCurrentState(item)}>
+                  <div
+                    onClick={() => {setActiveItem(item); } }
+                    className={`w-[90%] mx-auto p-[20px] text-xl text-left cursor-pointer ${isActive ? " transition ease-in bg-[rgba(217,217,217,0.4)] rounded-lg border-white/40 border-1 backdrop-blur-md" : ""}`}>
+                    {item}
+
+                  </div>
+                </SidebarGroup>
+
+
+              )
+
+            })}
+
+
+            <SidebarFooter className="backdrop-brightness-50 bg-gray bottom-0 absolute w-full border-t-1 border-white/40 backdrop-blur-md flex-row py-3 pb-5 items-center">
+              <div className="w-10 h-10 rounded-full bg-white"></div>
+              <div className="flex flex-col text-left">
+                <span>Name</span>
+                <span className="text-gray-400 text-xs">email@email.com</span>
+              </div>
+              <i className="fa-solid fa-arrow-right-from-bracket fa-lg right-0 ml-auto"></i>
+            </SidebarFooter>
+
+          </SidebarContent>
+        </Sidebar>
+
+
+        <main>
+          <SidebarTrigger />
+
+        </main>
+
+      </SidebarProvider>
+    </>
+
+  )
+
+}
+export default SidebarApp
