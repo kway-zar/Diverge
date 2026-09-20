@@ -27,12 +27,12 @@ function LoginPage() {
       >
 
         {/* Left panel — brand / gradient */}
-        <div className="relative m-4 flex flex-col justify-between rounded-[30px] shadow-glassy [--glassy-color:207_58_114] bg-gradient-to-br from-[#0C0C0C] via-[#B00049] to-[#3ACF98] p-10 md:m-10">
+        <div className="relative m-4 flex flex-col justify-between rounded-[30px] shadow-glassy [--glassy-color:207_58_114] bg-gradient-to-br from-[#0C0C0C] from-30% via-[#B00049] via-66% to-[#3ACF98] to-100% p-10 md:m-10">
           <div className="flex items-center gap-0">
             <img src={logo} alt="Diverge logo" className="h-24 w-auto -ml-12 -mt-7" />
             <span className="text-2xl font-light tracking-wide text-white -ml-6 -mt-10 font-['Ubuntu']">Diverge</span>
           </div>
-          <p className="text-2xl font-bold  leading-snug text-white mb-[-35px] -ml-6 !text-left [text-shadow:0_4px_4px_rgba(0,0,0,0.25)]">
+          <p className="text-2xl font-bold  leading-snug text-white mb-[-35px] -ml-6 !text-left [text-shadow:0_4px_4px_rgba(0,0,0,0.25)] opacity-85">
             From fast to fiber, where system incompetence diverge.
           </p>
         </div>
@@ -84,8 +84,8 @@ function LoginPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <Checkbox id="remember" defaultChecked />
-              <Label htmlFor="remember" className="text-sm font-normal text-neutral-200">
+              <Checkbox id="remember" className="bg-black" defaultChecked />
+              <Label htmlFor="remember" className="text-xs font-normal text-neutral-200">
                 Remember me
               </Label>
             </div>
