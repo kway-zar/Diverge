@@ -2,7 +2,6 @@
 import {
   Sidebar,
   SidebarProvider,
-  SidebarTrigger,
   SidebarGroup,
   SidebarContent,
   SidebarFooter
@@ -58,11 +57,6 @@ function SidebarApp({ items, getCurrentState }: SidebarProps) {
           </SidebarContent>
         </Sidebar>
 
-
-        <main>
-          <SidebarTrigger />
-
-        </main>
 
       </SidebarProvider>
     </>

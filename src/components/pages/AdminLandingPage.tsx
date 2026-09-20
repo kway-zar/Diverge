@@ -27,7 +27,7 @@ function AdminLandingPage() {
   return (
     <>
 
-      <div className="bg-black flex flex-row-reverse">
+      <div className="bg-[#121212] flex flex-row-reverse">
         <div className="w-[90vw] overflow-y-auto font-ubuntu text-white flex flex-col items-start mt-15">
 
           {renderContent()}
