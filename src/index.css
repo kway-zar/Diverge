@@ -5,6 +5,8 @@
 @theme {
   --font-ubuntu: "Ubuntu", sans-serif;
   --shadow-glassy: inset 6px 0px 2px -3px rgb(var(--glassy-color)/ 0.7), inset -6px -4px 2px -3px rgb(var(--glassy-color) / 0.3);
+  --font-ubuntu-mono: "Ubuntu", mono;
+  
 }
 
 
