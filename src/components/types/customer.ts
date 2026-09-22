@@ -1,4 +1,4 @@
-export type CustomerType = "Residential" | "Business" | "Government";
+export type CustomerType = "Residential" | "Business" | "Government" | "Commercial";
 export type CustomerStatus = "Active" | "Inactive" | "Pending" | "Suspended";
 
 export interface Customer {
@@ -7,6 +7,7 @@ export interface Customer {
     email: string;
     type: CustomerType;
     plan: string;
+    usage: string;
     balance: string;
     status: CustomerStatus;
     area: string;

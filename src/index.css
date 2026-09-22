@@ -4,10 +4,22 @@
 
 @theme {
   --font-ubuntu: "Ubuntu", sans-serif;
-  --shadow-glassy: inset 6px 0px 2px -3px rgb(var(--glassy-color)/ 0.7), inset -6px -4px 2px -3px rgb(var(--glassy-color) / 0.3);
+  --shadow-glassy: 
+    inset 1px 1px 1px 0px rgba(255, 255, 255, 0.2), 
+    inset -1px -1px 1px 0px rgba(255, 255, 255, 0.05), 
+    0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
+@layer utilities {
+  .hover-glass-rim {
+    @apply transition-all duration-200 ease-in-out;
+  }
+  .hover-glass-rim:hover {
+    @apply bg-white/10 border-white/20 text-white;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  }
 
+}
 
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";

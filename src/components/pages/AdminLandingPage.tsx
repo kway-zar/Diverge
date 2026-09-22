@@ -1,6 +1,7 @@
 import SidebarApp from '../Sidebar'
 import { useState } from 'react'
 import Navbar from '../Navbar.tsx'
+import CustomersPage from './CustomersPage.tsx'
 
 function AdminLandingPage() {
   const items = ["Dashboard", "Customers", "Billing", "Tickets", "Analytics", "Plan Management", "Support"]
@@ -15,7 +16,7 @@ function AdminLandingPage() {
     if (activeItem == 'Dashboard') {
       //return dashboard component here
     } if (activeItem == 'Customers') {
-      //return customer component here
+      return <CustomersPage />
     }
     //and so forth...
     return (
