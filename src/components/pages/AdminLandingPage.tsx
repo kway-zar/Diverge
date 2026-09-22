@@ -1,6 +1,9 @@
 import SidebarApp from '../Sidebar.tsx'
 import { useState } from 'react'
 import Navbar from '../Navbar.tsx'
+import Dashboard from './Dashboard.tsx'
+import Footer from '../Footer.tsx'
+
 
 function AdminLandingPage() {
   const items = ["Dashboard", "Customers", "Billing", "Tickets", "Analytics", "Plan Management", "Support"]
@@ -14,6 +17,7 @@ function AdminLandingPage() {
   const renderContent = () => {
     if (activeItem == 'Dashboard') {
       //return dashboard component here
+      return <Dashboard />
     } if (activeItem == 'Customers') {
       //return customer component here
     }
@@ -30,7 +34,7 @@ function AdminLandingPage() {
 
       <div className="bg-[#121212] flex flex-row-reverse">
 
-        <div className="w-[90vw] overflow-y-auto font-ubuntu text-white flex flex-col items-start mt-15">
+        <div className="w-[95vw] overflow-y-auto font-ubuntu text-white flex flex-col items-start ">
 
           {renderContent()}
 
@@ -40,6 +44,7 @@ function AdminLandingPage() {
 
 
       </div>
+      <Footer />
     </>
   )
 }
