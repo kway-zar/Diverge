@@ -1,6 +1,7 @@
-import SidebarApp from '../Sidebar.tsx'
+import SidebarApp from '../Sidebar'
 import { useState } from 'react'
 import Navbar from '../Navbar.tsx'
+import CustomersPage from './CustomersPage.tsx'
 import Dashboard from './Dashboard.tsx'
 import Footer from '../Footer.tsx'
 
@@ -19,7 +20,7 @@ function AdminLandingPage() {
       //return dashboard component here
       return <Dashboard />
     } if (activeItem == 'Customers') {
-      //return customer component here
+      return <CustomersPage />
     }
     //and so forth...
     return (
