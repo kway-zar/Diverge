@@ -5,8 +5,8 @@ function Navbar() {
   return (
 
     <Card className="absolute rounded-none sticky top-0 ring-0 flex flex-row">
-      <div className="ml-10">
-        <img src={logo} className='h-18 w-18 translate-x-5' />
+      <div className="ml-2">
+        <img src={logo} className='h-15 w-15 translate-x-5' />
       </div>
       <div className="flex flex-col items-start text-left">
         <span className="text-white text-lg font-thin font-ubuntu">Diverge</span>

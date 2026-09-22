@@ -1,4 +1,4 @@
-import SidebarApp from '../Sidebar.tsx'
+import SidebarApp from '../Sidebar'
 import { useState } from 'react'
 import Navbar from '../Navbar.tsx'
 
