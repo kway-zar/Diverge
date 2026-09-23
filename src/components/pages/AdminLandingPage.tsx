@@ -1,6 +1,7 @@
 import SidebarApp from '../Sidebar.tsx'
 import { useState } from 'react'
 import Navbar from '../Navbar.tsx'
+import BillingPage from './BillingPage.tsx'
 
 function AdminLandingPage() {
   const items = ["Dashboard", "Customers", "Billing", "Tickets", "Analytics", "Plan Management", "Support"]
@@ -17,6 +18,9 @@ function AdminLandingPage() {
     } if (activeItem == 'Customers') {
       //return customer component here
     }
+    if (activeItem == "Billing") {
+      return <BillingPage/>
+    }
     //and so forth...
     return (
       <></>
@@ -26,20 +30,24 @@ function AdminLandingPage() {
 
   return (
     <>
-      <Navbar />
+   <div className="h-screen w-screen overflow-hidden flex flex-col bg-[#121212]">
+      
+      <header className="shrink-0 z-30">
+        <Navbar />
+      </header>
 
-      <div className="bg-[#121212] flex flex-row-reverse">
+      <div className="flex-1 flex flex-row-reverse min-h-0 w-full overflow-hidden">
 
-        <div className="w-[90vw] overflow-y-auto font-ubuntu text-white flex flex-col items-start mt-15">
-
+        <main className="flex-1 h-full overflow-y-auto font-ubuntu text-white pt-8 px-8 pb-12">
           {renderContent()}
+        </main>
 
-        </div>
-
-        <SidebarApp items={items} getCurrentState={handleData} />
-
+        <aside className="shrink-0 h-full">
+          <SidebarApp items={items} getCurrentState={handleData} />
+        </aside>
 
       </div>
+    </div>
     </>
   )
 }
