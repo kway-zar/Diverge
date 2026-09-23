@@ -73,7 +73,7 @@ export function CustomersPage() {
   return (
     <>
       <div className="bg-[#121212] flex flex-row-reverse w-full">
-        <div className="w-full flex mr-10 lg:w-[90vw] overflow-y-auto overflow-x-hidden font-ubuntu text-white flex-col items-start px-4 lg:px-0">
+        <div className="w-full flex mr-10 lg:w-[90vw] z-0 overflow-y-auto overflow-x-hidden font-ubuntu text-white flex-col items-start px-4 lg:px-0">
           <div className="mb-5 ml-4 lg:ml-10">
             <h1 className="text-2xl font-bold tracking-wider text-white text-left">
               Customer Management

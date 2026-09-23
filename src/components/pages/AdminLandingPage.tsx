@@ -31,11 +31,11 @@ function AdminLandingPage() {
 
   return (
     <>
-      <Navbar />
+      <Navbar/>
 
       <div className="bg-[#121212] flex flex-row-reverse">
 
-        <div className="w-[95vw] overflow-y-auto font-ubuntu text-white flex flex-col items-start ">
+        <div className="w-[95vw] z-0 overflow-y-auto font-ubuntu text-white flex flex-col items-start ">
 
           {renderContent()}
 
