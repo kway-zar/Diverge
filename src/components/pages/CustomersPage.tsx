@@ -1,16 +1,19 @@
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Customer } from "../types/customer";
+import CustomerOverlay from "../modals/customerOverlay";
 
 
 export function CustomersPage() {
 
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const customers: Customer[] = [
         {
             accountID: "000001",
             name: "Jonathan Landoy",
-            email: "jonathan.landoy@example.com",
+            email: "jonathan@example.com",
             type: "Residential",
             plan: "Standard",
             usage: "5000 MB",
@@ -42,7 +45,7 @@ export function CustomersPage() {
             status: "Suspended",
             area: "Cebu",
             since: "2023-01-15"
-        }
+        },
     ];
 
 
@@ -108,48 +111,63 @@ export function CustomersPage() {
             <Table className="grow bg-white/5 shadow-glassy rounded-[1vw] text-[10px] sm:text-xs md:text-sm">
               <TableHeader>
                 <TableRow className="border-b border-white/10">
-                  <TableHead className="text-center whitespace-nowrap">
+                  <TableHead className="text-center whitespace-nowrap font-light text-[#FFFFFF] opacity-30">
                     ACCOUNT ID
                   </TableHead>
-                  <TableHead className="text-center whitespace-nowrap">NAME</TableHead>
-                  <TableHead className="text-center whitespace-nowrap">TYPE</TableHead>
-                  <TableHead className="text-center whitespace-nowrap">PLAN</TableHead>
-                  <TableHead className="text-center whitespace-nowrap">
+                  <TableHead className="text-center whitespace-nowrap font-light text-[#FFFFFF] opacity-30">
+                    NAME
+                  </TableHead>
+                  <TableHead className="text-center whitespace-nowrap font-light text-[#FFFFFF] opacity-30">
+                    TYPE
+                  </TableHead>
+                  <TableHead className="text-center whitespace-nowrap font-light text-[#FFFFFF] opacity-30">
+                    PLAN
+                  </TableHead>
+                  <TableHead className="text-center whitespace-nowrap font-light text-[#FFFFFF] opacity-30">
                     BALANCE
                   </TableHead>
-                  <TableHead className="text-center whitespace-nowrap">USAGE</TableHead>
-                  <TableHead className="text-center whitespace-nowrap">
+                  <TableHead className="text-center whitespace-nowrap font-light text-[#FFFFFF] opacity-30">
+                    USAGE
+                  </TableHead>
+                  <TableHead className="text-center whitespace-nowrap font-light text-[#FFFFFF] opacity-30">
                     STATUS
                   </TableHead>
-                  <TableHead className="text-center whitespace-nowrap">AREA</TableHead>
-                  <TableHead className="text-center whitespace-nowrap">SINCE</TableHead>
+                  <TableHead className="text-center whitespace-nowrap font-light text-[#FFFFFF] opacity-30">
+                    AREA
+                  </TableHead>
+                  <TableHead className="text-center whitespace-nowrap font-light text-[#FFFFFF] opacity-30">
+                    SINCE
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
+              
                 {customers.map((customer: Customer) => (
                 <TableRow className="border-b border-white/10 text-slate-300">
                   <TableCell className="text-center font-mono whitespace-nowrap text-[#3ACF98]">
                     {customer.accountID}
                   </TableCell>
+                  <Button onClick={() => setSelectedCustomer(customer)} className="w-full">
                   <TableCell className="text-center max-w-[150px]">
-                    <div className="flex flex-col truncate">
+                     <div className="flex flex-col truncate">
                       <span className="font-semibold text-slate-100 truncate">
                         {customer.name}
                       </span>
-                    </div>
+                      </div>
                   </TableCell>
+                  </Button>
                   <TableCell className="text-center whitespace-nowrap">
                     <span className={getTypeBadge(customer.type)}>
                       {customer.type}
                     </span>
                   </TableCell>
-                  <TableCell className="text-center max-w-[160px] truncate">
+                  <TableCell className="text-center max-w-[160px] truncate text-[#C4C4C4] font-light">
                     {customer.plan}
                   </TableCell>
                   <TableCell className="text-center whitespace-nowrap">
                     {customer.balance}
                   </TableCell>
-                  <TableCell className="text-center whitespace-nowrap">
+                  <TableCell className="text-center whitespace-nowrap text-[#C4C4C4] font-light">
                     {customer.usage}
                   </TableCell>
                   <TableCell className="text-center whitespace-nowrap">
@@ -157,8 +175,10 @@ export function CustomersPage() {
                       {customer.status}
                     </span>
                   </TableCell>
-                  <TableCell className="text-center whitespace-nowrap">{customer.area}</TableCell>
-                  <TableCell className="text-center font-mono whitespace-nowrap">
+                  <TableCell className="text-center whitespace-nowrap text-[#C4C4C4] font-light">
+                    {customer.area}
+                  </TableCell>
+                  <TableCell className="text-center font-mono whitespace-nowrap text-[#C4C4C4] font-light">
                     {customer.since}
                   </TableCell>
                 </TableRow>
@@ -168,6 +188,10 @@ export function CustomersPage() {
           </div>
         </div>
       </div>
+
+      {selectedCustomer && (
+        <CustomerOverlay customer={selectedCustomer} onClose={() => setSelectedCustomer(null)}/>
+      )}
     </>
   );
 }
