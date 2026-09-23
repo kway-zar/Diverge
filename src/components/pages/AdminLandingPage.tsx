@@ -9,7 +9,7 @@ import Footer from '../Footer.tsx'
 function AdminLandingPage() {
   const items = ["Dashboard", "Customers", "Billing", "Tickets", "Analytics", "Plan Management", "Support"]
 
-  const [activeItem, setActiveItem] = useState('')
+  const [activeItem, setActiveItem] = useState(items[0])
   const handleData = (data: string) => {
     setActiveItem(data);
 
@@ -31,11 +31,11 @@ function AdminLandingPage() {
 
   return (
     <>
-      <Navbar />
+      <Navbar/>
 
       <div className="bg-[#121212] flex flex-row-reverse">
 
-        <div className="w-[95vw] overflow-y-auto font-ubuntu text-white flex flex-col items-start ">
+        <div className="w-[95vw] z-0 overflow-y-auto font-ubuntu text-white flex flex-col items-start ">
 
           {renderContent()}
 

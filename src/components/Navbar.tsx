@@ -4,7 +4,7 @@ import logo from '@/assets/logo.png'
 function Navbar() {
   return (
 
-    <Card className="absolute rounded-none sticky top-0 ring-0 flex flex-row">
+    <Card className="rounded-none sticky top-0 ring-0 flex flex-row bg-gradient-to-b from-[#121212] to-transparent z-2 w-full h-auto">
       <div className="ml-2">
         <img src={logo} className='h-15 w-15 translate-x-5' />
       </div>
@@ -21,10 +21,6 @@ function Navbar() {
         </Card>
 
         <i className="fa-regular fa-bell fa-xl text-[#b00049] mx-5 cursor-pointer"></i>
-        {
-          //TODO: add the uptime and notif icon
-
-        }
 
 
       </div>
