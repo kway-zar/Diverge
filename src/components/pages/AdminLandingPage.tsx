@@ -9,7 +9,7 @@ import Footer from '../Footer.tsx'
 function AdminLandingPage() {
   const items = ["Dashboard", "Customers", "Billing", "Tickets", "Analytics", "Plan Management", "Support"]
 
-  const [activeItem, setActiveItem] = useState('')
+  const [activeItem, setActiveItem] = useState(items[0])
   const handleData = (data: string) => {
     setActiveItem(data);
 
