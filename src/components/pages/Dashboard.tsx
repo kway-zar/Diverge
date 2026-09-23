@@ -50,16 +50,63 @@ function Dashboard() {
           </CardFooter>
 
         </Card>
-       
+
       </div>
-        {
-          //TODO: implement a graph library in the container below
-        }
-      <Card className=" flex-1 h-40 p-2 ring-0 mr-5 mt-10 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-linear-[0deg,#1C1A1A_10%,#080808_90%]">
+      {
+        //TODO: implement a graph library in the container below
+      }
+      <h1 className="mt-5">Network Traffic</h1>
+      <Card className=" flex-1 h-40 p-2 ring-0 mr-5  shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-linear-[0deg,#1C1A1A_10%,#080808_90%]">
 
       </Card>
 
+
+      <div className="w-full mr-5 mt-5 flex flex-row place-content-evenly gap-10">
+        <Card className="w-[20vw] text-center flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-linear-[0deg,#1C1A1A_10%,#080808_90%]">
+          <CardHeader className="mt-0 font-thin text-xs opacity-30">Network Risks</CardHeader>
+          <CardContent className="text-2xl font-thin">
+            <p>Node PS = 34</p>
+          </CardContent>
+          <CardFooter className="flex flex-col text-[#CF3A72] border-0 px-4 pt-0">
+            <p>High Risk</p>
+            <p>84% Congestion</p>
+          </CardFooter>
+        </Card>
+
+        <Card className="w-[20vw] text-center flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-linear-[0deg,#1C1A1A_10%,#080808_90%]">
+          <CardHeader className="mt-0 font-thin text-xs opacity-30">ML Predictions</CardHeader>
+          <CardContent className="text-2xl font-thin">
+            <p>Churn Risk = 327</p>
+          </CardContent>
+          <CardFooter className="flex flex-col text-[#CF3A72] border-0 px-4 pt-0">
+            <p>High Risk</p>
+          </CardFooter>
+
+        </Card>
+        <Card className="w-[20vw] text-center mr-5 flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-linear-[0deg,#1C1A1A_10%,#080808_90%]">
+          <CardHeader className="mt-0 font-thin text-xs opacity-30">Model Accuracy</CardHeader>
+          <CardContent className="text-2xl font-thin">
+            <p>91.4%</p>
+          </CardContent>
+          <CardFooter className="flex flex-col justify-center text-[#4BE0A9] border-0 px-4 pt-0">
+            <p>Accuracy</p>
+            <p>Churn Prediction</p>
+          </CardFooter>
+
+        </Card>
+
+
+      </div>
+      {
+
+        //TODO: add Jeri's Table here
+      }
+      <div className="mt-5 flex-1 ring-0 mr-5  shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-linear-[0deg,#1C1A1A_10%,#080808_90%]">
+
+      </div>
       
+
+
     </div>
 
   )
