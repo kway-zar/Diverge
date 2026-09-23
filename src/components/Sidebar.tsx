@@ -4,11 +4,12 @@ import {
   SidebarProvider,
   SidebarGroup,
   SidebarContent,
-  SidebarFooter
+  SidebarTrigger,
+  SidebarFooter,
+
 } from '../components/ui/sidebar'
 
 import { useState } from 'react'
-
 interface SidebarProps {
   items: string[];
   getCurrentState: (data: string) => void;
@@ -19,9 +20,6 @@ interface SidebarProps {
 function SidebarApp({ items, getCurrentState }: SidebarProps) {
 
   const [activeItem, setActiveItem] = useState(items[0]);
-
-
-
   return (
     <>
       <SidebarProvider className="w-max">
@@ -30,9 +28,9 @@ function SidebarApp({ items, getCurrentState }: SidebarProps) {
             {items.map((item) => {
               const isActive = activeItem === item;
               return (
-                <SidebarGroup key={item} onClick={() =>getCurrentState(item)}>
+                <SidebarGroup key={item} onClick={() => getCurrentState(item)}>
                   <div
-                    onClick={() => {setActiveItem(item); } }
+                    onClick={() => { setActiveItem(item); }}
                     className={`w-[90%] mx-auto p-[20px] text-xl text-left cursor-pointer ${isActive ? " transition ease-in bg-[rgba(217,217,217,0.4)] rounded-lg border-white/40 border-1 backdrop-blur-md" : ""}`}>
                     {item}
 
@@ -56,8 +54,10 @@ function SidebarApp({ items, getCurrentState }: SidebarProps) {
 
           </SidebarContent>
         </Sidebar>
-
-
+        <main>
+          <SidebarTrigger
+            className="h-full pl-20 text-transparent" />
+        </main>
       </SidebarProvider>
     </>
 

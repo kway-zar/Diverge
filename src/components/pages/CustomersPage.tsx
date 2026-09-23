@@ -89,26 +89,26 @@ export function CustomersPage() {
             <Input
               type="text"
               placeholder="Search by ID, Name, or Email"
-              className="bg-white/5 shadow-glassy rounded-[2vw] w-full sm:w-80 md:w-120 border-0 italic focus-visible:ring-0 flex-1 min-w-0"
+              className="bg-white/5 shadow-glassy-jeri rounded-[2vw] w-full sm:w-80 md:w-120 border-0 italic focus-visible:ring-0 flex-1 min-w-0"
             />
-            <Button className="bg-white/2 font-bold shadow-glassy rounded-[2vw] px-5 hover-glass-rim whitespace-nowrap">
+            <Button className="bg-white/2 font-bold shadow-glassy-jeri rounded-[2vw] px-5 hover-glass-rim whitespace-nowrap">
               All
             </Button>
-            <Button className="bg-white/2 font-bold shadow-glassy rounded-[2vw] px-6 hover-glass-rim whitespace-nowrap">
+            <Button className="bg-white/2 font-bold shadow-glassy-jeri rounded-[2vw] px-6 hover-glass-rim whitespace-nowrap">
               Active
             </Button>
-            <Button className="bg-white/2 font-bold shadow-glassy rounded-[2vw] px-6 hover-glass-rim whitespace-nowrap">
+            <Button className="bg-white/2 font-bold shadow-glassy-jeri rounded-[2vw] px-6 hover-glass-rim whitespace-nowrap">
               Suspended
             </Button>
-            <Button className="bg-white/2 font-bold shadow-glassy rounded-[2vw] px-6 hover-glass-rim whitespace-nowrap">
+            <Button className="bg-white/2 font-bold shadow-glassy-jeri rounded-[2vw] px-6 hover-glass-rim whitespace-nowrap">
               Pending
             </Button>
-            <Button className="bg-white/2 font-bold shadow-glassy rounded-full w-8 h-8 p-0 text-lg hover-glass-rim shrink-0">
+            <Button className="bg-white/2 font-bold shadow-glassy-jeri rounded-full w-8 h-8 p-0 text-lg hover-glass-rim shrink-0">
               +
             </Button>
           </div>
           <div className="w-[85%] flex overflow-x-auto ml-4 lg:ml-10 pr-4 lg:pr-10">
-            <Table className="grow bg-white/5 shadow-glassy rounded-[1vw] text-[10px] sm:text-xs md:text-sm">
+            <Table className="grow bg-white/5 shadow-glassy-jeri rounded-[1vw] text-[10px] sm:text-xs md:text-sm">
               <TableHeader>
                 <TableRow className="border-b border-white/10">
                   <TableHead className="text-center whitespace-nowrap font-light text-[#FFFFFF] opacity-30">

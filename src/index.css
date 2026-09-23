@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
 @import 'tailwindcss';
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
@@ -7,11 +7,13 @@
 
 @theme {
   --font-ubuntu: "Ubuntu", sans-serif;
-  --font-ubuntu-mono: "Ubuntu Mono", monospace;
-  --shadow-glassy: 
+  --shadow-glassy-jeri: 
     inset 1px 1px 1px 0px rgba(255, 255, 255, 0.2), 
     inset -1px -1px 1px 0px rgba(255, 255, 255, 0.05), 
     0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --shadow-glassy: inset 6px 0px 2px -3px rgb(var(--glassy-color)/ 0.7), inset -6px -4px 2px -3px rgb(var(--glassy-color) / 0.3);
+  --font-ubuntu-mono: "Ubuntu Mono", monospace;
+
 }
 
 @layer utilities {
