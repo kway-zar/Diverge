@@ -38,7 +38,7 @@ function BillingPage() {
   }
 
   return (
-    <div className="w-full pb-12">
+    <div className="w-full pr-10 mb-20 ">
       <div className="w-full flex items-start justify-between mb-8">
         <div className="flex flex-col items-start text-left">
           <h1 className="text-[36px] font-bold leading-none tracking-[0.05em] opacity-75 text-[#FFFFFF]">
@@ -50,7 +50,7 @@ function BillingPage() {
         </div>
 
         <Button 
-        className="shrink-0 w-[200px] h-[44px] bg-[#3ACF98]/25 rounded-[12px] text-[18px] font-normal tracking-wide text-white cursor-pointer border-none shadow-none hover:bg-[#3ACF98]/35">
+          className="shrink-0 w-[200px] h-[44px] bg-[#3ACF98]/25 rounded-[12px] text-[18px] font-normal tracking-wide text-white cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#3ACF98]/35">
           Generate Invoice
         </Button>
       </div>
@@ -59,10 +59,15 @@ function BillingPage() {
         {stats.map((stat, i) => (
           <Card
             key={i}
-            style={{borderLeftColor: `rgba(${stat.border}, 0.3)`,boxShadow:
-          "inset 1px 1px 1px 0px rgba(255, 255, 255, 0.2), inset -1px -1px 1px 0px rgba(255, 255, 255, 0.05), 0 8px 32px 0 rgba(0, 0, 0, 0.37)", }}
-            className="!ring-0 !shadow-none h-[135px] !py-0 rounded-[5px] border-y-0 border-r-0 border-l-[11px] pl-3.5 flex flex-col items-start text-left justify-center"
+            className="relative overflow-hidden h-[135px] !py-0 rounded-[5px] !border-0 !shadow-none !ring-0 !bg-transparent pl-6 flex flex-col items-start text-left justify-center"
           >
+            <span 
+            className="absolute left-0 top-0 bottom-0 w-[11px] rounded-l-[5px] shadow-glassy-jeri" 
+            style={{ 
+              backgroundColor: `rgba(${stat.border}, 0.4)`,
+              ['--glassy-color' as string]: stat.border
+            }}
+            />
             <CardHeader className="!p-0 !m-0 space-y-0 w-full text-left">
               <CardTitle className="text-[24px] font-light leading-[100%] tracking-[0.05em] text-[#FFFFFF] opacity-60">
                 {stat.title}
@@ -77,12 +82,7 @@ function BillingPage() {
         ))}
       </div>
 
-      <div className="w-full bg-[#B00049]/30 rounded-xl h-[83px] border border-red-900/40 bg-[#2C0A0E] px-5 py-3.5 flex items-center gap-4 mb-8"
-        style={{
-          boxShadow:
-          "inset 1px 1px 1px 0px rgba(255, 255, 255, 0.2), inset -1px -1px 1px 0px rgba(255, 255, 255, 0.05), 0 8px 32px 0 rgba(0, 0, 0, 0.37)",
-        }}
-      >
+      <div className="w-full bg-[#B00049]/30 rounded-xl h-[83px] border border-red-900/40 bg-[#2C0A0E] px-5 py-3.5 flex items-center gap-4 mb-8 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black">
         <AlertTriangle className="w-[64px] h-[59px] text-amber-500 shrink-0" />
         <div className="text-left mb-2">
           <h3 className="text-[24px] font-bold leading-[100%] tracking-[0.05em] text-[#E18E08] opacity-75">
@@ -122,11 +122,8 @@ function BillingPage() {
                 <TableCell className="py-3 text-[16px] font-light leading-[100%] tracking-[0.05em] text-[#C4C4C4] text-center">{inv.paymentMethod}</TableCell>
                 <TableCell className="py-3 text-center">
                   <span 
-                   style={{
-                  boxShadow:
-                    "inset 1px 1px 1px 0px rgba(255, 255, 255, 0.2), inset -1px -1px 1px 0px rgba(255, 255, 255, 0.05), 0 8px 32px 0 rgba(0, 0, 0, 0.37)",
-                    }}
-                  className={`px-3 py-2 border-none w-[90px] rounded-full border text-[16px] font-normal text-[#C4C4C4] leading-[100%] tracking-[0.05em] text-center radius-[41px] inline-block ${getStatusBadge(inv.status)}`}>
+                  
+                  className={`px-3 py-2 border-none w-[90px] rounded-full border text-[16px] font-normal text-[#C4C4C4] leading-[100%] tracking-[0.05em] text-center radius-[41px] shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black inline-block ${getStatusBadge(inv.status)}`}>
                     {inv.status}
                     
                   </span>

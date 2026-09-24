@@ -35,24 +35,20 @@ function AdminLandingPage() {
 
   return (
     <>
-        <Navbar />
- 
+       <Navbar/>
+
       <div className="bg-[#121212] flex flex-row-reverse">
 
         <div className="w-[95vw] z-0 overflow-y-auto font-ubuntu text-white flex flex-col items-start ">
 
-        <main className="flex-1 h-full overflow-y-auto font-ubuntu text-white pt-8 px-8 pb-12">
           {renderContent()}
-        </main>
 
-        <aside className="shrink-0 h-full">
-          <SidebarApp items={items} getCurrentState={handleData} />
-        </aside>
+        </div>
+
+        <SidebarApp items={items} getCurrentState={handleData} />
+
 
       </div>
-
-    </div>
-
       <Footer />
     </>
   )
