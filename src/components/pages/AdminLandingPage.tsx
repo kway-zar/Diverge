@@ -1,6 +1,7 @@
 import SidebarApp from '../Sidebar'
 import { useState } from 'react'
 import Navbar from '../Navbar.tsx'
+import BillingPage from './BillingPage.tsx'
 import CustomersPage from './CustomersPage.tsx'
 import Dashboard from './Dashboard.tsx'
 import Footer from '../Footer.tsx'
@@ -22,6 +23,9 @@ function AdminLandingPage() {
     } if (activeItem == 'Customers') {
       return <CustomersPage />
     }
+    if (activeItem == "Billing") {
+      return <BillingPage/>
+    }
     //and so forth...
     return (
       <></>
@@ -31,7 +35,7 @@ function AdminLandingPage() {
 
   return (
     <>
-      <Navbar/>
+       <Navbar/>
 
       <div className="bg-[#121212] flex flex-row-reverse">
 
