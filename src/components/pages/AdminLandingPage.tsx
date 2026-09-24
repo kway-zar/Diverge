@@ -1,12 +1,16 @@
-import SidebarApp from '../Sidebar.tsx'
+import SidebarApp from '../Sidebar'
 import { useState } from 'react'
 import Navbar from '../Navbar.tsx'
 import BillingPage from './BillingPage.tsx'
+import CustomersPage from './CustomersPage.tsx'
+import Dashboard from './Dashboard.tsx'
+import Footer from '../Footer.tsx'
+
 
 function AdminLandingPage() {
   const items = ["Dashboard", "Customers", "Billing", "Tickets", "Analytics", "Plan Management", "Support"]
 
-  const [activeItem, setActiveItem] = useState('')
+  const [activeItem, setActiveItem] = useState(items[0])
   const handleData = (data: string) => {
     setActiveItem(data);
 
@@ -15,8 +19,9 @@ function AdminLandingPage() {
   const renderContent = () => {
     if (activeItem == 'Dashboard') {
       //return dashboard component here
+      return <Dashboard />
     } if (activeItem == 'Customers') {
-      //return customer component here
+      return <CustomersPage />
     }
     if (activeItem == "Billing") {
       return <BillingPage/>
@@ -30,13 +35,11 @@ function AdminLandingPage() {
 
   return (
     <>
-   <div className="h-screen w-screen overflow-hidden flex flex-col bg-[#121212]">
-      
-      <header className="shrink-0 z-30">
         <Navbar />
-      </header>
+ 
+      <div className="bg-[#121212] flex flex-row-reverse">
 
-      <div className="flex-1 flex flex-row-reverse min-h-0 w-full overflow-hidden">
+        <div className="w-[95vw] z-0 overflow-y-auto font-ubuntu text-white flex flex-col items-start ">
 
         <main className="flex-1 h-full overflow-y-auto font-ubuntu text-white pt-8 px-8 pb-12">
           {renderContent()}
@@ -47,7 +50,10 @@ function AdminLandingPage() {
         </aside>
 
       </div>
+
     </div>
+
+      <Footer />
     </>
   )
 }
