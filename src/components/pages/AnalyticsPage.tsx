@@ -1,8 +1,10 @@
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Progress, ProgressValue} from '@/components/ui/progress'
+import { Progress, ProgressValue } from '@/components/ui/progress'
 import { ProgressIndicator } from '@/components/ui/progress'
+import { Separator } from '@/components/ui/separator'
+
 
 function AnalyticsPage() {
   return (
@@ -82,7 +84,7 @@ function AnalyticsPage() {
               <h1 className="font-thin">Diverge Netflix</h1>
             </CardHeader>
             <CardContent className="flex flex-row">
-              <span className="flex flex-1 flex-col text-xs gap-2 mt-2">
+              <span className="flex flex-1 flex-col text-xs gap-2 bottom-0 mt-auto">
                 <span className="flex flex-row gap-2">
                   <div className="shadow-glassy-jeri rounded-4xl p-2  bg-[#B00049]/20">30d balance overdue</div>
                   <div className="shadow-glassy-jeri rounded-4xl p-2  bg-[#B00049]/20">Repeated Speed Complaints</div>
@@ -92,18 +94,108 @@ function AnalyticsPage() {
                   Recommendation: Speed check visits and payment extension.
                 </div>
               </span>
-              <span className="w-[10%] flex items-center flex-col">
+              <span className="w-[10%] flex items-center flex-col my-auto">
                 <h1 className="text-4xl font-semibold text-orange-700">78</h1>
                 <h1 className="text-[0.6rem] opacity-30 mt-0 mb-1">/100</h1>
                 <Progress value={78} className="w-[80%] h-1 bg-[rgb(80,80,80)] rounded-md">
-                  <ProgressIndicator className="bg-orange-500 rounded-md"/>
+                  <ProgressIndicator className="bg-orange-500 rounded-md" />
                 </Progress>
-                
+                <Button className="bg-orange-500 rounded-md p-1 text-xs mt-2">
+                  Reach Out
+                </Button>
               </span>
             </CardContent>
 
           </Card>
 
+          <div className="flex flex-row relative gap-4 mt-4">
+            <Card className="shadow-glassy-jeri ring-0 w-full bg-[rgba(75,75,75,0.1)] backdrop-contrast-60 gap-0">
+              <CardHeader>Churn Probability Distribution</CardHeader>
+            </Card>
+            <Card className="shadow-glassy-jeri ring-0 w-full bg-[rgba(75,75,75,0.1)] backdrop-contrast-60 gap-0">
+              <CardHeader>
+                <h1>Churn Probability Distribution</h1>
+                <h1 className='text-xs font-thin'>Top Churn Drivers</h1>
+                <CardContent className="flex flex-row">
+                  <div className="flex-1 flex flex-col gap-2">
+
+
+                  </div>
+                  <div className="w-[60%] flex flex-col right-0 gap-2">
+                    <span className="flex flex-row items-center place-content-between">
+                      <Progress value={78} className="w-[80%] h-1 bg-[rgb(80,80,80)] rounded-md">
+                        <ProgressIndicator className="bg-orange-500 rounded-md" />
+                      </Progress>
+                      <h1>7.8</h1>
+                    </span>
+                    <span className="flex flex-row items-center place-content-between">
+                      <Progress value={78} className="w-[80%] h-1 bg-[rgb(80,80,80)] rounded-md">
+                        <ProgressIndicator className="bg-orange-500 rounded-md" />
+                      </Progress>
+                      <h1>7.8</h1>
+                    </span>
+                    <span className="flex flex-row items-center place-content-between">
+                      <Progress value={78} className="w-[80%] h-1 bg-[rgb(80,80,80)] rounded-md">
+                        <ProgressIndicator className="bg-orange-500 rounded-md" />
+                      </Progress>
+                      <h1>7.8</h1>
+                    </span>
+                    <span className="flex flex-row items-center place-content-between">
+                      <Progress value={78} className="w-[80%] h-1 bg-[rgb(80,80,80)] rounded-md">
+                        <ProgressIndicator className="bg-orange-500 rounded-md" />
+                      </Progress>
+                      <h1>7.8</h1>
+                    </span>
+
+                  </div>
+                </CardContent>
+              </CardHeader>
+            </Card>
+
+          </div>
+
+        </TabsContent>
+
+        <TabsContent value="anomalies" className="mr-5 font-ubuntu-mono">
+          <Card className="shadow-glassy-jeri ring-0 w-full bg-[rgba(75,75,75,0.1)] backdrop-contrast-60 gap-2">
+            <CardHeader className="flex flex-row gap-4 tracking-widest">
+              <span className="flex flex-col text-emerald-500">
+                <h1>RZL-01</h1>
+              </span>
+              <h1 className="ring-1 ring-red-500 bg-red-500/20 p-1 text-xs text-red-500 rounded-md">CRITICAL</h1>
+              <h1 className="font-thin">Packet Loss</h1>
+            </CardHeader>
+            <CardContent className="flex flex-row ">
+              <span className="flex flex-1 flex-col text-xs gap-2 bottom-0 mt-auto">
+                <span className="flex flex-row items-center gap-1">
+                  <h1 className="opacity-40">Affected:</h1>
+                  <h1 className="opacity-40 text-base">678 Subscriber</h1>
+                </span>
+                <span className="absolute top-5 right-5">
+                  <h1 className="text-red-500 text-4xl">18.4%</h1>
+                  <h1 className="opacity-40">{"Threshold: < 5%"}</h1>
+                </span>
+                <div className="flex-1 ring-1 ring-emerald-500 text-emerald-500 rounded-xl p-2 bg-emerald-500/20">
+                  Recommendation: Speed check visits and payment extension.
+                </div>
+              </span>
+            </CardContent>
+
+          </Card>
+          
+          <h1 className="mt-2">Node Heatmap</h1>
+          <Card className="shadow-glassy-jeri ring-0 w-full bg-[rgba(75,75,75,0.1)] backdrop-contrast-60 gap-2">
+            <CardHeader>
+              <span>
+                Health scores (0-100) across simulated nodes.
+                <Separator className="w-full bg-white/40"/>
+              </span>
+            </CardHeader>
+            <CardContent>
+            </CardContent>
+
+            <CardFooter></CardFooter>
+          </Card>
         </TabsContent>
       </Tabs>
 
