@@ -182,19 +182,36 @@ function AnalyticsPage() {
             </CardContent>
 
           </Card>
-          
+
           <h1 className="mt-2">Node Heatmap</h1>
           <Card className="shadow-glassy-jeri ring-0 w-full bg-[rgba(75,75,75,0.1)] backdrop-contrast-60 gap-2">
             <CardHeader>
               <span>
                 Health scores (0-100) across simulated nodes.
-                <Separator className="w-full bg-white/40"/>
+                <Separator className="w-full bg-white/40" />
               </span>
             </CardHeader>
-            <CardContent>
+
+            <CardContent className="bg-[url('../src/assets/image_11.png')] bg-no-repeat bg-auto bg-center h-40">
+
             </CardContent>
 
-            <CardFooter></CardFooter>
+            <CardFooter className="border-0 flex flex-row gap-2">
+              <div className="bg-[#4BE0A9] w-2 h-2 rounded-full mr-2 "></div>
+              <h1>{"Healthy (>90%)"}</h1>
+
+              <div className="bg-orange-500 w-2 h-2 rounded-full mr-2 "></div>
+              <h1>{"Degraded (70-90%)"}</h1>
+
+              <div className="bg-orange-800 w-2 h-2 rounded-full mr-2 "></div>
+              <h1>{"Warning (50-70%)"}</h1>
+
+              <div className="bg-red-500 w-2 h-2 rounded-full mr-2 "></div>
+              <h1>{"Critical (<50%)"}</h1>
+
+
+
+            </CardFooter>
           </Card>
         </TabsContent>
       </Tabs>
