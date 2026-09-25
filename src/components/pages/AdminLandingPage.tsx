@@ -6,6 +6,8 @@ import CustomersPage from './CustomersPage.tsx'
 import Dashboard from './Dashboard.tsx'
 import Footer from '../Footer.tsx'
 import Tickets from './Tickets.tsx'
+import AnalyticsPage from './AnalyticsPage.tsx'
+import PlanManagement from './PlanManagement.tsx'
 
 
 function AdminLandingPage() {
@@ -28,6 +30,13 @@ function AdminLandingPage() {
     }
     if (activeItem == "Billing") {
       return <BillingPage/>
+    
+    }
+    if (activeItem == 'Analytics') {
+      return <AnalyticsPage />
+    }
+    if (activeItem == 'Plan Management') {
+      return <PlanManagement/>
     }
     //and so forth...
     return (
@@ -38,7 +47,7 @@ function AdminLandingPage() {
 
   return (
     <>
-       <Navbar/>
+      <Navbar />
 
       <div className="bg-[#121212] flex flex-row-reverse">
 
