@@ -74,8 +74,8 @@ export function CustomersPage() {
 
   return (
     <>
-      <div className="bg-[#121212] flex flex-row-reverse">
-        <div className="w-full lg:w-[90vw] overflow-y-auto font-ubuntu text-white flex flex-col items-start px-4 lg:px-0">
+      <div className="bg-[#121212] flex flex-row-reverse w-full">
+        <div className="w-full flex mr-10 lg:w-[90vw] z-0 overflow-y-auto overflow-x-hidden font-ubuntu text-white flex-col items-start px-4 lg:px-0">
           <div className="mb-5 ml-4 lg:ml-10">
             <h1 className="text-2xl font-bold tracking-wider text-white text-left">
               Customer Management
@@ -106,9 +106,8 @@ export function CustomersPage() {
               +
             </Button>
           </div>
-          <div className="w-[85%] ml-4 lg:ml-10 mr-4 lg:mr-10">
-            <div className="overflow-x-auto rounded-[1vw] shadow-glassy-jeri">
-              <Table className="grow bg-white/5 rounded-[1vw] text-[10px] sm:text-xs md:text-sm">
+          <div className="w-full flex-1 ml-4 lg:ml-10 pr-4 lg:pr-10">
+            <Table className="bg-white/5 shadow-glassy-jeri rounded-[1vw] text-[10px] sm:text-xs md:text-sm">
               <TableHeader>
                 <TableRow className="border-b border-white/10">
                   <TableHead className="text-center whitespace-nowrap font-light text-[#FFFFFF] opacity-30">
@@ -143,7 +142,7 @@ export function CustomersPage() {
               <TableBody>
               
                 {customers.map((customer: Customer) => (
-                <TableRow className="border-b border-white/10 text-slate-300">
+                <TableRow className="border-b border-white/10 text-slate-300" key={customer.accountID}>
                   <TableCell className="text-center font-mono whitespace-nowrap text-[#3ACF98]">
                     {customer.accountID}
                   </TableCell>
