@@ -1,10 +1,11 @@
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Progress, ProgressValue } from '@/components/ui/progress'
+import { Progress } from '@/components/ui/progress'
 import { ProgressIndicator } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
 
+//TODO: refactor tabs into individual files
 
 function AnalyticsPage() {
   return (

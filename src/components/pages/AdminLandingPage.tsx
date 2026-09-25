@@ -6,6 +6,7 @@ import CustomersPage from './CustomersPage.tsx'
 import Dashboard from './Dashboard.tsx'
 import Footer from '../Footer.tsx'
 import AnalyticsPage from './AnalyticsPage.tsx'
+import PlanManagement from './PlanManagement.tsx'
 
 
 function AdminLandingPage() {
@@ -30,6 +31,9 @@ function AdminLandingPage() {
     }
     if (activeItem == 'Analytics') {
       return <AnalyticsPage />
+    }
+    if (activeItem == 'Plan Management') {
+      return <PlanManagement/>
     }
     //and so forth...
     return (
