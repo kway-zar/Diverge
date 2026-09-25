@@ -5,6 +5,7 @@ import BillingPage from './BillingPage.tsx'
 import CustomersPage from './CustomersPage.tsx'
 import Dashboard from './Dashboard.tsx'
 import Footer from '../Footer.tsx'
+import AnalyticsPage from './AnalyticsPage.tsx'
 
 
 function AdminLandingPage() {
@@ -25,6 +26,10 @@ function AdminLandingPage() {
     }
     if (activeItem == "Billing") {
       return <BillingPage/>
+    
+    }
+    if (activeItem == 'Analytics') {
+      return <AnalyticsPage />
     }
     //and so forth...
     return (
@@ -35,7 +40,7 @@ function AdminLandingPage() {
 
   return (
     <>
-       <Navbar/>
+      <Navbar />
 
       <div className="bg-[#121212] flex flex-row-reverse">
 
