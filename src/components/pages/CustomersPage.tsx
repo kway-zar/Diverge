@@ -3,7 +3,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Customer } from "../types/customer";
-import CustomerOverlay from "../modals/customerOverlay";
 
 
 export function CustomersPage() {
@@ -107,8 +106,9 @@ export function CustomersPage() {
               +
             </Button>
           </div>
-          <div className="w-[85%] flex overflow-x-auto ml-4 lg:ml-10 pr-4 lg:pr-10">
-            <Table className="grow bg-white/5 shadow-glassy-jeri rounded-[1vw] text-[10px] sm:text-xs md:text-sm">
+          <div className="w-[85%] ml-4 lg:ml-10 mr-4 lg:mr-10">
+            <div className="overflow-x-auto rounded-[1vw] shadow-glassy-jeri">
+              <Table className="grow bg-white/5 rounded-[1vw] text-[10px] sm:text-xs md:text-sm">
               <TableHeader>
                 <TableRow className="border-b border-white/10">
                   <TableHead className="text-center whitespace-nowrap font-light text-[#FFFFFF] opacity-30">
@@ -185,6 +185,7 @@ export function CustomersPage() {
                 ))}
               </TableBody>
             </Table>
+            </div>
           </div>
         </div>
       </div>
