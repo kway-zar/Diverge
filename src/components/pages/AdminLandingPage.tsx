@@ -5,6 +5,7 @@ import BillingPage from './BillingPage.tsx'
 import CustomersPage from './CustomersPage.tsx'
 import Dashboard from './Dashboard.tsx'
 import Footer from '../Footer.tsx'
+import Tickets from './Tickets.tsx'
 import AnalyticsPage from './AnalyticsPage.tsx'
 import PlanManagement from './PlanManagement.tsx'
 
@@ -24,6 +25,8 @@ function AdminLandingPage() {
       return <Dashboard />
     } if (activeItem == 'Customers') {
       return <CustomersPage />
+    } if (activeItem == 'Tickets') {
+      return <Tickets/>
     }
     if (activeItem == "Billing") {
       return <BillingPage/>

@@ -3,7 +3,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Customer } from "../types/customer";
-import CustomerOverlay from "../modals/customerOverlay";
 
 
 export function CustomersPage() {
@@ -185,6 +184,7 @@ export function CustomersPage() {
                 ))}
               </TableBody>
             </Table>
+            </div>
           </div>
         </div>
       </div>

@@ -97,25 +97,25 @@ function ManageAccount({
                 <h2 className="flex ml-4 mb-0.5 font-bold text-xs text-[#C4C4C4]">
                   BALANCE
                 </h2>
-                <Input type="text" placeholder="Php 10,000.00" className="bg-[#D9D9D9]/20 shadow-glassy rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-6 ml-4 text-xs"/>
+                <Input type="text" placeholder="Php 10,000.00" className="bg-[#D9D9D9]/20 shadow-glassy-jeri rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-6 ml-4 text-xs"/>
               </div>
               <div className="ml-5">
                 <h2 className="flex ml-4 mb-0.5 font-bold text-xs text-[#C4C4C4] ">
                   USAGE
                 </h2>
-                <Input type="text" placeholder="100 MB" className="bg-[#D9D9D9]/20  shadow-glassy rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-6 ml-4 text-xs" />
+                <Input type="text" placeholder="100 MB" className="bg-[#D9D9D9]/20  shadow-glassy-jeri rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-6 ml-4 text-xs" />
                 <h2 className="flex ml-4 mb-0.5 font-bold text-xs text-[#C4C4C4] ">
                   STATUS
                 </h2>
-                <Input type="text" placeholder="Suspended" className="bg-[#D9D9D9]/20 shadow-glassy rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-6 ml-4 text-xs"/>
+                <Input type="text" placeholder="Suspended" className="bg-[#D9D9D9]/20 shadow-glassy-jeri rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-6 ml-4 text-xs"/>
                 <h2 className="flex ml-4 mb-0.5 font-bold text-xs text-[#C4C4C4] ">
                   AREA
                 </h2>
-                      <Input type="text" placeholder="Bulacan"className="bg-[#D9D9D9]/20  shadow-glassy rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-6 ml-4 text-xs"/>
+                      <Input type="text" placeholder="Bulacan"className="bg-[#D9D9D9]/20  shadow-glassy-jeri rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-6 ml-4 text-xs"/>
                 <h2 className="flex ml-4 mb-0.5 font-bold text-xs text-[#C4C4C4]">
                   SINCE
                 </h2>
-                <Input type="text" placeholder="August 2012" className="bg-[#D9D9D9]/20 shadow-glassy rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-6 ml-4 text-xs"/>
+                <Input type="text" placeholder="August 2012" className="bg-[#D9D9D9]/20 shadow-glassy-jeri rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-6 ml-4 text-xs"/>
               </div>
             </div>
 

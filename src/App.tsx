@@ -5,6 +5,7 @@ import TestingPage from './components/pages/TestingPage.tsx'
 import LoginPage from './components/pages/LoginPage.tsx'
 import AdminLandingPage from './components/pages/AdminLandingPage.tsx'
 import CustomersPage from './components/pages/CustomersPage.tsx'
+import Tickets from './components/pages/Tickets.tsx'
 function App() {
 
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/login" element={<LoginPage/>}/>
         <Route path="/admin" element={<AdminLandingPage/>}/>
         <Route path="/customers" element={<CustomersPage/>}/>
+        <Route path="/tickets" element={<Tickets/>}/>
       </Routes>
     </Router>
   )
