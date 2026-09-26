@@ -23,7 +23,7 @@ function SidebarApp({ items, getCurrentState }: SidebarProps) {
   return (
     <>
       <SidebarProvider className="w-max">
-        <Sidebar variant="floating" className="h-[90dvh] mt-20 mb-5 ml-5">
+        <Sidebar variant="floating" className="h-[70dvh] lg:h-[85dvh] my-auto lg:mt-20 mb-10 ml-5">
           <SidebarContent className='gap-2 bg-[#393939] rounded-xl inset-shadow-white inset-shadow-xs text-white backdrop-blur-md pt-4'>
             {items.map((item) => {
               const isActive = activeItem === item;
@@ -31,7 +31,7 @@ function SidebarApp({ items, getCurrentState }: SidebarProps) {
                 <SidebarGroup key={item} onClick={() => getCurrentState(item)}>
                   <div
                     onClick={() => { setActiveItem(item); }}
-                    className={`w-[90%] mx-auto p-[2px] md:p-[15px] text-xl text-left cursor-pointer ${isActive ? " transition ease-in bg-[rgba(217,217,217,0.4)] rounded-lg border-white/40 border-1 backdrop-blur-md" : ""}`}>
+                    className={`w-[90%] mx-auto p-[2px] md:p-[15px] text-xs lg:text-base text-left cursor-pointer ${isActive ? " transition ease-in bg-[rgba(217,217,217,0.4)] rounded-lg border-white/40 border-1 backdrop-blur-md" : ""}`}>
                     {item}
 
                   </div>
