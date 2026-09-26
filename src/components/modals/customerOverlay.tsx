@@ -97,10 +97,10 @@ function CustomerOverlay({
             </div>
 
             <div className="flex justify-center gap-10 mt-5">
-              <Button className="bg-[#B00049] font-light w-40 rounded-2xl shadow-glassy text-xs tracking-widest" onClick={() => setShowManage(true)}>
+              <Button className="bg-[#B00049] font-light w-40 rounded-2xl shadow-glassy-jeri text-xs tracking-widest" onClick={() => setShowManage(true)}>
                 Manage Account
               </Button>
-              <Button className="bg-[#3ACF98] font-light w-40 rounded-2xl shadoe-glassy text-xs tracking-widest">
+              <Button className="bg-[#3ACF98] font-light w-40 rounded-2xl shadoe-glassy-jeri text-xs tracking-widest">
                 Create Ticket
               </Button>
             </div>

@@ -38,7 +38,7 @@ function ManageAccount({
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#121212]/50">
-        <Card className="relative w-[600px] h-auto  ring-0 bg-[#121212] shadow-glassy rounded-[2vw] opacity-80 gap-2">
+        <Card className="relative w-[600px] h-auto  ring-0 bg-[#121212] shadow-glassy-jeri rounded-[2vw] opacity-80 gap-2">
           <CardHeader className="flex flex-col ml-4 font-medium">
             <CardTitle className="font-ubuntu">{customer.name}</CardTitle>
             <CardDescription className="font-ubuntu-mono text-[#DE0961]">
@@ -57,12 +57,12 @@ function ManageAccount({
                 <h2 className="flex ml-4 mb-0.5 font-bold text-xs text-[#C4C4C4]">
                   EMAIL
                 </h2>
-                <Input type="text" placeholder="name@example.com" className="bg-[#D9D9D9]/20 shadow-glassy rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-6 ml-4 text-xs"/>
+                <Input type="text" placeholder="name@example.com" className="bg-[#D9D9D9]/20 shadow-glassy-jeri rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-6 ml-4 text-xs"/>
                 <h2 className="flex ml-4 mb-0.5 font-bold text-xs text-[#C4C4C4] ">
                   TYPE
                 </h2>
                 <Select items={type} defaultValue="Residential">
-                  <SelectTrigger id="form-type" className="w-full bg-[#D9D9D9]/20 shadow-glassy rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-2 ml-4 text-xs">
+                  <SelectTrigger id="form-type" className="w-full bg-[#D9D9D9]/20 shadow-glassy-jeri rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-2 ml-4 text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1a1a1a] shadow-glassy rounded-[1vw] border border-white/10 ring-0 text-white">
@@ -80,7 +80,7 @@ function ManageAccount({
                   PLAN
                 </h2>
                 <Select items={plan} defaultValue="Default MBps" >
-                  <SelectTrigger id="form-plan" className="w-full bg-[#D9D9D9]/20  shadow-glassy rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-2 ml-4 text-xs">
+                  <SelectTrigger id="form-plan" className="w-full bg-[#D9D9D9]/20  shadow-glassy-jeri rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-2 ml-4 text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1a1a1a] shadow-glassy rounded-[10px] border border-white/10 ring-0 text-white">
@@ -120,10 +120,10 @@ function ManageAccount({
             </div>
 
             <div className="flex justify-center gap-10 mt-5">
-              <Button className="bg-[#B00049] font-light w-40 rounded-2xl shadow-glassy text-xs tracking-widest">
+              <Button className="bg-[#B00049] font-light w-40 rounded-2xl shadow-glassy-jeri text-xs tracking-widest">
                 Cancel
               </Button>
-              <Button className="bg-[#3ACF98] font-light w-40 rounded-2xl shadoe-glassy text-xs tracking-widest">
+              <Button className="bg-[#3ACF98] font-light w-40 rounded-2xl shadoe-glassy-jeri text-xs tracking-widest">
                 Create Ticket
               </Button>
             </div>
