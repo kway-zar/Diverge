@@ -182,7 +182,7 @@ function Technicians() {
 
                     ))}
                 </Card>
-                <Card className="h-[494px] bg-[#C4C4C4]/20 rounded-[15px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black p-4">
+                <Card className="h-full bg-[#C4C4C4]/20 rounded-[15px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black p-4">
                     {selectedEngineer ? (
                         <div className="flex flex-col gap-3">
                             <div className="flex justify-between">
@@ -222,22 +222,22 @@ function Technicians() {
                                     </span>
                                 </div>
                             </div>
-                            <Tabs defaultValue="overview" className="ml-13 mt-5 w-full">
-                <TabsList className="shadow-glassy-jeri p-2 gap-5  rounded-[10px] h-[55px] bg-transparent">
-                    <TabsTrigger value="overview" className="h-full flex-1 rounded-[10px] border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em ] cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">OVERVIEW</TabsTrigger>
-                    <TabsTrigger value="field-reports" className="h-full flex-1 rounded-[10px] border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">FIELD ENGINEERS</TabsTrigger>
-                    <TabsTrigger value="reviews" className="h-full flex-1 rounded-[10px] border- text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">FIELD ENGINEERS</TabsTrigger>
-                </TabsList>
-                <TabsContent value="overview" className="flex flex-col left-0">
-                    <TechnicianOverview/>
-                </TabsContent>
-                <TabsContent value="field-reports">
-                    <TechnicianFieldReports/>
-                </TabsContent> 
-                <TabsContent value="reviews">
-                    <TechnicianReviews/>
-                </TabsContent> 
-            </Tabs>
+                            <Tabs defaultValue="overview" className="pl-15 mt-5 w-full">
+                                <TabsList className="shadow-glassy-jeri p-2 gap-5  rounded-[10px] h-[55px] bg-transparent">
+                                    <TabsTrigger value="overview" className="h-full flex-1 rounded-[10px] border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em ] cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">OVERVIEW</TabsTrigger>
+                                    <TabsTrigger value="field-reports" className="h-full flex-1 rounded-[10px] border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">FIELD ENGINEERS</TabsTrigger>
+                                    <TabsTrigger value="reviews" className="h-full flex-1 rounded-[10px] border- text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">FIELD ENGINEERS</TabsTrigger>
+                                </TabsList>
+                                <TabsContent value="overview" className="flex flex-col left-0">
+                                <TechnicianOverview/>
+                                </TabsContent>
+                                <TabsContent value="field-reports">
+                                    <TechnicianFieldReports/>
+                                </TabsContent> 
+                                <TabsContent value="reviews">
+                                    <TechnicianReviews/>
+                                </TabsContent> 
+                            </Tabs>
                         </div>
                     ) : (
                         "Asan ba tong ininyerong ito"
