@@ -23,7 +23,7 @@ function SidebarApp({ items, getCurrentState }: SidebarProps) {
   return (
     <>
       <SidebarProvider className="w-max">
-        <Sidebar variant="floating" className="md:scale-93 h-max my-auto lg:mt-20 mb-15 ml-5">
+        <Sidebar variant="floating" className="md:scale-90 h-max my-auto lg:mt-12 mb-15 ml-5">
           <SidebarContent className='gap-2 bg-[#393939] rounded-t-xl inset-shadow-white inset-shadow-xs text-white backdrop-blur-md pt-4'>
             {items.map((item) => {
               const isActive = activeItem === item;
