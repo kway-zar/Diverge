@@ -6,6 +6,10 @@ import CustomersPage from './CustomersPage.tsx'
 import Dashboard from './Dashboard.tsx'
 import Footer from '../Footer.tsx'
 import SupportTicket from "./SupportTicket.tsx"
+import Tickets from './Tickets.tsx'
+import AnalyticsPage from './AnalyticsPage.tsx'
+import PlanManagement from './PlanManagement.tsx'
+
 
 
 function AdminLandingPage() {
@@ -23,9 +27,18 @@ function AdminLandingPage() {
       return <Dashboard />
     } if (activeItem == 'Customers') {
       return <CustomersPage />
+    } if (activeItem == 'Tickets') {
+      return <Tickets/>
     }
     if (activeItem == "Billing") {
       return <BillingPage/>
+    
+    }
+    if (activeItem == 'Analytics') {
+      return <AnalyticsPage />
+    }
+    if (activeItem == 'Plan Management') {
+      return <PlanManagement/>
     }
     if (activeItem == "Support") {
       return <SupportTicket/>
@@ -39,7 +52,7 @@ function AdminLandingPage() {
 
   return (
     <>
-       <Navbar/>
+      <Navbar />
 
       <div className="bg-[#121212] flex flex-row-reverse">
 
