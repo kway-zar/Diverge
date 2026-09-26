@@ -91,7 +91,7 @@ function AnalyticsPage() {
                   <div className="shadow-glassy-jeri rounded-4xl p-2  bg-[#B00049]/20">Repeated Speed Complaints</div>
                   <div className="shadow-glassy-jeri rounded-4xl p-2  bg-[#B00049]/20">5 tickets in a month</div>
                 </span>
-                <div className="flex-1 shadow-glassy-jeri rounded-4xl p-2 bg-emerald-500/50">
+                <div className="flex flex-1 flex-row shadow-glassy-jeri text-emerald-500 rounded-2xl p-2 bg-emerald-400/20">
                   Recommendation: Speed check visits and payment extension.
                 </div>
               </span>
@@ -176,7 +176,7 @@ function AnalyticsPage() {
                   <h1 className="text-red-500 text-4xl">18.4%</h1>
                   <h1 className="opacity-40">{"Threshold: < 5%"}</h1>
                 </span>
-                <div className="flex-1 ring-1 ring-emerald-500 text-emerald-500 rounded-xl p-2 bg-emerald-500/20">
+                <div className="flex flex-1 flex-row shadow-glassy-jeri text-emerald-500 rounded-2xl p-2 bg-emerald-400/20">
                   Recommendation: Speed check visits and payment extension.
                 </div>
               </span>
