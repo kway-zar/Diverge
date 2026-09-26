@@ -5,9 +5,11 @@ import BillingPage from './BillingPage.tsx'
 import CustomersPage from './CustomersPage.tsx'
 import Dashboard from './Dashboard.tsx'
 import Footer from '../Footer.tsx'
+import SupportTicket from "./SupportTicket.tsx"
 import Tickets from './Tickets.tsx'
 import AnalyticsPage from './AnalyticsPage.tsx'
 import PlanManagement from './PlanManagement.tsx'
+
 
 
 function AdminLandingPage() {
@@ -37,6 +39,9 @@ function AdminLandingPage() {
     }
     if (activeItem == 'Plan Management') {
       return <PlanManagement/>
+    }
+    if (activeItem == "Support") {
+      return <SupportTicket/>
     }
     //and so forth...
     return (
