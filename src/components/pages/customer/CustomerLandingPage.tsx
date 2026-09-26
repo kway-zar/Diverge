@@ -5,6 +5,7 @@ import Footer from '../../Footer.tsx'
 import MyAccount from './MyAccount.tsx'
 import Billing from './Billing.tsx'
 import Support from './Support.tsx'
+import PlanChanges from './PlanChanges.tsx'
 
 function CustomerLandingPage() {
   const items = ["My Account", "Billing", "Tickets", "Plan Changes", "Support"]
@@ -21,11 +22,12 @@ function CustomerLandingPage() {
       return <MyAccount />
     } if (activeItem == 'Billing') {
       return <Billing/>
+
     } if (activeItem == 'Tickets') {
 
     }
     if (activeItem == 'Plan Changes') {
-
+      return <PlanChanges />
     }
     if (activeItem == 'Support') {
       return <Support/>
