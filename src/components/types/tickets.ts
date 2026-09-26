@@ -10,5 +10,7 @@ export interface Tickets {
     assignedTo: string;
     status: TicketStatus;
     SLA: string;
+    created: string;
     updated: string;
 }
+
