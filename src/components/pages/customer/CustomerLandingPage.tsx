@@ -4,7 +4,7 @@ import Navbar from '../../Navbar.tsx'
 import Footer from '../../Footer.tsx'
 import MyAccount from './MyAccount.tsx'
 import Billing from './Billing.tsx'
-
+import Support from './Support.tsx'
 
 function CustomerLandingPage() {
   const items = ["My Account", "Billing", "Tickets", "Plan Changes", "Support"]
@@ -28,7 +28,7 @@ function CustomerLandingPage() {
 
     }
     if (activeItem == 'Support') {
-
+      return <Support/>
     }
     //and so forth...
     return (
