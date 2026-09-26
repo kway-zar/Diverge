@@ -2,9 +2,158 @@ import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { AlertTriangle } from "lucide-react"
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { Invoice } from "../types/invoice";
+import type { Invoice, InvoiceStatus } from "../types/invoice";
+import {X} from "lucide-react";
+import {useState, useEffect} from "react";
+
+
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog"
+
+
+const STATUS_OPTIONS: InvoiceStatus[] = ["Paid", "Pending", "Overdue"]
+
+function BillingStatusModal({
+  invoice,
+  isOpen,
+  onClose,
+  onStatusChange,
+}: {
+  invoice: Invoice | null
+  isOpen: boolean
+  onClose: () => void
+  onStatusChange: (invoiceID: string, status: InvoiceStatus) => void
+}) {
+  const [selectedStatus, setSelectedStatus] = useState<InvoiceStatus>(
+    invoice?.status ?? "Pending"
+  )
+
+  useEffect(() => {
+    if (invoice) {
+      setSelectedStatus(invoice.status)
+    }
+  }, [invoice])
+
+    if (!invoice) return null
+
+const handleSave = () => {
+  onStatusChange(invoice.invoiceID, selectedStatus)
+  onClose()
+}
+ 
+  return(
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent 
+    className="min-w-[1090px] max-w-none h-[648px] bg-[#121212] text-white py-5 px-12 rounded-[30px] border-0 shadow-[0_0_12px_rgba(80,42,42,0.15)] [&>button]:hidden outline-none ring-0 focus:ring-0 focus-visible:ring-0">
+        <div className="flex flex-col gap-10">
+          <div className="flex justify-between ">
+          <div className="flex flex-col gap-2 items-left">
+            <p className="text-[32px] font-light text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-30 uppercase">
+              Billing Status
+            </p>
+            <h2 className="text-[40px] font-medium text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-75 mt-3">
+              {invoice.account}
+            </h2>
+            <p className="text-[20px] font-medium text-[#3ACF98] opacity-75 leading-[100%] tracking-[0.05em]">
+              {invoice.invoiceID}
+            </p>
+          </div>
+          <div className="top-0">
+            <button 
+              onClick={onClose} 
+              className="text-gray-400 hover:text-white transition-colors p-1 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+          </button>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-8 mt-6">
+              <div className="flex flex-col gap-5">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]"> 
+                    EMAIL
+                  </span>
+                  <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-70 ml-1">
+                    {invoice.email}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]"> 
+                    CONTACT
+                  </span>
+                  <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-70 ml-1">
+                    {invoice.contact}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]"> 
+                    PLAN
+                  </span>
+                  <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-70 ml-1">
+                    {invoice.plan}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]"> 
+                    AMOUNT
+                  </span>
+                  <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-70 ml-1">
+                    {invoice.amount}
+                  </p>
+                </div>
+              </div>
+            <div className="flex flex-col gap-3">
+              <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]"> 
+                STATUS
+              </span>
+              <select
+                value={selectedStatus}
+                onChange={(e) =>  {
+          
+                  setSelectedStatus(e.target.value as InvoiceStatus);
+                }}
+                className="w-[310px] h-[35px] rounded-lg bg-[#D9D9D9]/20 radius-[10px] shadow-[inset_0_4px_4px_rgba(0,0,0,0.25)] font-regular text-[#FFFFFF] text-[24px] font-ubuntu-mono opacity-75 px-4 outline-none cursor-pointer"
+              >
+                {STATUS_OPTIONS.map((status) => (
+                <option key={status} value={status} className="bg-[#1E1E1E] text-[24px] font-regular text-[#FFFFFF] font-ubuntu-mono opacity-75">
+                  {status}
+                </option>
+                ))}
+              </select>
+              <div className="flex flex-col gap-1">
+                  <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]"> 
+                    DUE DATE
+                  </span>
+                  <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-70 ml-1">
+                    {invoice.dueDate}
+                  </p>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-between">
+            <Button onClick={onClose} className="w-[399px] h-[71px] bg-[#B00049]/20 rounded-[30px] text-[32px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#B00049]/35">
+              Cancel
+            </Button>
+            <Button onClick={handleSave} className="w-[399px] h-[71px] bg-[#3ACF98]/20 rounded-[30px] text-[32px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#3ACF98]/35">
+              Save Changes
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
 
 function BillingPage() {
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const handleRowClick = (invoice: Invoice) => {
+    setSelectedInvoice(invoice)
+    setIsModalOpen(true)
+  }
   const stats = [
     { title: "Collected Weekly", amount: "₱305, 000", border: "58, 207, 152" },
     { title: "Pending Invoices", amount: "₱180, 200", border: "34, 100, 231" },
@@ -12,19 +161,19 @@ function BillingPage() {
     { title: "Refunds Issued", amount: "₱9, 102", border: "255, 216, 24" },
   ]
 
- const invoices: Invoice[] = [
-    { invoiceID: "INV-231231-01", account: "Vanna Hernandez", plan: "Diverge Netflix", amount: "₱1,499", dueDate: "Sep 24, 2026", paymentMethod: "-", status: "Pending" },
-    { invoiceID: "INV-231231-01", account: "Jonathan Landoy", plan: "Fiber 50 Mbps", amount: "₱999", dueDate: "Sep 22, 2026", paymentMethod: "-", status: "Pending" },
-    { invoiceID: "INV-231231-01", account: "Clifford Galvez", plan: "Super FiberX", amount: "₱2,199", dueDate: "Sep 20, 2026", paymentMethod: "-", status: "Pending" },
-    { invoiceID: "INV-231231-01", account: "Francis Lasay", plan: "Fiber 50 Mbps", amount: "₱999", dueDate: "Sep 19, 2026", paymentMethod: "GCash", status: "Paid" },
-    { invoiceID: "INV-231231-01", account: "Guiller Dela Cruz", plan: "Super FiberX", amount: "₱2,199", dueDate: "Sep 18, 2026", paymentMethod: "Bank Transfer", status: "Paid" },
-    { invoiceID: "INV-231231-01", account: "Alex Ogbac", plan: "Fiber 50 Mbps", amount: "₱999", dueDate: "Sep 18, 2026", paymentMethod: "-", status: "Pending" },
-    { invoiceID: "INV-231231-01", account: "Jeriana Maranguis", plan: "Super FiberX", amount: "₱2,199", dueDate: "Sep 10, 2026", paymentMethod: "-", status: "Overdue" },
-    { invoiceID: "INV-231231-01", account: "Christian Devera", plan: "Fiber 50 Mbps", amount: "₱999", dueDate: "Sep 8, 2026", paymentMethod: "Maya", status: "Paid" },
-    { invoiceID: "INV-231231-01", account: "Robi Luna", plan: "Diverge Netflix", amount: "₱1,499", dueDate: "Sep 5, 2026", paymentMethod: "-", status: "Overdue" },
-    { invoiceID: "INV-231231-01", account: "Cedrick Millonte", plan: "Fiber 50 Mbps", amount: "₱999", dueDate: "Aug 30, 2026", paymentMethod: "GCash", status: "Paid" },
-    { invoiceID: "INV-231231-01", account: "Wil Manalang", plan: "Fiber 50 Mbps", amount: "₱999", dueDate: "Aug 28, 2026", paymentMethod: "Bank Transfer", status: "Paid" },
-  ];
+const [invoices, setInvoices] = useState<Invoice[]>([
+  { invoiceID: "INV-231231-01", account: "Vanna Hernandez", email: "vanna@example.com", contact: "+63 912345678", plan: "Diverge Netflix", amount: "₱1,499", dueDate: "Sep 24, 2026", paymentMethod: "-", status: "Pending" },
+  { invoiceID: "INV-231231-02", account: "Jonathan Landoy", email: "jonathan@example.com", contact: "+63 912345678", plan: "Fiber 50 Mbps", amount: "₱999", dueDate: "Sep 22, 2026", paymentMethod: "-", status: "Pending" },
+  { invoiceID: "INV-231231-03", account: "Clifford Galvez", email: "clifford@example.com", contact: "+63 912345678", plan: "Super FiberX", amount: "₱2,199", dueDate: "Sep 20, 2026", paymentMethod: "-", status: "Pending" },
+  { invoiceID: "INV-231231-04", account: "Francis Lasay", email: "francis@example.com", contact: "+63 912345678", plan: "Fiber 50 Mbps", amount: "₱999", dueDate: "Sep 19, 2026", paymentMethod: "Gcash", status: "Paid" },
+  { invoiceID: "INV-231231-05", account: "Guiller Dela Cruz", email: "guiller@example.com", contact: "+63 912345678", plan: "Super FiberX", amount: "₱2,199", dueDate: "Sep 18, 2026", paymentMethod: "Bank Transfer", status: "Paid" },
+  { invoiceID: "INV-231231-06", account: "Alex Ogbac", email: "alex@example.com", contact: "+63 912345678", plan: "Fiber 50 Mbps", amount: "₱999", dueDate: "Sep 18, 2026", paymentMethod: "-", status: "Pending" },
+  { invoiceID: "INV-231231-07", account: "Jeriana Maranguis", email: "jeriana@example.com", contact: "+63 912345678", plan: "Super FiberX", amount: "₱2,199", dueDate: "Sep 10, 2026", paymentMethod: "-", status: "Overdue" },
+  { invoiceID: "INV-231231-08", account: "Christian Devera", email: "christian@example.com", contact: "+63 912345678", plan: "Fiber 50 Mbps", amount: "₱999", dueDate: "Sep 8, 2026", paymentMethod: "Maya", status: "Paid" },
+  { invoiceID: "INV-231231-09", account: "Robi Luna", email: "robi@example.com", contact: "+63 912345678", plan: "Diverge Netflix", amount: "₱1,499", dueDate: "Sep 5, 2026", paymentMethod: "-", status: "Overdue" },
+  { invoiceID: "INV-231231-10", account: "Cedrick Millonte", email: "cedrick@example.com", contact: "+63 912345678", plan: "Fiber 50 Mbps", amount: "₱999", dueDate: "Aug 30, 2026", paymentMethod: "Gcash", status: "Paid" },
+  { invoiceID: "INV-231231-11", account: "Wil Manalang", email: "wil@example.com", contact: "+63 912345678", plan: "Fiber 50 Mbps", amount: "₱999", dueDate: "Aug 28, 2026", paymentMethod: "Bank Transfer", status: "Paid" },
+]);
 
   function getStatusBadge(status: Invoice["status"]) {
     switch (status) {
@@ -36,6 +185,20 @@ function BillingPage() {
         return "bg-[#B00049]/20";
     }
   }
+
+  const handleStatusChange = (
+    invoiceID: string,
+    newStatus: InvoiceStatus
+    ) => {
+    setInvoices((prevInvoices) =>
+    prevInvoices.map((invoice) =>
+      invoice.invoiceID === invoiceID
+        ? { ...invoice, status: newStatus }
+        : invoice
+    )
+  );
+};
+
 
   return (
     <div className="w-full pr-10 mb-20 ">
@@ -112,9 +275,9 @@ function BillingPage() {
             </TableRow>
           </TableHeader>
           <TableBody className="w-full">
-            {invoices.map((inv, idx) => (
-              <TableRow key={idx} className="border-b border-white/5 hover:bg-white/5 transition-colors text-center">
-                <TableCell className="w-[126px] py-3 text-[20px] font-medium leading-[100%] tracking-[0.05em] text-[#3ACF98] opacity-60 text-center">{inv.invoiceID}</TableCell>
+            {invoices.map((inv, index) => (
+              <TableRow key={`${inv.invoiceID}-${index}`} onClick={() => handleRowClick(inv)} className="border-b border-white/5 hover:bg-white/5 transition-colors text-center cursor-pointer">
+                <TableCell className="w-[126px] py-3 text-[20px] font-medium leading-[100%] tracking-[0.05em] text-[#3ACF98] opacity-60 text-center ">{inv.invoiceID}</TableCell>
                 <TableCell className="py-3 text-[20px] font-medium leading-[100%] tracking-[0.05em] text-[#C4C4C4] text-center">{inv.account}</TableCell>
                 <TableCell className="py-3 text-[20px] font-light leading-[100%] tracking-[0.05em] text-[#C4C4C4]/92 text-center">{inv.plan}</TableCell>
                 <TableCell className="py-3 text-[16px] font-medium leading-[100%] tracking-[0.05em] text-[#C4C4C4] text-center">{inv.amount}</TableCell>
@@ -135,7 +298,13 @@ function BillingPage() {
       </div>
         
       </div>
-
+      <BillingStatusModal
+        key={selectedInvoice?.invoiceID}
+        invoice={selectedInvoice}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onStatusChange={handleStatusChange}
+      />       
     </div>
   )
 }
