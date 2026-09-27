@@ -71,14 +71,14 @@ function MyAccount() {
 
       </span>
       <Card className="flex-1 mr-4 ring-0 h-full shadow-glassy-jeri bg-neutral-500/40 gap-0">
-          <CardHeader className='text-2xl font-ubuntu-mono'>Internet Consumption</CardHeader>
-          <CardContent>
-            {
+        <CardHeader className='text-2xl font-ubuntu-mono'>Internet Consumption</CardHeader>
+        <CardContent>
+          {
             //TODO: add chartsjs??
           }
 
-          </CardContent>
-          <CardFooter className="border-none mt-auto opacity-40">
+        </CardContent>
+        <CardFooter className="border-none mt-auto opacity-40">
           <p>Avg Consumption: 100Mpbs</p>
         </CardFooter>
       </Card>
