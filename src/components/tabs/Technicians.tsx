@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent} from '@/components/ui/tabs'
 import TechnicianOverview from "./TechnicianOverview.tsx";
 import TechnicianFieldReports from "./TechnicianFieldReports.tsx";
 import TechnicianReviews from "./TechnicianReviews.tsx";
+import {engineers} from "../data/engineerData";
 
 function Technicians() {
     const stats = [
@@ -33,44 +34,6 @@ function Technicians() {
             valueColor: "#3ACF98"
         }
     ]
-    const engineers: Engineer[] = [
-        {
-            id: "FE01",
-            name: "Field Engineer 1",
-            location: "MNL/RC",
-            rating: "⭐ 4.9",
-            status: "On-Site"
-        },
-        {
-            id: "FE02",
-            name: "Field Engineer 2",
-            location: "MNL/BC",
-            rating: "⭐ 4.7",
-            status: "Traveling"
-        },
-        {
-            id: "FE03",
-            name: "Field Engineer 3",
-            location: "MNL/AC",
-            rating: "⭐ 4.8",
-            status: "Available"
-        },
-        {
-            id: "FE04",
-            name: "Field Engineer 4",
-            location: "MNL/AC",
-            rating: "⭐ 4.8",
-            status: "Available"
-        },
-        {
-            id: "FE05",
-            name: "Field Engineer 5",
-            location: "MNL/AC",
-            rating: "⭐ 4.8",
-            status: "Available"
-        }
-    ]
-    
     const statusStyles: Record<EngineerStatus, {
         text: string;
         border: string;
@@ -90,8 +53,20 @@ function Technicians() {
             text: "#3ACF98",
             border: "#3ACF98",
             background: "#4BE0A933"
-        }
+        },
+        "Off-Duty": {
+            text: "#888888",
+            border: "#888888",
+            background: "#88888833",
+        },
+
+        "Unavailable": {
+            text: "#E14545",
+            border: "#E14545",
+            background: "#E1454533",
+        },
     }
+    
 
     const [selectedEngineerId, setSelectedEngineerId] = useState<string | null>(null);
 
@@ -106,7 +81,7 @@ function Technicians() {
     return(
         <div className="flex flex-col items-start text-left mt-5 gap-7 w-[97%]">
             <div className="flex flex-col gap-1">
-                <span className="font-ubuntu-mono text-[32px] font-regular text-[#FFFFFF] tracking-[0.05em] leading-[100%] opacity-70">
+                <span className="font-ubuntu-mono text-[32px] font-regular text-[#FFFFFF] tracking-[0.05em] leading-[100%]">
                     Technician Monitoring
                 </span>
                 <span className="font-ubuntu-mono text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] leading-[100%] opacity-50">
@@ -213,29 +188,29 @@ function Technicians() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex flex-col gap-2">
+                                <div className="flex flex-col items-center justify-center">
                                     <h1 className="text-[40px] font-semibold text-[#E1AE08] opacity-80 tracking-[0.05em] leading-[100%]">
                                     {selectedEngineer.rating}
                                     </h1>
-                                    <span className="text-[20px]">
-                                        ⭐⭐⭐⭐⭐
+                                    <span className="text-[30px] text-yellow-400">
+                                        {"★".repeat(Math.round(selectedEngineer.rating))}
                                     </span>
                                 </div>
                             </div>
                             <Tabs defaultValue="overview" className="mt-5 w-full">
-                                <TabsList className="ml-15 shadow-glassy-jeri p-2 gap-5  rounded-[10px] h-[55px] bg-transparent">
-                                    <TabsTrigger value="overview" className="h-full flex-1 rounded-[10px] border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em ] cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Overview</TabsTrigger>
-                                    <TabsTrigger value="field-reports" className="h-full flex-1 rounded-[10px] border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Field Reports</TabsTrigger>
-                                    <TabsTrigger value="reviews" className="h-full flex-1 rounded-[10px] border- text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Reviews</TabsTrigger>
+                                <TabsList className="rounded-[10px] ml-15 shadow-glassy-jeri gap-5 h-auto p-1 bg-transparent">
+                                    <TabsTrigger value="overview" className="px-4 py-1.5 h-full flex-1 border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em ] cursor-pointer data-active:rounded-[10px] border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Overview</TabsTrigger>
+                                    <TabsTrigger value="field-reports" className="px-4 py-1.5 h-full flex-1 border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-[10px] border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Field Reports</TabsTrigger>
+                                    <TabsTrigger value="reviews" className="px-4 py-1.5 h-full flex-1 border- text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-[10px] border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Reviews</TabsTrigger>
                                 </TabsList>
                                 <TabsContent value="overview"   className="ml-5">
-                                <TechnicianOverview/>
+                                <TechnicianOverview engineer={selectedEngineer}/>
                                 </TabsContent>
                                 <TabsContent value="field-reports" className="ml-5">
-                                    <TechnicianFieldReports/>
+                                    <TechnicianFieldReports engineer={selectedEngineer}/>
                                 </TabsContent> 
                                 <TabsContent value="reviews" className="ml-5">
-                                    <TechnicianReviews/>
+                                    <TechnicianReviews engineer={selectedEngineer}/>
                                 </TabsContent> 
                             </Tabs>
                         </div>
