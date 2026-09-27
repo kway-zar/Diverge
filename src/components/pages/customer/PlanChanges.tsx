@@ -11,7 +11,7 @@ function PlanChanges() {
   return (
 
 
-    <div className="flex flex-col text-left w-[90vw] font-light tracking-wide">
+    <div className="flex flex-col text-left w-full font-light tracking-wide">
       {
         //TODO: make optimize the cards rendering once the types are determined
       }
@@ -22,7 +22,7 @@ function PlanChanges() {
           <i className="fa-solid fa-bolt-lightning fa-xl"></i>
           <p>Upgrades to 200 Mbps or below take effect within 30 minutes — no technician needed. Downgrades have a 30-day lock-in</p>
         </div>
-        <div className="grid grid-cols-3 gap-x-5">
+        <div className="flex flex-1 flex-row gap-x-5">
           {
             //Request style
           }

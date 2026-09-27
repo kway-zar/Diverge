@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { TabsContent } from '@/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-import type { UpgradeReq } from "../types/upgradeReq";
+import type { UpgradeReq } from "../../types/upgradeReq";
 
 
 function UpgradeReqTab() {
