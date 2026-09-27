@@ -7,7 +7,6 @@ export const engineers: Engineer[] = [
         location: "MANILA/QC",
         rating: 4.9,
         status: "On-Site",
-
         currentJob: "TK-231231 No Internet",
         completed: 214,
         queue: 1,
