@@ -42,6 +42,7 @@ export const engineers: Engineer[] = [
         fieldReports: [
             {
                 ticketId: "TK-231321",
+                engineerId: "ENG-0001",
                 date: "Sep 21",
                 status: "Fully Resolved",
                 description: "Internet connection issue diagnosed and resolved.",
@@ -50,6 +51,7 @@ export const engineers: Engineer[] = [
             },
             {
                 ticketId: "TK-231322",
+                engineerId: "ENG-0001",
                 date: "Sep 19",
                 status: "Fully Resolved",
                 description: "Router connection problem identified and fixed.",
@@ -60,7 +62,7 @@ export const engineers: Engineer[] = [
 
         reviews: [
             {
-                reviewer: "Jonathan Landoy",
+                reviewer: "Guiller Dela Cruz",
                 rating: 5,
                 date: "Nov 12",
                 comment: "Arrived on time and explained everything clearly.",
@@ -115,6 +117,7 @@ export const engineers: Engineer[] = [
         fieldReports: [
             {
                 ticketId: "TK-231245",
+                engineerId: "ENG-0002",
                 date: "Sep 20",
                 status: "In Progress",
                 description: "Slow connection reported by customer. Network inspection ongoing.",
@@ -123,6 +126,7 @@ export const engineers: Engineer[] = [
             },
             {
                 ticketId: "TK-231240",
+                engineerId: "ENG-0002",
                 date: "Sep 18",
                 status: "Fully Resolved",
                 description: "Connection instability resolved after equipment inspection.",
@@ -188,6 +192,7 @@ export const engineers: Engineer[] = [
         fieldReports: [
             {
                 ticketId: "TK-231250",
+                engineerId: "ENG-0003",
                 date: "Sep 22",
                 status: "Fully Resolved",
                 description: "Router configuration completed successfully.",
@@ -196,6 +201,7 @@ export const engineers: Engineer[] = [
             },
             {
                 ticketId: "TK-231251",
+                engineerId: "ENG-0003",
                 date: "Sep 20",
                 status: "Fully Resolved",
                 description: "Wi-Fi configuration and connectivity testing completed.",
@@ -261,6 +267,7 @@ export const engineers: Engineer[] = [
         fieldReports: [
             {
                 ticketId: "TK-231260",
+                engineerId: "ENG-0004",
                 date: "Sep 17",
                 status: "Fully Resolved",
                 description: "No internet issue resolved after connection testing.",
@@ -320,6 +327,7 @@ export const engineers: Engineer[] = [
         fieldReports: [
             {
                 ticketId: "TK-231270",
+                engineerId: "ENG-0005",
                 date: "Sep 16",
                 status: "In Progress",
                 description: "Signal loss detected. Further network inspection required.",

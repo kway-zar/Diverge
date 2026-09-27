@@ -188,12 +188,12 @@ function Technicians() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex flex-col gap-2">
+                                <div className="flex flex-col items-center justify-center">
                                     <h1 className="text-[40px] font-semibold text-[#E1AE08] opacity-80 tracking-[0.05em] leading-[100%]">
                                     {selectedEngineer.rating}
                                     </h1>
-                                    <span className="text-[20px]">
-                                        ⭐⭐⭐⭐⭐
+                                    <span className="text-[30px] text-yellow-400">
+                                        {"★".repeat(Math.round(selectedEngineer.rating))}
                                     </span>
                                 </div>
                             </div>

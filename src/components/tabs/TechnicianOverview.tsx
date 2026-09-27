@@ -1,6 +1,7 @@
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import type {Engineer} from "../types/engineer";
 
+
 interface TechnicianOverviewProps{
     engineer: Engineer;
 }
@@ -26,11 +27,7 @@ function TechnicianOverview({engineer} : TechnicianOverviewProps) {
         }
     ];
 
-    const metricsData = [
-        { id: '1', label: 'Customer Satisfaction', benchmark: 80, score: 90 },
-        { id: '2', label: 'Response Time', benchmark: 80, score: 90 },
-        { id: '3', label: 'First Contact Resolution', benchmark: 90, score: 80 },
-    ];
+    const metrics = engineer.metrics;
 
     return(
         <div className="flex flex-col gap-5 mt-5 mr-10">
@@ -57,7 +54,7 @@ function TechnicianOverview({engineer} : TechnicianOverviewProps) {
             <div className="w-full rounded-xl p-6 font-ubuntu-mono">
                 <h2 className="mb-6 text-[22px] text-[#FFFFFF] tracking-[0.05em] leading-[100%]">Performance vs Benchmarks</h2>
                 <div className="space-y-6">
-                    {metricsData.map((item) => {
+                    {metrics.map((item) => {
                         const isPassed = item.score >= item.benchmark;
                         const statusColor = isPassed ? 'text-[#3ACF98]' : 'text-[#DD0002]';
                         const progressBg = isPassed ? 'bg-[#3ACF98]' : 'bg-[#920C0D]';
