@@ -11,7 +11,7 @@ function TechnicianFieldReports() {
     //     }
     // ]
     return(
-        <div className="grid grid-row-2 gap-7 mt-10">
+        <div className="grid grid-row-2 gap-7 mt-10 mb-10">
             <Card className="w-full h-[125px] px-2 bg-[#D9D9D9]/20 rounded-[20px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black">
                 <div className="flex flex-col gap-1">
                     <div className="flex justify-between">
