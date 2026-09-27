@@ -27,7 +27,7 @@ function TechnicianOverview() {
 
     return(
         <div className="flex flex-col gap-5 mt-5 mr-10">
-            <div className="grid grid-cols-3 gap-20 w-full px-10">
+            <div className="grid grid-cols-3 gap-20 w-full">
                 {overviews.map((overview, index) => (
                     <Card key={index} className="w-full h-[135px] bg-[#C4C4C4]/20 rounded-[15px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black">
                         <CardContent className="flex flex-col items-center justify-center gap-4">

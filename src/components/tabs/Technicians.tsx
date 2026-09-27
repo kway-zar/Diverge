@@ -222,19 +222,19 @@ function Technicians() {
                                     </span>
                                 </div>
                             </div>
-                            <Tabs defaultValue="overview" className="pl-15 mt-5 w-full">
-                                <TabsList className="shadow-glassy-jeri p-2 gap-5  rounded-[10px] h-[55px] bg-transparent">
+                            <Tabs defaultValue="overview" className="mt-5 w-full">
+                                <TabsList className="ml-15 shadow-glassy-jeri p-2 gap-5  rounded-[10px] h-[55px] bg-transparent">
                                     <TabsTrigger value="overview" className="h-full flex-1 rounded-[10px] border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em ] cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Overview</TabsTrigger>
                                     <TabsTrigger value="field-reports" className="h-full flex-1 rounded-[10px] border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Field Reports</TabsTrigger>
                                     <TabsTrigger value="reviews" className="h-full flex-1 rounded-[10px] border- text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Reviews</TabsTrigger>
                                 </TabsList>
-                                <TabsContent value="overview" className="flex flex-col left-0">
+                                <TabsContent value="overview"   className="ml-5">
                                 <TechnicianOverview/>
                                 </TabsContent>
-                                <TabsContent value="field-reports">
+                                <TabsContent value="field-reports" className="ml-5">
                                     <TechnicianFieldReports/>
                                 </TabsContent> 
-                                <TabsContent value="reviews">
+                                <TabsContent value="reviews" className="ml-5">
                                     <TechnicianReviews/>
                                 </TabsContent> 
                             </Tabs>
