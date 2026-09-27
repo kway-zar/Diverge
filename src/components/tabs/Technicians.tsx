@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent} from '@/components/ui/tabs'
 import TechnicianOverview from "./TechnicianOverview.tsx";
 import TechnicianFieldReports from "./TechnicianFieldReports.tsx";
 import TechnicianReviews from "./TechnicianReviews.tsx";
+import {engineers} from "../data/engineerData";
 
 function Technicians() {
     const stats = [
@@ -33,44 +34,6 @@ function Technicians() {
             valueColor: "#3ACF98"
         }
     ]
-    const engineers: Engineer[] = [
-        {
-            id: "FE01",
-            name: "Field Engineer 1",
-            location: "MNL/RC",
-            rating: "⭐ 4.9",
-            status: "On-Site"
-        },
-        {
-            id: "FE02",
-            name: "Field Engineer 2",
-            location: "MNL/BC",
-            rating: "⭐ 4.7",
-            status: "Traveling"
-        },
-        {
-            id: "FE03",
-            name: "Field Engineer 3",
-            location: "MNL/AC",
-            rating: "⭐ 4.8",
-            status: "Available"
-        },
-        {
-            id: "FE04",
-            name: "Field Engineer 4",
-            location: "MNL/AC",
-            rating: "⭐ 4.8",
-            status: "Available"
-        },
-        {
-            id: "FE05",
-            name: "Field Engineer 5",
-            location: "MNL/AC",
-            rating: "⭐ 4.8",
-            status: "Available"
-        }
-    ]
-    
     const statusStyles: Record<EngineerStatus, {
         text: string;
         border: string;
@@ -90,8 +53,20 @@ function Technicians() {
             text: "#3ACF98",
             border: "#3ACF98",
             background: "#4BE0A933"
-        }
+        },
+        "Off-Duty": {
+            text: "#888888",
+            border: "#888888",
+            background: "#88888833",
+        },
+
+        "Unavailable": {
+            text: "#E14545",
+            border: "#E14545",
+            background: "#E1454533",
+        },
     }
+    
 
     const [selectedEngineerId, setSelectedEngineerId] = useState<string | null>(null);
 
@@ -229,13 +204,13 @@ function Technicians() {
                                     <TabsTrigger value="reviews" className="px-4 py-1.5 h-full flex-1 border- text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-[10px] border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Reviews</TabsTrigger>
                                 </TabsList>
                                 <TabsContent value="overview"   className="ml-5">
-                                <TechnicianOverview/>
+                                <TechnicianOverview engineer={selectedEngineer}/>
                                 </TabsContent>
                                 <TabsContent value="field-reports" className="ml-5">
-                                    <TechnicianFieldReports/>
+                                    <TechnicianFieldReports engineer={selectedEngineer}/>
                                 </TabsContent> 
                                 <TabsContent value="reviews" className="ml-5">
-                                    <TechnicianReviews/>
+                                    <TechnicianReviews engineer={selectedEngineer}/>
                                 </TabsContent> 
                             </Tabs>
                         </div>
