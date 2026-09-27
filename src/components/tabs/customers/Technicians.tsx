@@ -5,7 +5,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent} from '@/components/ui/tabs'
 import TechnicianOverview from "./TechnicianOverview.tsx";
 import TechnicianFieldReports from "./TechnicianFieldReports.tsx";
 import TechnicianReviews from "./TechnicianReviews.tsx";
-import {engineers} from "../data/engineerData";
+import {engineers} from "../../data/engineerData";
 
 function Technicians() {
     const stats = [

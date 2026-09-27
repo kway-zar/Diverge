@@ -1,5 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import mapImage from "../../assets/image 12.png"
+import mapImage from "../../../assets/image 12.png"
 
 function MapView() {
     const legendItems = [
@@ -28,7 +28,7 @@ function MapView() {
                             <h1 className="text-[16px] font-regular font-ubuntu-mono text-[#FFFFFF] tracking-[0.05em] leading-[100%]">
                                 {legend.name}
                             </h1>
-                            <p lassName="text-[15px] font-regular font-ubuntu-mono text-[#FFFFFF] tracking-[0.05em] leading-[100%] opacity-80">
+                            <p className="text-[15px] font-regular font-ubuntu-mono text-[#FFFFFF] tracking-[0.05em] leading-[100%] opacity-80">
                                 {legend.status}
                             </p>
                         </div>
