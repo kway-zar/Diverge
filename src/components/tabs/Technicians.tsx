@@ -106,7 +106,7 @@ function Technicians() {
     return(
         <div className="flex flex-col items-start text-left mt-5 gap-7 w-[97%]">
             <div className="flex flex-col gap-1">
-                <span className="font-ubuntu-mono text-[32px] font-regular text-[#FFFFFF] tracking-[0.05em] leading-[100%] opacity-70">
+                <span className="font-ubuntu-mono text-[32px] font-regular text-[#FFFFFF] tracking-[0.05em] leading-[100%]">
                     Technician Monitoring
                 </span>
                 <span className="font-ubuntu-mono text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] leading-[100%] opacity-50">
@@ -223,10 +223,10 @@ function Technicians() {
                                 </div>
                             </div>
                             <Tabs defaultValue="overview" className="mt-5 w-full">
-                                <TabsList className="ml-15 shadow-glassy-jeri p-2 gap-5  rounded-[10px] h-[55px] bg-transparent">
-                                    <TabsTrigger value="overview" className="h-full flex-1 rounded-[10px] border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em ] cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Overview</TabsTrigger>
-                                    <TabsTrigger value="field-reports" className="h-full flex-1 rounded-[10px] border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Field Reports</TabsTrigger>
-                                    <TabsTrigger value="reviews" className="h-full flex-1 rounded-[10px] border- text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Reviews</TabsTrigger>
+                                <TabsList className="rounded-[10px] ml-15 shadow-glassy-jeri gap-5 h-auto p-1 bg-transparent">
+                                    <TabsTrigger value="overview" className="px-4 py-1.5 h-full flex-1 border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em ] cursor-pointer data-active:rounded-[10px] border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Overview</TabsTrigger>
+                                    <TabsTrigger value="field-reports" className="px-4 py-1.5 h-full flex-1 border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-[10px] border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Field Reports</TabsTrigger>
+                                    <TabsTrigger value="reviews" className="px-4 py-1.5 h-full flex-1 border- text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-[10px] border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Reviews</TabsTrigger>
                                 </TabsList>
                                 <TabsContent value="overview"   className="ml-5">
                                 <TechnicianOverview/>
