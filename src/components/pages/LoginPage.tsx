@@ -6,17 +6,27 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useNavigate } from "react-router-dom"
  
 function LoginPage() {
+  const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
- 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // TODO: auth API/backend
-    console.log({ email, password })
-  }
+  const [error, setError] = useState("")
+
+     const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault()
+
+       if (!email.trim() || !password.trim()) {
+      setError("Please enter both email and password.")
+      return
+     }
+
+    setError("")
+    // TODO: replace with real auth API for backend
+    navigate("/dashboard")
+   }
  
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-[conic-gradient(from_180deg_at_50%_50%,_#121212,_#373535,_#121212)] p-6">
@@ -42,6 +52,7 @@ function LoginPage() {
             Access your Diverge account from anywhere, anytime.
           </p>
  
+          {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-white">Email</Label>
