@@ -6,6 +6,8 @@ import MyAccount from './MyAccount.tsx'
 import Billing from './Billing.tsx'
 import Support from './Support.tsx'
 import PlanChanges from './PlanChanges.tsx'
+import CustomerTickets from './CustomerTickets.tsx'
+
 
 function CustomerLandingPage() {
   const items = ["My Account", "Billing", "Tickets", "Plan Changes", "Support"]
@@ -24,7 +26,7 @@ function CustomerLandingPage() {
       return <Billing/>
 
     } if (activeItem == 'Tickets') {
-
+      return <CustomerTickets/>
     }
     if (activeItem == 'Plan Changes') {
       return <PlanChanges />
