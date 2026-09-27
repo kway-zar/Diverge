@@ -8,8 +8,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { Tickets as Ticket } from "../types/tickets";
-import TicketStatus from "../modals/ticketStatus";
+import type { Tickets as Ticket } from "../../types/tickets";
+import TicketStatus from "../../modals/ticketStatus";
 
 const filterOptions = ["All", "Open", "In Progress", "Resolved", "Escalated"];
 

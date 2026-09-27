@@ -2,9 +2,9 @@ import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger} from '@/components/ui/tabs'
 
-import ChurnRisk from '../tabs/admin/ChurnRisk'
-import Anomalies from '../tabs/admin/Anomalies'
-import Upgrade from '../tabs/admin/Upgrade'
+import ChurnRisk from '../../tabs/admin/ChurnRisk'
+import Anomalies from '../../tabs/admin/Anomalies'
+import Upgrade from '../../tabs/admin/Upgrade'
 
 function AnalyticsPage() {
   return (
@@ -67,12 +67,8 @@ function AnalyticsPage() {
           <TabsTrigger value="forecast" className="cursor-pointer hover:bg-neutral-500/20 data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">FORECAST</TabsTrigger>
         </TabsList>
 
-        {
-          //TODO: tab contents
-        }
         <ChurnRisk/>
         <Anomalies />
-
         <Upgrade />
       </Tabs>
 

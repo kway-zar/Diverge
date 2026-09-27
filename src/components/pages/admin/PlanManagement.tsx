@@ -1,6 +1,6 @@
-import CreatePlan from '../modals/CreatePlan.tsx'
-import OfferTab from '../tabs/customers/OfferTab.tsx'
-import UpgradeReqTab from '../tabs/customers/UpgradeReqTab.tsx'
+import CreatePlan from '../../modals/CreatePlan.tsx'
+import OfferTab from '../../tabs/admin/OfferTab.tsx'
+import UpgradeReqTab from '../../tabs/admin/UpgradeReqTab.tsx'
 
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 function PlanManagement() {

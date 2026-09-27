@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { AlertTriangle } from "lucide-react"
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { Invoice, InvoiceStatus } from "../types/invoice";
+import type { Invoice, InvoiceStatus } from "../../types/invoice";
 import {X} from "lucide-react";
 import {useState, useEffect} from "react";
 
