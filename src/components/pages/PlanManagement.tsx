@@ -1,6 +1,6 @@
 import CreatePlan from '../modals/CreatePlan.tsx'
-import OfferTab from '../tabs/OfferTab.tsx'
-import UpgradeReqTab from '../tabs/UpgradeReqTab.tsx'
+import OfferTab from '../tabs/customers/OfferTab.tsx'
+import UpgradeReqTab from '../tabs/customers/UpgradeReqTab.tsx'
 
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 function PlanManagement() {
@@ -15,8 +15,8 @@ function PlanManagement() {
       </div>
       <Tabs defaultValue="offer" className="flex-1 mt-10">
         <TabsList className="shadow-glassy-jeri p-1 rounded-4xl">
-          <TabsTrigger value="offer" className="cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">PLAN OFFERINGS</TabsTrigger>
-          <TabsTrigger value="upgrade" className="cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">UPGRADE REQUESTS</TabsTrigger>
+          <TabsTrigger value="offer" className="cursor-pointer hover:bg-neutral-500/20 data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">PLAN OFFERINGS</TabsTrigger>
+          <TabsTrigger value="upgrade" className="cursor-pointer hover:bg-neutral-500/20 data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">UPGRADE REQUESTS</TabsTrigger>
         </TabsList>
         <OfferTab />
         <UpgradeReqTab />
