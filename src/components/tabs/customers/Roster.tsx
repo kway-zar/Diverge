@@ -30,17 +30,18 @@ function RosterModal({
   return(
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-    className="min-w-[1090px] max-w-none h-[648px] bg-[#121212] text-white py-5 px-12 rounded-[30px] border-0 shadow-[0_0_12px_rgba(80,42,42,0.15)] [&>button]:hidden outline-none ring-0 focus:ring-0 focus-visible:ring-0">
-        <div className="flex flex-col gap-10">
+    className="min-w-[1090px] max-w-none h-[648px] bg-[#121212] text-white py-8 px-16 rounded-[30px] border-0 shadow-[0_0_12px_rgba(80,42,42,0.15)] [&>button]:hidden outline-none ring-0 focus:ring-0 focus-visible:ring-0">
+        <div className="flex flex-col gap-5">
           <div className="flex justify-between ">
-          <div className="flex gap-3 items-center justify-center">
+          <div className="flex gap-5 items-center">
             <div className="w-[86px] h-[86px] rounded-full bg-[#D9D9D9]">
             </div>
-            <div className="flex flex-col gap-3 items-center justify-center">
+            <div className="flex flex-col gap-2">
               <h1 className="text-[32px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em]">
                 {engineer.name}
               </h1>
               <p className="text-[20px] font-regular font-ubuntu-mono text-[#3ACF98] leading-[100%] tracking-[0.05em]">
+                {engineer.id}
               </p>
             </div>
           </div>
@@ -53,38 +54,38 @@ function RosterModal({
           </button>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-8 mt-6">
+          <div className="grid grid-cols-2 gap-8 mt-4 mb-7">
               <div className="flex flex-col gap-5">
-                <div className="flex flex-col gap-1">
-                  <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]"> 
-                    Hello
+                <div className="flex flex-col gap-2">
+                  <span className="text-[20px] font-light text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em] opacity-80"> 
+                    DISTRICT
                   </span>
-                  <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-70 ml-1">
-                    World
+                  <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-75 ml-6">
+                    {engineer.location}
                   </p>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]"> 
-                   Hellow
+                <div className="flex flex-col gap-2">
+                  <span className="text-[20px] font-light text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em] opacity-80"> 
+                   RATING
                   </span>
-                  <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-70 ml-1">
-                    World
+                  <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-75 ml-6">
+                   ★ {engineer.rating}
                   </p>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]"> 
-                    PLAN
+                <div className="flex flex-col gap-2">
+                  <span className="text-[20px] font-light text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em] opacity-80"> 
+                    PHONE
                   </span>
-                  <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-70 ml-1">
-                    Hello
+                  <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-75 ml-6">
+                    {engineer.phoneNo}
                   </p>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]"> 
-                    AMOUNT
+                <div className="flex flex-col gap-2">
+                  <span className="text-[20px] font-light text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em] opacity-80"> 
+                    CURRENT JOB
                   </span>
-                  <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-70 ml-1">
-                    World
+                  <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-75 ml-6">
+                    {engineer.currentJob}
                   </p>
                 </div>
               </div>
@@ -93,21 +94,37 @@ function RosterModal({
                 Hello
               </span>
               
-              <div className="flex flex-col gap-1">
-                  <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]"> 
-                    DUE DATE
+              <div className="flex flex-col gap-2">
+                  <span className="text-[20px] font-light text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em] opacity-80"> 
+                    JOBS COMPLETED
                   </span>
-                  <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-70 ml-1">
-                    World
+                  <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-75 ml-6">
+                    {engineer.completed}
+                  </p>
+              </div>
+              <div className="flex flex-col gap-2">
+                  <span className="text-[20px] font-light text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em] opacity-80"> 
+                    STATUS
+                  </span>
+                  <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-75 ml-6">
+                    {engineer.status}
+                  </p>
+              </div>
+              <div className="flex flex-col gap-2">
+                  <span className="text-[20px] font-light text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em] opacity-80"> 
+                    CURRENT JOB
+                  </span>
+                  <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-75 ml-6">
+                    {engineer.overview.joined}
                   </p>
               </div>
             </div>
           </div>
           <div className="flex justify-between">
-            <Button  className="w-[399px] h-[71px] bg-[#B00049]/20 rounded-[30px] text-[32px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#B00049]/35">
+            <Button  className="w-[399px] h-[71px] bg-[#4BE0A9]/40 rounded-[30px] text-[32px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#B00049]/35">
               Assign Job
             </Button>
-            <Button  className="w-[399px] h-[71px] bg-[#3ACF98]/20 rounded-[30px] text-[32px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#3ACF98]/35">
+            <Button  className="w-[399px] h-[71px] bg-[#FFFFFF]/29 rounded-[30px] text-[32px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#3ACF98]/35">
               View History
             </Button>
           </div>
