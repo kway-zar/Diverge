@@ -3,7 +3,7 @@ import type { Engineer } from "../types/engineer";
 export const engineers: Engineer[] = [
     {
         id: "ENG-0001",
-        name: "Field Engineer 1",
+        name: "Christian Devera",
         location: "MANILA/QC",
         rating: 4.9,
         phoneNo: "+63 123 456 7890",
@@ -80,7 +80,7 @@ export const engineers: Engineer[] = [
 
     {
         id: "ENG-0002",
-        name: "Field Engineer 2",
+        name: "Guiller Dela Cruz",
         location: "MANILA/BC",
         rating: 4.7,
         phoneNo: "+63 123 456 7890",
@@ -157,7 +157,7 @@ export const engineers: Engineer[] = [
 
     {
         id: "ENG-0003",
-        name: "Field Engineer 3",
+        name: "Jeriana Maranguis",
         location: "MANILA/AC",
         rating: 4.8,
         phoneNo: "+63 123 456 7890",
@@ -234,7 +234,7 @@ export const engineers: Engineer[] = [
 
     {
         id: "ENG-0004",
-        name: "Field Engineer 4",
+        name: "Vanna Hernandez",
         location: "MANILA/AC",
         rating: 4.8,
         phoneNo: "+63 123 456 7890",
@@ -296,7 +296,7 @@ export const engineers: Engineer[] = [
 
     {
         id: "ENG-0005",
-        name: "Field Engineer 5",
+        name: "Jonald Rodulfo",
         location: "MANILA/QC",
         rating: 4.6,
         phoneNo: "+63 123 456 7890",

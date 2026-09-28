@@ -8,28 +8,48 @@ import TechnicianReviews from "./TechnicianReviews.tsx";
 import {engineers} from "../../data/engineerData";
 
 function Technicians() {
+    const avgTeamRating = engineers.reduce((sum, engineer) => sum + engineer.rating, 0) / engineers.length;
+
+    const reportsThisMonth = engineers.reduce(
+        (total, engineer) => total + engineer.fieldReports.length,
+        0
+    );
+
+    const belowBenchmark = engineers.reduce(
+        (total, engineer) =>
+            total +
+            engineer.metrics.filter(
+                (metric) => metric.score < metric.benchmark
+            ).length,
+        0
+    );
+
+    const topPerformer = engineers.reduce((top, engineer) =>
+        engineer.rating > top.rating ? engineer : top
+    );
+
     const stats = [
         {
             title: "AVG TEAM RATING",
-            value: "4.7",
+            value: avgTeamRating.toFixed(1),
             description: "Across S Engineers",
             valueColor: "#E1AE08"
         },
         {
             title: "REPORTS THIS MONTH",
-            value: "67",
+            value: reportsThisMonth,
             description: "Field Submissions",
             valueColor: "#274F9E"
         },
         {
             title: "BELOW BENCHMARK",
-            value: "3",
+            value: belowBenchmark,
             description: "Punctuality",
             valueColor: "#DD0002"
         },
         {
             title: "TOP PERFORMER",
-            value: "Tech 1",
+            value: topPerformer.name,
             description: "5 star ratings in 20 jobs",
             valueColor: "#3ACF98"
         }
@@ -78,6 +98,8 @@ function Technicians() {
         (engineer) => engineer.id === selectedEngineerId
     )
 
+    
+
     return(
         <div className="flex flex-col items-start text-left mt-5 gap-7 w-[97%]">
             <div className="flex flex-col gap-1">
@@ -95,7 +117,7 @@ function Technicians() {
                             <h2 className="text-[20px] font-light text-[#FFFFFF] tracking-[0.05em] leading-[100%]">
                                 {stat.title}
                             </h2>
-                            <h1 className="text-[40px] font-bold tracking-[0.05em] leading-[100%]"
+                            <h1 className="text-[36px] font-bold tracking-[0.05em] leading-[100%]"
                                 style={{color: stat.valueColor}}
                             >
                                 {stat.value}
