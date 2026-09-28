@@ -141,7 +141,7 @@ function Technicians() {
                         <div 
                         key={engineer.id}
                         onClick={() => handleEngineerClick(engineer.id)}
-                        className={`cursor-pointer flex flex-row gap-5 transition-all duration-200 hover:bg-white/10 hover:scale-[1.02] rounded-full px-2 py-1 
+                        className={`cursor-pointer flex flex-row gap-5 items-center transition-all duration-200 hover:bg-white/10 hover:scale-[1.02] rounded-full px-2 py-1 
                                     ${selectedEngineerId === engineer.id 
                                         ? "bg-[#3ACF98]/15 shadow-glassy-jeri"
                                         : ""
@@ -150,7 +150,7 @@ function Technicians() {
                             <div className="w-[56px] h-[51px] rounded-full bg-[#D9D9D9]">
 
                             </div>
-                            <div className="flex flex-col gap-3">
+                            <div className="flex-1 min-w-0 flex flex-col gap-3">
                                 <h2 className="font-ubunto-mono text-[16px] text-[#FFFFFF] font-regular tracking-[0.05em] leading-[100%]">
                                     {engineer.name}
                                 </h2>
@@ -158,12 +158,12 @@ function Technicians() {
                                     {engineer.location}
                                 </p>
                             </div>
-                            <div className="flex flex-col gap-2 pl-8">
+                            <div className="w-[100px] shrink-0 flex flex-col gap-2 items-center justify-center">
                                 <p className="text-[13px] font-semibold text-[#E1AE08] opacity-80 tracking-[0.05em] leading-[100%]">
                                     {engineer.rating}
                                 </p>
                                 <span 
-                                className="w-[62px] h-[23px] rounded-[10px] border-[1px] flex items-center justify-center text-[11px] tracking-[0.05em] leading-[100%]"
+                                className="w-[70px] h-[23px] rounded-[10px] border-[1px] flex items-center justify-center text-[11px] tracking-[0.05em] leading-[100%]"
                                 style={{
                                     color: statusStyles[engineer.status].text,
                                     borderColor: statusStyles[engineer.status].border,
