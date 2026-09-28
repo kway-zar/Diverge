@@ -3,19 +3,21 @@ import type { Engineer } from "../types/engineer";
 export const engineers: Engineer[] = [
     {
         id: "ENG-0001",
-        name: "Field Engineer 1",
+        name: "Christian Devera",
         location: "MANILA/QC",
         rating: 4.9,
+        phoneNo: "+63 123 456 7890",
         status: "On-Site",
-
         currentJob: "TK-231231 No Internet",
         completed: 214,
         queue: 1,
+        
 
         overview: {
             jobsCompleted: 109,
             thisMonth: 10,
             avgResolution: 1.5,
+            joined: "November 12",
         },
 
         metrics: [
@@ -78,9 +80,10 @@ export const engineers: Engineer[] = [
 
     {
         id: "ENG-0002",
-        name: "Field Engineer 2",
+        name: "Guiller Dela Cruz",
         location: "MANILA/BC",
         rating: 4.7,
+        phoneNo: "+63 123 456 7890",
         status: "Traveling",
 
         currentJob: "TK-231245 Slow Connection",
@@ -91,6 +94,7 @@ export const engineers: Engineer[] = [
             jobsCompleted: 98,
             thisMonth: 12,
             avgResolution: 1.8,
+            joined: "November 12",
         },
 
         metrics: [
@@ -153,9 +157,10 @@ export const engineers: Engineer[] = [
 
     {
         id: "ENG-0003",
-        name: "Field Engineer 3",
+        name: "Jeriana Maranguis",
         location: "MANILA/AC",
         rating: 4.8,
+        phoneNo: "+63 123 456 7890",
         status: "Available",
 
         currentJob: "TK-231250 Router Configuration",
@@ -166,6 +171,7 @@ export const engineers: Engineer[] = [
             jobsCompleted: 102,
             thisMonth: 14,
             avgResolution: 1.4,
+            joined: "November 12",
         },
 
         metrics: [
@@ -228,9 +234,10 @@ export const engineers: Engineer[] = [
 
     {
         id: "ENG-0004",
-        name: "Field Engineer 4",
+        name: "Vanna Hernandez",
         location: "MANILA/AC",
         rating: 4.8,
+        phoneNo: "+63 123 456 7890",
         status: "Off-Duty",
 
         currentJob: "TK-231260 No Internet",
@@ -241,6 +248,7 @@ export const engineers: Engineer[] = [
             jobsCompleted: 96,
             thisMonth: 9,
             avgResolution: 1.7,
+            joined: "November 12",
         },
 
         metrics: [
@@ -278,7 +286,7 @@ export const engineers: Engineer[] = [
 
         reviews: [
             {
-                reviewer: "Luis Garcia",
+                reviewer: "Bana Banana",
                 rating: 5,
                 date: "Sep 17",
                 comment: "Very professional and courteous.",
@@ -288,9 +296,10 @@ export const engineers: Engineer[] = [
 
     {
         id: "ENG-0005",
-        name: "Field Engineer 5",
+        name: "Jonald Rodulfo",
         location: "MANILA/QC",
         rating: 4.6,
+        phoneNo: "+63 123 456 7890",
         status: "Unavailable",
 
         currentJob: "TK-231270 Signal Loss",
@@ -301,6 +310,7 @@ export const engineers: Engineer[] = [
             jobsCompleted: 91,
             thisMonth: 7,
             avgResolution: 2.0,
+            joined: "November 12",
         },
 
         metrics: [

@@ -8,28 +8,48 @@ import TechnicianReviews from "./TechnicianReviews.tsx";
 import {engineers} from "../../data/engineerData";
 
 function Technicians() {
+    const avgTeamRating = engineers.reduce((sum, engineer) => sum + engineer.rating, 0) / engineers.length;
+
+    const reportsThisMonth = engineers.reduce(
+        (total, engineer) => total + engineer.fieldReports.length,
+        0
+    );
+
+    const belowBenchmark = engineers.reduce(
+        (total, engineer) =>
+            total +
+            engineer.metrics.filter(
+                (metric) => metric.score < metric.benchmark
+            ).length,
+        0
+    );
+
+    const topPerformer = engineers.reduce((top, engineer) =>
+        engineer.rating > top.rating ? engineer : top
+    );
+
     const stats = [
         {
             title: "AVG TEAM RATING",
-            value: "4.7",
+            value: avgTeamRating.toFixed(1),
             description: "Across S Engineers",
             valueColor: "#E1AE08"
         },
         {
             title: "REPORTS THIS MONTH",
-            value: "67",
+            value: reportsThisMonth,
             description: "Field Submissions",
             valueColor: "#274F9E"
         },
         {
             title: "BELOW BENCHMARK",
-            value: "3",
+            value: belowBenchmark,
             description: "Punctuality",
             valueColor: "#DD0002"
         },
         {
             title: "TOP PERFORMER",
-            value: "Tech 1",
+            value: topPerformer.name,
             description: "5 star ratings in 20 jobs",
             valueColor: "#3ACF98"
         }
@@ -78,6 +98,8 @@ function Technicians() {
         (engineer) => engineer.id === selectedEngineerId
     )
 
+    
+
     return(
         <div className="flex flex-col items-start text-left mt-5 gap-7 w-[97%]">
             <div className="flex flex-col gap-1">
@@ -95,7 +117,7 @@ function Technicians() {
                             <h2 className="text-[20px] font-light text-[#FFFFFF] tracking-[0.05em] leading-[100%]">
                                 {stat.title}
                             </h2>
-                            <h1 className="text-[40px] font-bold tracking-[0.05em] leading-[100%]"
+                            <h1 className="text-[36px] font-bold tracking-[0.05em] leading-[100%]"
                                 style={{color: stat.valueColor}}
                             >
                                 {stat.value}
@@ -119,7 +141,7 @@ function Technicians() {
                         <div 
                         key={engineer.id}
                         onClick={() => handleEngineerClick(engineer.id)}
-                        className={`cursor-pointer flex flex-row gap-5 transition-all duration-200 hover:bg-white/10 hover:scale-[1.02] rounded-full px-2 py-1 
+                        className={`cursor-pointer flex flex-row gap-5 items-center transition-all duration-200 hover:bg-white/10 hover:scale-[1.02] rounded-full px-2 py-1 
                                     ${selectedEngineerId === engineer.id 
                                         ? "bg-[#3ACF98]/15 shadow-glassy-jeri"
                                         : ""
@@ -128,7 +150,7 @@ function Technicians() {
                             <div className="w-[56px] h-[51px] rounded-full bg-[#D9D9D9]">
 
                             </div>
-                            <div className="flex flex-col gap-3">
+                            <div className="flex-1 min-w-0 flex flex-col gap-3">
                                 <h2 className="font-ubunto-mono text-[16px] text-[#FFFFFF] font-regular tracking-[0.05em] leading-[100%]">
                                     {engineer.name}
                                 </h2>
@@ -136,12 +158,12 @@ function Technicians() {
                                     {engineer.location}
                                 </p>
                             </div>
-                            <div className="flex flex-col gap-2 pl-8">
+                            <div className="w-[100px] shrink-0 flex flex-col gap-2 items-center justify-center">
                                 <p className="text-[13px] font-semibold text-[#E1AE08] opacity-80 tracking-[0.05em] leading-[100%]">
                                     {engineer.rating}
                                 </p>
                                 <span 
-                                className="w-[62px] h-[23px] rounded-[10px] border-[1px] flex items-center justify-center text-[11px] tracking-[0.05em] leading-[100%]"
+                                className="w-[70px] h-[23px] rounded-[10px] border-[1px] flex items-center justify-center text-[11px] tracking-[0.05em] leading-[100%]"
                                 style={{
                                     color: statusStyles[engineer.status].text,
                                     borderColor: statusStyles[engineer.status].border,

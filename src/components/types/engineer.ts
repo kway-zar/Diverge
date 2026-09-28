@@ -7,6 +7,7 @@ export type EngineerStatus =
 
 export interface FieldReport {
     ticketId: string;
+    engineerId: string;
     date: string;
     status: "Fully Resolved" | "In Progress";
     description: string;
@@ -32,6 +33,7 @@ export interface EngineerOverview {
     jobsCompleted: number;
     thisMonth: number;
     avgResolution: number;
+    joined: string;
 }
 
 export interface Engineer {
@@ -39,6 +41,7 @@ export interface Engineer {
     name: string;
     location: string;
     rating: number;
+    phoneNo: string;
     status: EngineerStatus;
 
 
