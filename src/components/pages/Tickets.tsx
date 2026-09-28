@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, type ComponentProps } from "react";
 import {
   Table,
   TableBody,
@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table";
 import type { Tickets as Ticket } from "../types/tickets";
 import TicketStatus from "../modals/ticketStatus";
+import SubmitTicket from "../modals/SubmitTicket";
 
 const filterOptions = ["All", "Open", "In Progress", "Resolved", "Escalated"];
 
@@ -19,6 +20,7 @@ function Tickets() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeIntensity, setActiveIntensity] = useState("All");
   const [selectedSubscriber, setSelectedSubscriber] = useState<Ticket | null>(null);
+  const [showSubmitTicket, setShowSubmitTicket] = useState(false);
   const tickets: Ticket[] = [
     {
       ticketID: "TICK-1001",
@@ -93,7 +95,10 @@ function Tickets() {
               </p>
             </div>
             <div className="px-5">
-              <Button className="w-30 h-8 rounded-[10px] font-ubuntu bg-[#3ACF98]/30 text-white shadow-glassy-jeri">
+              <Button
+                onClick={() => setShowSubmitTicket(true)}
+                className="w-30 h-8 rounded-[10px] font-ubuntu bg-[#3ACF98]/30 text-white shadow-glassy-jeri"
+              >
                 + New Ticket
               </Button>
             </div>
@@ -349,6 +354,13 @@ function Tickets() {
 
         {selectedSubscriber && (
         <TicketStatus ticket={selectedSubscriber} onClose={() => setSelectedSubscriber(null)} />
+      )}
+
+      {showSubmitTicket && (
+        <SubmitTicket
+          customer={{} as ComponentProps<typeof SubmitTicket>["customer"]}
+          onClose={() => setShowSubmitTicket(false)}
+        />
       )}
     </>
   );
