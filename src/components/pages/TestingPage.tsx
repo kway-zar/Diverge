@@ -1,8 +1,7 @@
 
 function TestingPage() {
-  return (
+  return(
     <>
-      Hello
     </>
   )
 }
