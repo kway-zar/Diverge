@@ -1,5 +1,5 @@
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
-import type {Engineer} from "../types/engineer";
+import type {Engineer} from "../../types/engineer";
 
 interface TechnicianFieldReportsProps {
     engineer: Engineer;
