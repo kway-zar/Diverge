@@ -1,45 +1,49 @@
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
+import type {Engineer} from "../types/engineer";
 
-function TechnicianOverview() {
-    const overviews = [
+
+interface TechnicianOverviewProps{
+    engineer: Engineer;
+}
+
+function TechnicianOverview({engineer} : TechnicianOverviewProps) {
+    const overview = engineer.overview;
+
+    const overviewCards = [
         {
-            value: "109",
+            value: overview.jobsCompleted,
             description: "JOBS COMPLETED",
             time: "All time"
         },
         {
-            value: "10",
+            value: overview.thisMonth,
             description: "THIS MONTH",
             time: "Sep 2026"
         },
         {
-            value: "1.5",
+            value: overview.avgResolution,
             description: "AVG RESOLUTION",
             time: "Per job"
         }
-    ]
-
-    const metricsData = [
-        { id: '1', label: 'Customer Satisfaction', benchmark: 80, score: 90 },
-        { id: '2', label: 'Response Time', benchmark: 80, score: 90 },
-        { id: '3', label: 'First Contact Resolution', benchmark: 90, score: 80 },
     ];
+
+    const metrics = engineer.metrics;
 
     return(
         <div className="flex flex-col gap-5 mt-5 mr-10">
-            <div className="grid grid-cols-3 gap-20 w-full">
-                {overviews.map((overview, index) => (
-                    <Card key={index} className="w-full h-[135px] bg-[#C4C4C4]/20 rounded-[15px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black">
+            <div className="grid grid-cols-3 gap-20 w-full  ">
+                {overviewCards.map((item) => (
+                    <Card key={item.description} className="w-full h-[135px] bg-[#C4C4C4]/20 rounded-[15px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black">
                         <CardContent className="flex flex-col items-center justify-center gap-4">
                             <h1 className="text-[40px] font-bold text-[#FFFFFF] tracking-[0.05em] leading-[100%]">
-                                {overview.value}
+                                {item.value}
                             </h1>
                             <div className="flex flex-col gap-1 items-center justify-center">
                                 <p className="text-[15px] font-light opacity-75 tracking-[0.05em] leading-[100%]">
-                                    {overview.description}
+                                    {item.description}
                                 </p>
                                 <p className="text-[15px] font-light opacity-75 tracking-[0.05em] leading-[100%]">
-                                    {overview.time}
+                                    {item.time}
                                 </p>
                             </div>
 
@@ -50,7 +54,7 @@ function TechnicianOverview() {
             <div className="w-full rounded-xl p-6 font-ubuntu-mono">
                 <h2 className="mb-6 text-[22px] text-[#FFFFFF] tracking-[0.05em] leading-[100%]">Performance vs Benchmarks</h2>
                 <div className="space-y-6">
-                    {metricsData.map((item) => {
+                    {metrics.map((item) => {
                         const isPassed = item.score >= item.benchmark;
                         const statusColor = isPassed ? 'text-[#3ACF98]' : 'text-[#DD0002]';
                         const progressBg = isPassed ? 'bg-[#3ACF98]' : 'bg-[#920C0D]';

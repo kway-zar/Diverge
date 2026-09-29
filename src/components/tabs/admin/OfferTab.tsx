@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { TabsContent } from '@/components/ui/tabs'
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
-import EditPlan from '../modals/EditPlan.tsx'
+import EditPlan from '../../modals/EditPlan.tsx'
 
 
 

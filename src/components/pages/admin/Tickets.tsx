@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, type ComponentProps } from "react";
 import {
   Table,
   TableBody,
@@ -8,8 +8,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { Tickets as Ticket } from "../types/tickets";
-import TicketStatus from "../modals/ticketStatus";
+import type { Tickets as Ticket } from "../../types/tickets";
+import TicketStatus from "../../modals/ticketStatus";
+import SubmitTicket from "../../modals/SubmitTicket";
 
 const filterOptions = ["All", "Open", "In Progress", "Resolved", "Escalated"];
 
@@ -19,6 +20,7 @@ function Tickets() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeIntensity, setActiveIntensity] = useState("All");
   const [selectedSubscriber, setSelectedSubscriber] = useState<Ticket | null>(null);
+  const [showSubmitTicket, setShowSubmitTicket] = useState(false);
   const tickets: Ticket[] = [
     {
       ticketID: "TICK-1001",
@@ -81,8 +83,8 @@ function Tickets() {
   }
   return (
     <>
-      <div className="bg-[#121212] flex">
-        <div className="w-full lg:w-[90vw] overflow-y-auto overflow-x-auto no-scrollbar font font-ubuntu flex flex-col items-start px-4 lg:px-0 ">
+      <div className="bg-[#121212] w-full">
+        <div className="w-full overflow-y-auto overflow-x-auto no-scrollbar font font-ubuntu flex flex-col items-start px-4 lg:px-0 ">
           <div className="mb-5 lg:ml-2 flex justify-between items-center w-full">
             <div>
               <h1 className="text-white text-2xl font-bold tracking-wider text-left">
@@ -93,7 +95,10 @@ function Tickets() {
               </p>
             </div>
             <div className="px-5">
-              <Button className="w-30 h-8 rounded-[10px] font-ubuntu bg-[#3ACF98]/30 text-white shadow-glassy-jeri">
+              <Button
+                onClick={() => setShowSubmitTicket(true)}
+                className="w-30 h-8 rounded-[10px] font-ubuntu bg-[#3ACF98]/30 text-white shadow-glassy-jeri"
+              >
                 + New Ticket
               </Button>
             </div>
@@ -130,7 +135,7 @@ function Tickets() {
             </div>
           </div>
 
-          <div className="flex flex-row gap-3 w-full justify-left items-center ml-25">
+          <div className="flex flex-row gap-3 w-full justify-left items-center ml-10">
             <div className="flex flex-row items-center shadow-glassy-jeri rounded-[40px]">
               {filterOptions.map((filter) => {
                 const isActive = activeIntensity === filter;
@@ -138,11 +143,10 @@ function Tickets() {
                   <Button
                     key={filter}
                     onClick={() => setActiveIntensity(filter)}
-                    className={`w-25 rounded-[40px] font-ubuntu transition-colors duration-200 ease-in-out text-white text-[18px]  ${
-                      isActive
+                    className={`w-25 rounded-[40px] font-ubuntu transition-colors duration-200 ease-in-out text-white text-[18px]  ${isActive
                         ? "bg-[#3ACF98]/30 text-white shadow-glassy-jeri"
                         : "bg-transparent text-white opacity-30 hover:bg-white/10"
-                    }`}
+                      }`}
                   >
                     {filter}
                   </Button>
@@ -157,11 +161,10 @@ function Tickets() {
                   <Button
                     key={filter}
                     onClick={() => setActiveFilter(filter)}
-                    className={`w-20 rounded-[40px] font-ubuntu transition-colors duration-200 ease-in-out text-white  text-[18px] ${
-                      isActive
+                    className={`w-20 rounded-[40px] font-ubuntu transition-colors duration-200 ease-in-out text-white  text-[18px] ${isActive
                         ? "bg-[#3ACF98]/30 text-white shadow-glassy-jeri"
                         : "bg-transparent text-white opacity-30 hover:bg-white/10"
-                    }`}
+                      }`}
                   >
                     {filter}
                   </Button>
@@ -209,13 +212,13 @@ function Tickets() {
                     <TableCell className="text-center font-mono whitespace-nowrap text-[#3ACF98]">
                       {tickets.ticketID}
                     </TableCell>
-                      <TableCell className="text-center max-w-[150px] cursor-pointer" onClick={() => setSelectedSubscriber(tickets)}>
-                        <div className="flex flex-col truncate">
-                          <span className="font-semibold text-slate-100 truncate">
-                            {tickets.subscriber}
-                          </span>
-                        </div>
-                      </TableCell>
+                    <TableCell className="text-center max-w-[150px] cursor-pointer" onClick={() => setSelectedSubscriber(tickets)}>
+                      <div className="flex flex-col truncate">
+                        <span className="font-semibold text-slate-100 truncate">
+                          {tickets.subscriber}
+                        </span>
+                      </div>
+                    </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
                       <span>{tickets.issue}</span>
                     </TableCell>
@@ -264,13 +267,13 @@ function Tickets() {
                       </p>
                     </TableCell>
                     <TableCell className="text-center">
-                       <h1 className="text-[12px]">Queue</h1>
+                      <h1 className="text-[12px]">Queue</h1>
                       <p className="text-[11px] font-bold text-[#235ED4]">
                         5
                       </p>
                     </TableCell>
                   </TableRow>
-                   <TableRow className="border-b border-white/10">
+                  <TableRow className="border-b border-white/10">
                     <TableCell className="pr-40">
                       <h1 className="text-[12px]">Antipolo / Rodriguez</h1>
                       <p className="text-[11px] font-bold text-[#235ED4]">
@@ -278,13 +281,13 @@ function Tickets() {
                       </p>
                     </TableCell>
                     <TableCell className="text-center">
-                       <h1 className="text-[12px]">Queue</h1>
+                      <h1 className="text-[12px]">Queue</h1>
                       <p className="text-[11px] font-bold text-[#235ED4]">
                         5
                       </p>
                     </TableCell>
                   </TableRow>
-                   <TableRow className="border-b border-white/10">
+                  <TableRow className="border-b border-white/10">
                     <TableCell className="pr-40">
                       <h1 className="text-[12px]">Antipolo / Rodriguez</h1>
                       <p className="text-[11px] font-bold text-[#235ED4]">
@@ -292,7 +295,7 @@ function Tickets() {
                       </p>
                     </TableCell>
                     <TableCell className="text-center">
-                       <h1 className="text-[12px]">Queue</h1>
+                      <h1 className="text-[12px]">Queue</h1>
                       <p className="text-[11px] font-bold text-[#235ED4]">
                         5
                       </p>
@@ -302,7 +305,7 @@ function Tickets() {
               </Table>
             </div>
             <div className="w-full min-w-[640px] h-auto overflow-hidden shadow-glassy-jeri rounded-[15px] content-center  bg-white/5 shadow-glassy-jeri p-4">
-             <h1 className="text-white text-xl font-bold tracking-wider text-left">
+              <h1 className="text-white text-xl font-bold tracking-wider text-left">
                 Escalation Matrix
               </h1>
               <Table className="w-full mt-1 text-start">
@@ -315,10 +318,10 @@ function Tickets() {
                       </p>
                     </TableCell>
                     <TableCell className="text-center">
-                       <h1 className="text-[13px]">Stand By</h1>
+                      <h1 className="text-[13px]">Stand By</h1>
                     </TableCell>
                   </TableRow>
-                     <TableRow className="border-b border-white/10">
+                  <TableRow className="border-b border-white/10">
                     <TableCell className="pr-30">
                       <h1 className="text-[13px]">Unresolved &gt; 1h</h1>
                       <p className="text-[16px] font-bold text-[#FFFF]">
@@ -326,10 +329,10 @@ function Tickets() {
                       </p>
                     </TableCell>
                     <TableCell className="text-center">
-                       <h1 className="text-[13px]">Triggered</h1>
+                      <h1 className="text-[13px]">Triggered</h1>
                     </TableCell>
                   </TableRow>
-                     <TableRow className="border-b border-white/10">
+                  <TableRow className="border-b border-white/10">
                     <TableCell className="pr-30">
                       <h1 className="text-[13px]">Unresolved &gt; 1h</h1>
                       <p className="text-[16px] font-bold text-[#FFFF]">
@@ -337,7 +340,7 @@ function Tickets() {
                       </p>
                     </TableCell>
                     <TableCell className="text-center">
-                       <h1 className="text-[13px]">Stand By</h1>
+                      <h1 className="text-[13px]">Stand By</h1>
                     </TableCell>
                   </TableRow>
                 </TableBody>
@@ -347,8 +350,15 @@ function Tickets() {
         </div>
       </div>
 
-        {selectedSubscriber && (
+      {selectedSubscriber && (
         <TicketStatus ticket={selectedSubscriber} onClose={() => setSelectedSubscriber(null)} />
+      )}
+
+      {showSubmitTicket && (
+        <SubmitTicket
+          customer={{} as ComponentProps<typeof SubmitTicket>["customer"]}
+          onClose={() => setShowSubmitTicket(false)}
+        />
       )}
     </>
   );

@@ -1,10 +1,10 @@
-import SidebarApp from '../Sidebar'
+import SidebarApp from '../../Sidebar.tsx'
 import { useState } from 'react'
-import Navbar from '../Navbar.tsx'
+import Navbar from '../../Navbar.tsx'
 import BillingPage from './BillingPage.tsx'
 import CustomersPage from './CustomersPage.tsx'
 import Dashboard from './Dashboard.tsx'
-import Footer from '../Footer.tsx'
+import Footer from '../../Footer.tsx'
 import SupportTicket from "./SupportTicket.tsx"
 import Tickets from './Tickets.tsx'
 import AnalyticsPage from './AnalyticsPage.tsx'
@@ -56,7 +56,7 @@ function AdminLandingPage() {
 
       <div className="bg-[#121212] flex flex-row-reverse">
 
-        <div className="w-[95vw] z-0 overflow-y-auto font-ubuntu text-white flex flex-col items-start ">
+        <div className="w-[95vw] mr-5 z-0 overflow-y-auto font-ubuntu text-white flex flex-col items-start ">
 
           {renderContent()}
 
