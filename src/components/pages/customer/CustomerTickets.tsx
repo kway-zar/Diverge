@@ -1,8 +1,12 @@
+import { useState, type ComponentProps } from "react";
 import { Button } from "@/components/ui/button";
 import type { Tickets } from "@/components/types/tickets"
+import SubmitTicket from "@/components/modals/SubmitTicket";
+
 
 function CustomerTickets() {
-   
+   const [showSubmitTicket, setShowSubmitTicket] = useState(false);
+
    const tickets: Tickets[] = [
      {
          ticketID: "TICK-1001",
@@ -56,7 +60,7 @@ function CustomerTickets() {
     }
 
   return (
-   
+    <>
       <div className="bg-[#121212] flex flex-col w-full px-4 sm:px-6 lg:px-10 py-6">
         <div className="mr-3 w-full max-w-8xl flex flex-col">
           <div className="mb-5 justify-between items-center w-full flex gap-4">
@@ -66,7 +70,10 @@ function CustomerTickets() {
               </h1>
             </div>
             <div>
-              <Button className="h-8 rounded-[10px] px-4 font-ubuntu bg-[#3ACF98]/30 text-white shadow-glassy-jeri">
+              <Button
+                onClick={() => setShowSubmitTicket(true)}
+                className="h-8 rounded-[10px] px-4 font-ubuntu bg-[#3ACF98]/30 text-white shadow-glassy-jeri"
+              >
                 + New Ticket
               </Button>
             </div>
@@ -103,6 +110,14 @@ function CustomerTickets() {
           </div>
         </div>
       </div>
-  );
+
+      {showSubmitTicket && (
+        <SubmitTicket
+          customer={{} as ComponentProps<typeof SubmitTicket>["customer"]}
+          onClose={() => setShowSubmitTicket(false)}
+        />
+      )}
+    </>
+  )
 }
 export default CustomerTickets;
