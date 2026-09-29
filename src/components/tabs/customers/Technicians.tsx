@@ -1,5 +1,5 @@
-import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
-import type {Engineer, EngineerStatus} from "../../types/engineer.ts"
+import { Card, CardContent} from '@/components/ui/card'
+import type {EngineerStatus} from "../../types/engineer.ts"
 import {useState} from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent} from '@/components/ui/tabs'
 import TechnicianOverview from "./TechnicianOverview.tsx";
