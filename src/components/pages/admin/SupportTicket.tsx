@@ -1,6 +1,7 @@
-import FieldEngineers from "../tabs/FieldEngineers.tsx";
-import Technicians from "../tabs/Technicians.tsx";
+import FieldEngineers from "../../tabs/customers/FieldEngineers.tsx";
+import Technicians from "../../tabs/customers/Technicians.tsx";
 import { Tabs, TabsList, TabsTrigger, TabsContent} from '@/components/ui/tabs'
+
 
 function SupportTicket() {
     return(

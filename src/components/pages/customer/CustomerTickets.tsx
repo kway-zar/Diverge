@@ -62,9 +62,9 @@ function CustomerTickets() {
   return (
     <>
       <div className="bg-[#121212] flex flex-col w-full px-4 sm:px-6 lg:px-10 py-6">
-        <div className="mr-3 w-full max-w-6xl flex flex-col">
+        <div className="mr-3 w-full max-w-8xl flex flex-col">
           <div className="mb-5 justify-between items-center w-full flex gap-4">
-            <div className="flex-1 min-w-0">
+            <div className="flex-1">
               <h1 className="text-white text-2xl font-medium tracking-wider text-left">
                 My Support Ticket
               </h1>
@@ -118,6 +118,6 @@ function CustomerTickets() {
         />
       )}
     </>
-  );
+  )
 }
 export default CustomerTickets;

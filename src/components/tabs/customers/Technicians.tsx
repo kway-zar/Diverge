@@ -1,76 +1,59 @@
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
-import type {Engineer, EngineerStatus} from "../types/engineer"
+import type {Engineer, EngineerStatus} from "../../types/engineer.ts"
 import {useState} from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent} from '@/components/ui/tabs'
 import TechnicianOverview from "./TechnicianOverview.tsx";
 import TechnicianFieldReports from "./TechnicianFieldReports.tsx";
 import TechnicianReviews from "./TechnicianReviews.tsx";
+import {engineers} from "../../data/engineerData";
 
 function Technicians() {
+    const avgTeamRating = engineers.reduce((sum, engineer) => sum + engineer.rating, 0) / engineers.length;
+
+    const reportsThisMonth = engineers.reduce(
+        (total, engineer) => total + engineer.fieldReports.length,
+        0
+    );
+
+    const belowBenchmark = engineers.reduce(
+        (total, engineer) =>
+            total +
+            engineer.metrics.filter(
+                (metric) => metric.score < metric.benchmark
+            ).length,
+        0
+    );
+
+    const topPerformer = engineers.reduce((top, engineer) =>
+        engineer.rating > top.rating ? engineer : top
+    );
+
     const stats = [
         {
             title: "AVG TEAM RATING",
-            value: "4.7",
+            value: avgTeamRating.toFixed(1),
             description: "Across S Engineers",
             valueColor: "#E1AE08"
         },
         {
             title: "REPORTS THIS MONTH",
-            value: "67",
+            value: reportsThisMonth,
             description: "Field Submissions",
             valueColor: "#274F9E"
         },
         {
             title: "BELOW BENCHMARK",
-            value: "3",
+            value: belowBenchmark,
             description: "Punctuality",
             valueColor: "#DD0002"
         },
         {
             title: "TOP PERFORMER",
-            value: "Tech 1",
+            value: topPerformer.name,
             description: "5 star ratings in 20 jobs",
             valueColor: "#3ACF98"
         }
     ]
-    const engineers: Engineer[] = [
-        {
-            id: "FE01",
-            name: "Field Engineer 1",
-            location: "MNL/RC",
-            rating: "⭐ 4.9",
-            status: "On-Site"
-        },
-        {
-            id: "FE02",
-            name: "Field Engineer 2",
-            location: "MNL/BC",
-            rating: "⭐ 4.7",
-            status: "Traveling"
-        },
-        {
-            id: "FE03",
-            name: "Field Engineer 3",
-            location: "MNL/AC",
-            rating: "⭐ 4.8",
-            status: "Available"
-        },
-        {
-            id: "FE04",
-            name: "Field Engineer 4",
-            location: "MNL/AC",
-            rating: "⭐ 4.8",
-            status: "Available"
-        },
-        {
-            id: "FE05",
-            name: "Field Engineer 5",
-            location: "MNL/AC",
-            rating: "⭐ 4.8",
-            status: "Available"
-        }
-    ]
-    
     const statusStyles: Record<EngineerStatus, {
         text: string;
         border: string;
@@ -90,8 +73,20 @@ function Technicians() {
             text: "#3ACF98",
             border: "#3ACF98",
             background: "#4BE0A933"
-        }
+        },
+        "Off-Duty": {
+            text: "#888888",
+            border: "#888888",
+            background: "#88888833",
+        },
+
+        "Unavailable": {
+            text: "#E14545",
+            border: "#E14545",
+            background: "#E1454533",
+        },
     }
+    
 
     const [selectedEngineerId, setSelectedEngineerId] = useState<string | null>(null);
 
@@ -103,10 +98,12 @@ function Technicians() {
         (engineer) => engineer.id === selectedEngineerId
     )
 
+    
+
     return(
         <div className="flex flex-col items-start text-left mt-5 gap-7 w-[97%]">
             <div className="flex flex-col gap-1">
-                <span className="font-ubuntu-mono text-[32px] font-regular text-[#FFFFFF] tracking-[0.05em] leading-[100%] opacity-70">
+                <span className="font-ubuntu-mono text-[32px] font-regular text-[#FFFFFF] tracking-[0.05em] leading-[100%]">
                     Technician Monitoring
                 </span>
                 <span className="font-ubuntu-mono text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] leading-[100%] opacity-50">
@@ -120,7 +117,7 @@ function Technicians() {
                             <h2 className="text-[20px] font-light text-[#FFFFFF] tracking-[0.05em] leading-[100%]">
                                 {stat.title}
                             </h2>
-                            <h1 className="text-[40px] font-bold tracking-[0.05em] leading-[100%]"
+                            <h1 className="text-[36px] font-bold tracking-[0.05em] leading-[100%]"
                                 style={{color: stat.valueColor}}
                             >
                                 {stat.value}
@@ -144,7 +141,7 @@ function Technicians() {
                         <div 
                         key={engineer.id}
                         onClick={() => handleEngineerClick(engineer.id)}
-                        className={`cursor-pointer flex flex-row gap-5 transition-all duration-200 hover:bg-white/10 hover:scale-[1.02] rounded-full px-2 py-1 
+                        className={`cursor-pointer flex flex-row gap-5 items-center transition-all duration-200 hover:bg-white/10 hover:scale-[1.02] rounded-full px-2 py-1 
                                     ${selectedEngineerId === engineer.id 
                                         ? "bg-[#3ACF98]/15 shadow-glassy-jeri"
                                         : ""
@@ -153,7 +150,7 @@ function Technicians() {
                             <div className="w-[56px] h-[51px] rounded-full bg-[#D9D9D9]">
 
                             </div>
-                            <div className="flex flex-col gap-3">
+                            <div className="flex-1 min-w-0 flex flex-col gap-3">
                                 <h2 className="font-ubunto-mono text-[16px] text-[#FFFFFF] font-regular tracking-[0.05em] leading-[100%]">
                                     {engineer.name}
                                 </h2>
@@ -161,12 +158,12 @@ function Technicians() {
                                     {engineer.location}
                                 </p>
                             </div>
-                            <div className="flex flex-col gap-2 pl-8">
+                            <div className="w-[100px] shrink-0 flex flex-col gap-2 items-center justify-center">
                                 <p className="text-[13px] font-semibold text-[#E1AE08] opacity-80 tracking-[0.05em] leading-[100%]">
                                     {engineer.rating}
                                 </p>
                                 <span 
-                                className="w-[62px] h-[23px] rounded-[10px] border-[1px] flex items-center justify-center text-[11px] tracking-[0.05em] leading-[100%]"
+                                className="w-[70px] h-[23px] rounded-[10px] border-[1px] flex items-center justify-center text-[11px] tracking-[0.05em] leading-[100%]"
                                 style={{
                                     color: statusStyles[engineer.status].text,
                                     borderColor: statusStyles[engineer.status].border,
@@ -213,29 +210,29 @@ function Technicians() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex flex-col gap-2">
+                                <div className="flex flex-col items-center justify-center">
                                     <h1 className="text-[40px] font-semibold text-[#E1AE08] opacity-80 tracking-[0.05em] leading-[100%]">
                                     {selectedEngineer.rating}
                                     </h1>
-                                    <span className="text-[20px]">
-                                        ⭐⭐⭐⭐⭐
+                                    <span className="text-[30px] text-yellow-400">
+                                        {"★".repeat(Math.round(selectedEngineer.rating))}
                                     </span>
                                 </div>
                             </div>
                             <Tabs defaultValue="overview" className="mt-5 w-full">
-                                <TabsList className="ml-15 shadow-glassy-jeri p-2 gap-5  rounded-[10px] h-[55px] bg-transparent">
-                                    <TabsTrigger value="overview" className="h-full flex-1 rounded-[10px] border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em ] cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Overview</TabsTrigger>
-                                    <TabsTrigger value="field-reports" className="h-full flex-1 rounded-[10px] border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Field Reports</TabsTrigger>
-                                    <TabsTrigger value="reviews" className="h-full flex-1 rounded-[10px] border- text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Reviews</TabsTrigger>
+                                <TabsList className="rounded-[10px] ml-15 shadow-glassy-jeri gap-5 h-auto p-1 bg-transparent">
+                                    <TabsTrigger value="overview" className="px-4 py-1.5 h-full flex-1 border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em ] cursor-pointer data-active:rounded-[10px] border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Overview</TabsTrigger>
+                                    <TabsTrigger value="field-reports" className="px-4 py-1.5 h-full flex-1 border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-[10px] border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Field Reports</TabsTrigger>
+                                    <TabsTrigger value="reviews" className="px-4 py-1.5 h-full flex-1 border- text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-[10px] border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Reviews</TabsTrigger>
                                 </TabsList>
                                 <TabsContent value="overview"   className="ml-5">
-                                <TechnicianOverview/>
+                                <TechnicianOverview engineer={selectedEngineer}/>
                                 </TabsContent>
                                 <TabsContent value="field-reports" className="ml-5">
-                                    <TechnicianFieldReports/>
+                                    <TechnicianFieldReports engineer={selectedEngineer}/>
                                 </TabsContent> 
                                 <TabsContent value="reviews" className="ml-5">
-                                    <TechnicianReviews/>
+                                    <TechnicianReviews engineer={selectedEngineer}/>
                                 </TabsContent> 
                             </Tabs>
                         </div>
