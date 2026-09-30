@@ -1,13 +1,8 @@
 import { useState } from "react"
 import { Upload } from "lucide-react"
-import type { Tickets } from "../../types/tickets"
+import { initialJobs } from "@/components/data/ticketData"
 
-export type TicketRef = Pick<Tickets, "ticketID" | "subscriber">
-const openTickets: TicketRef[] = [
-  {ticketID: "TK - 231231", subscriber: "Vanna Hernandez"},
-  {ticketID: "TK - 231232", subscriber: "Jojo Landoy"},
-  {ticketID: "TK - 231233", subscriber: "Jojo Corp.",}
-]
+
  
 type Outcome = "Fully Resolved" | "Partially Solved" | "Needs Follow-Up"
  
@@ -15,7 +10,7 @@ const inputBox =
   "w-full rounded-[10px] border border-white/10 bg-white/10 px-4 font-ubuntu-mono text-[20px] tracking-[1px] text-white/85 shadow-[inset_0_4px_4px_rgba(0,0,0,0.25)] placeholder:text-white/60 focus:outline-none"
  
 function FieldReport() {
-  const [ticketID, setTicketID] = useState(openTickets[0].ticketID)
+  const [ticketID, setTicketID] = useState(initialJobs[0].ticketID)
   const [summary, setSummary] = useState("")
   const [parts, setParts] = useState("")
   const [timeOnSite, setTimeOnSite] = useState("")
@@ -53,7 +48,7 @@ function FieldReport() {
     setSubmitted(false)
   }
  
-  const selectedTicket = openTickets.find((t) => t.ticketID === ticketID) ?? openTickets[0]
+  const selectedTicket = initialJobs.find((t) => t.ticketID === ticketID) ?? initialJobs[0]
  
   if (submitted) {
     return (
@@ -104,7 +99,7 @@ function FieldReport() {
           onChange={(e) => setTicketID(e.target.value)}
           className={`${inputBox} mb-8 h-[65px]`}
         >
-          {openTickets.map((t) => (
+          {initialJobs.map((t) => (
             <option key={t.ticketID} value={t.ticketID} className="bg-[#1a1a1a]">
               {t.ticketID} - {t.subscriber}
             </option>
