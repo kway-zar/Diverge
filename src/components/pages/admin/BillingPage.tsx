@@ -5,6 +5,7 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/
 import type { Invoice, InvoiceStatus } from "../../types/invoice";
 import {X} from "lucide-react";
 import {useState, useEffect} from "react";
+import { invoices as initialInvoices } from "../../data/invoiceData";
 
 
 import {
@@ -161,19 +162,7 @@ function BillingPage() {
     { title: "Refunds Issued", amount: "₱9, 102", border: "255, 216, 24" },
   ]
 
-const [invoices, setInvoices] = useState<Invoice[]>([
-  { invoiceID: "INV-231231-01", account: "Vanna Hernandez", email: "vanna@example.com", contact: "+63 912345678", plan: "Diverge Netflix", amount: "₱1,499", dueDate: "Sep 24, 2026", paymentMethod: "-", status: "Pending" },
-  { invoiceID: "INV-231231-02", account: "Jonathan Landoy", email: "jonathan@example.com", contact: "+63 912345678", plan: "Fiber 50 Mbps", amount: "₱999", dueDate: "Sep 22, 2026", paymentMethod: "-", status: "Pending" },
-  { invoiceID: "INV-231231-03", account: "Clifford Galvez", email: "clifford@example.com", contact: "+63 912345678", plan: "Super FiberX", amount: "₱2,199", dueDate: "Sep 20, 2026", paymentMethod: "-", status: "Pending" },
-  { invoiceID: "INV-231231-04", account: "Francis Lasay", email: "francis@example.com", contact: "+63 912345678", plan: "Fiber 50 Mbps", amount: "₱999", dueDate: "Sep 19, 2026", paymentMethod: "Gcash", status: "Paid" },
-  { invoiceID: "INV-231231-05", account: "Guiller Dela Cruz", email: "guiller@example.com", contact: "+63 912345678", plan: "Super FiberX", amount: "₱2,199", dueDate: "Sep 18, 2026", paymentMethod: "Bank Transfer", status: "Paid" },
-  { invoiceID: "INV-231231-06", account: "Alex Ogbac", email: "alex@example.com", contact: "+63 912345678", plan: "Fiber 50 Mbps", amount: "₱999", dueDate: "Sep 18, 2026", paymentMethod: "-", status: "Pending" },
-  { invoiceID: "INV-231231-07", account: "Jeriana Maranguis", email: "jeriana@example.com", contact: "+63 912345678", plan: "Super FiberX", amount: "₱2,199", dueDate: "Sep 10, 2026", paymentMethod: "-", status: "Overdue" },
-  { invoiceID: "INV-231231-08", account: "Christian Devera", email: "christian@example.com", contact: "+63 912345678", plan: "Fiber 50 Mbps", amount: "₱999", dueDate: "Sep 8, 2026", paymentMethod: "Maya", status: "Paid" },
-  { invoiceID: "INV-231231-09", account: "Robi Luna", email: "robi@example.com", contact: "+63 912345678", plan: "Diverge Netflix", amount: "₱1,499", dueDate: "Sep 5, 2026", paymentMethod: "-", status: "Overdue" },
-  { invoiceID: "INV-231231-10", account: "Cedrick Millonte", email: "cedrick@example.com", contact: "+63 912345678", plan: "Fiber 50 Mbps", amount: "₱999", dueDate: "Aug 30, 2026", paymentMethod: "Gcash", status: "Paid" },
-  { invoiceID: "INV-231231-11", account: "Wil Manalang", email: "wil@example.com", contact: "+63 912345678", plan: "Fiber 50 Mbps", amount: "₱999", dueDate: "Aug 28, 2026", paymentMethod: "Bank Transfer", status: "Paid" },
-]);
+const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
 
   function getStatusBadge(status: Invoice["status"]) {
     switch (status) {

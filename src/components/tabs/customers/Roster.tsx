@@ -21,7 +21,7 @@ function RosterModal({
   isOpen,
   onClose,
 } : {
-  engineer : Engineer | Null;
+  engineer : Engineer | null;
   isOpen: boolean;
   onClose: () => void
 }) {
@@ -121,11 +121,11 @@ function RosterModal({
             </div>
           </div>
           <div className="flex justify-between">
-            <Button  className="w-[399px] h-[71px] bg-[#4BE0A9]/40 rounded-[30px] text-[32px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#B00049]/35">
+            <Button  className="w-[399px] h-[71px] bg-[#4BE0A9]/40 rounded-[30px] text-[32px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#4BE0A9]/35">
               Assign Job
             </Button>
-            <Button  className="w-[399px] h-[71px] bg-[#FFFFFF]/29 rounded-[30px] text-[32px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#3ACF98]/35">
-              View History
+            <Button  className="w-[399px] h-[71px] bg-[#FFFFFF]/29 rounded-[30px] text-[32px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#FFFFFF]/35">
+              Cancel
             </Button>
           </div>
         </div>
