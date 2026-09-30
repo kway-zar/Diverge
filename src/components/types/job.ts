@@ -3,7 +3,7 @@ export type JobStatus = "Assigned" | "En Route" | "On-Site"
  
 export interface Job {
   ticketID: string
-  customer: string
+  subscriber: string
   address: string
   phone: string
   priority: JobPriority
@@ -15,7 +15,7 @@ export interface Job {
  
 export interface CompletedJob {
   ticketID: string
-  customer: string
+  subscriber: string
   issue: string
   outcome: "Completed" | "Cannot Complete"
 }
