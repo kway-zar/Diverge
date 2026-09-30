@@ -1,4 +1,6 @@
-const ratingBreakdown = [
+import type { RatingBreakdown, Metric, Feedback } from "../../types/evaluation";
+
+const ratingBreakdown: RatingBreakdown[] = [
   { stars: 5, count: 14 },
   { stars: 4, count: 3 },
   { stars: 3, count: 1 },
@@ -7,7 +9,7 @@ const ratingBreakdown = [
 ]
 const maxRatingCount = Math.max(...ratingBreakdown.map((r) => r.count))
  
-const metrics = [
+const metrics: Metric[] = [
   { label: "Average Resolution Time", value: "1h 23min", benchmark: "Benchmark: 2h 00min", percent: 88 },
   { label: "Customer Satisfaction", value: "4.5 / 5.0", benchmark: "Benchmark: 4.5 / 5.0", percent: 90 },
   { label: "First-Call Resolution", value: "85%", benchmark: "Benchmark: 80%", percent: 85 },
@@ -15,7 +17,7 @@ const metrics = [
   { label: "Jobs Completed", value: "18", benchmark: "Benchmark: --", percent: 100 },
 ]
  
-const feedback = [
+const feedback: Feedback[] = [
   { name: "Vanna Hernandez", date: "Sep 23", stars: 5, quote: "Very professional and fast! Fixed the issue within 30 minutes." },
   { name: "Jojo Landoy", date: "Sep 19", stars: 5, quote: "Was polite and knowledgeable. Great experience." },
   { name: "Jepoy", date: "Sep 12", stars: 4, quote: "Resolved the issue but took longer than expected." },
