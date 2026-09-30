@@ -1,10 +1,12 @@
 import { useState } from "react"
 import { Upload } from "lucide-react"
- 
-const openTickets = [
-  { ticketID: "TK - 231231", customer: "Vanna Hernandez" },
-  { ticketID: "TK - 231232", customer: "Jojo Landoy" },
-  { ticketID: "TK - 231233", customer: "Jojo Corp." },
+import type { Tickets } from "../../types/tickets"
+
+export type TicketRef = Pick<Tickets, "ticketID" | "subscriber">
+const openTickets: TicketRef[] = [
+  {ticketID: "TK - 231231", subscriber: "Vanna Hernandez"},
+  {ticketID: "TK - 231232", subscriber: "Jojo Landoy"},
+  {ticketID: "TK - 231233", subscriber: "Jojo Corp.",}
 ]
  
 type Outcome = "Fully Resolved" | "Partially Solved" | "Needs Follow-Up"
@@ -104,7 +106,7 @@ function FieldReport() {
         >
           {openTickets.map((t) => (
             <option key={t.ticketID} value={t.ticketID} className="bg-[#1a1a1a]">
-              {t.ticketID} - {t.customer}
+              {t.ticketID} - {t.subscriber}
             </option>
           ))}
         </select>
