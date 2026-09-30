@@ -1,12 +1,12 @@
-import type { Payment } from "../types/payment"
+import type { CustomerPayment } from "../types/payment"
 
-export const paymentHistory: Payment[] = [
+export const paymentHistory: CustomerPayment[] = [
   {
     invoice: "INV-231231-01",
     period: "September 2026",
     amount: "₱1,499",
     due: "October 1, 2026",
-    method: "Pending",
+    method: "Gcash",
     status: "Pending",
   },
   {
