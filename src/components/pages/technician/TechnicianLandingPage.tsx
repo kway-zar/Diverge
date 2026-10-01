@@ -3,6 +3,7 @@ import SidebarApp from "@/components/Sidebar"
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import Jobs from "./Jobs"
+import Maps from "./Maps"
 import FieldReport from "./FieldReport"
 import Evaluation from "./Evaluation"
  
@@ -18,14 +19,16 @@ function TechnicianLandingPage() {
     if (activeItem === "Jobs") {
       return <Jobs />
     }
+    if (activeItem === "Maps") {
+      return <Maps />
+    }
     if (activeItem === "Field Report") {
       return <FieldReport />
     }
     if (activeItem === "Evaluation") {
       return <Evaluation />
     }
-    
-    return <p className="m-10 text-white/60">{activeItem} is coming soon.</p>
+    return null
   }
  
   return (
