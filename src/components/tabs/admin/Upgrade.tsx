@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { TabsContent } from "@/components/ui/tabs"
-import type { Upgrade } from "@/components/types/upgrade"
+import type { Upgrade as UpgradeOffer } from "@/components/types/upgrade"
 
 function getConfidenceColor(value: number) {
   const clampedValue = Math.min(Math.max(value, 0), 100)
@@ -12,7 +12,7 @@ function getConfidenceColor(value: number) {
 
 function Upgrade() {
 
-  const upgrade: Upgrade[] = [
+  const upgrade: UpgradeOffer[] = [
     {
       targetUID: "uid",
       name: "Vanna Hernandez",

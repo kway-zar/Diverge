@@ -1,10 +1,10 @@
 
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import type { MyAccount } from '@/components/types/myAccount'
+import type { MyAccount as AccountSummary } from '@/components/types/myAccount'
 
 function MyAccount(){
-  const account: MyAccount = {
+  const account: AccountSummary = {
   accountID: "000001",
   name: "Vanna Hernadez",
   location: "Burgos Rodriguez, Rizal",

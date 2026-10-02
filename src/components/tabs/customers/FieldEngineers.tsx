@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import Roster from "./Roster.tsx";
 import MapView from "./MapView.tsx";
 import { Tabs, TabsList, TabsTrigger, TabsContent} from '@/components/ui/tabs'

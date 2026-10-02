@@ -1,5 +1,5 @@
-import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
-import type {Engineer} from "../../types/engineer";
+import { Card } from '@/components/ui/card'
+import type { Engineer } from "../../types/engineer";
 
 interface TechnicianFieldReportsProps {
     engineer: Engineer;
@@ -11,7 +11,7 @@ function TechnicianFieldReports({engineer}: TechnicianFieldReportsProps) {
     return(
         <div className="grid grid-row-2 gap-7 mt-10 mb-10 mr-10">
             {reports.map((report) => (
-            <Card index={report.ticketId} className="w-full h-[125px] px-2 bg-white/5 rounded-[20px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black">
+            <Card key={report.ticketId} className="w-full h-[125px] px-2 bg-white/5 rounded-[20px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black">
                 <div className="flex flex-col gap-1">
                     <div className="flex justify-between">
                         <div className="flex gap-3 items-center justify-center">
