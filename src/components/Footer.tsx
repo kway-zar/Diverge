@@ -4,7 +4,7 @@ import Logo from '../assets/logo.png'
 
 function Footer() {
   return (
-    <div className='flex flex-col w-full relative bottom-0 h-auto bg-[#0D0D0D] items-center'>
+    <div className='z-0 flex flex-col w-full relative bottom-0 h-auto bg-[#0D0D0D] items-center'>
       <div className="mx-5 grow flex flex-row font-ubuntu mt-5 text-white items-center">
         <img src={Logo} className='w-15 h-15'></img>
         <p className="text-left text-xl tracking-widest -translate-x-2">DIVERGE</p>

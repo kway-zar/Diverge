@@ -23,16 +23,16 @@ function CustomerLandingPage() {
       //return dashboard component here
       return <MyAccount />
     } if (activeItem == 'Billing') {
-      return <Billing/>
+      return <Billing />
 
     } if (activeItem == 'Tickets') {
-      return <CustomerTickets/>
+      return <CustomerTickets />
     }
     if (activeItem == 'Plan Changes') {
       return <PlanChanges />
     }
     if (activeItem == 'Support') {
-      return <Support/>
+      return <Support />
     }
     //and so forth...
     return (
@@ -47,7 +47,7 @@ function CustomerLandingPage() {
 
       <div className="bg-[#121212] flex flex-row-reverse">
 
-        <div className="w-[95vw] mr-5 z-0 overflow-y-auto font-ubuntu text-white flex flex-col items-start ">
+        <div className="w-[95vw] z-20 overflow-y-auto font-ubuntu text-white flex flex-col items-start ">
 
           {renderContent()}
 
@@ -58,6 +58,7 @@ function CustomerLandingPage() {
 
       </div>
       <Footer />
+
     </>
   )
 }

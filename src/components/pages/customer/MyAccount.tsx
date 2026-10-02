@@ -23,7 +23,7 @@ function MyAccount(){
   return (
     <div className="text-left w-full flex flex-col gap-4">
       <Card className="flex-1 mr-4 ring-0 shadow-glassy-jeri bg-neutral-500/40">
-        <CardContent className="w-full flex flex-row ml-4 py-5">
+        <CardContent className="w-full flex flex-row ml-4 pb-2">
           <span className="w-full flex flex-row gap-x-5">
             <div className="w-24 h-24 rounded-full bg-white"></div>
             <span className="w-[80%] grid grid-cols-1">
@@ -31,7 +31,7 @@ function MyAccount(){
               <h1 className="text-2xl">{account.name}</h1>
               <p className='opacity-60 tracking-widest font-thin'>{"Account No." + account.accountID + "•" + account.location}</p>
             </span>
-            <span className='w-40'>
+            <span className='w-50'>
               <span className="font-ubuntu-mono flex flex-row items-center gap-4 text-emerald-500 text-emerald-50">
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></div>
                 <p>Connection Active</p>

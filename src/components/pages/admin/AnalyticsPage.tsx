@@ -73,10 +73,10 @@ function AnalyticsPage() {
       </div>
       <Tabs defaultValue="churnRisk" className="w-full mt-10">
         <TabsList className="shadow-glassy-jeri p-1 rounded-4xl">
-          <TabsTrigger value="churnRisk" className="cursor-pointer hover:bg-neutral-500/20 data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">CHURN RISK</TabsTrigger>
-          <TabsTrigger value="anomalies" className="cursor-pointer hover:bg-neutral-500/20 data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">ANOMALIES</TabsTrigger>
-          <TabsTrigger value="upgrade" className="cursor-pointer hover:bg-neutral-500/20 data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">UPGRADE</TabsTrigger>
-          <TabsTrigger value="forecast" className="cursor-pointer hover:bg-neutral-500/20 data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">FORECAST</TabsTrigger>
+          <TabsTrigger value="churnRisk" className="cursor-pointer hover:bg-neutral-500/20 data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-emerald-500 from-40% to-transparent data-active:shadow-glassy-jeri">CHURN RISK</TabsTrigger>
+          <TabsTrigger value="anomalies" className="cursor-pointer hover:bg-neutral-500/20 data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-emerald-500 from-40% to-transparent data-active:shadow-glassy-jeri">ANOMALIES</TabsTrigger>
+          <TabsTrigger value="upgrade" className="cursor-pointer hover:bg-neutral-500/20 data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-emerald-500 from-40% to-transparent data-active:shadow-glassy-jeri">UPGRADE</TabsTrigger>
+          <TabsTrigger value="forecast" className="cursor-pointer hover:bg-neutral-500/20 data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-emerald-500 from-40% to-transparent data-active:shadow-glassy-jeri">FORECAST</TabsTrigger>
         </TabsList>
 
         <ChurnRisk/>
