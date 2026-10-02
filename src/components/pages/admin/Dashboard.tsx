@@ -6,8 +6,8 @@ function Dashboard() {
       <h1 className="text-2xl">Operations Dashboard</h1>
       <h2 className="text-md opacity-30 font-thin"><i>Wednesday, September 16, 2026 12:31AM PHT</i></h2>
 
-      <div className="w-full mr-5 mt-5 flex flex-row place-content-evenly gap-10">
-        <Card className="w-[20vw] flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-white/5">
+      <div className="w-full mr-5 mt-5 flex flex-row place-content-evenly gap-10 max-sm:flex-col max-sm:gap-4">
+        <Card className="w-[20vw] flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-white/5 max-sm:w-full">
           <CardHeader className="mt-0 font-thin text-xs opacity-30">Map Tracking Latency</CardHeader>
           <CardContent className="text-2xl font-thin">
             <p>100ms</p>
@@ -18,7 +18,7 @@ function Dashboard() {
 
         </Card>
 
-        <Card className="w-[20vw] flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-white/5">
+        <Card className="w-[20vw] flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-white/5 max-sm:w-full">
           <CardHeader className="mt-0 font-thin text-xs opacity-30">Responsive Design</CardHeader>
           <CardContent className="text-2xl font-thin">
             <p>250ms</p>
@@ -29,7 +29,7 @@ function Dashboard() {
 
         </Card>
 
-        <Card className="w-[20vw] flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-white/5">
+        <Card className="w-[20vw] flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-white/5 max-sm:w-full">
           <CardHeader className="mt-0 font-thin text-xs opacity-30">Scalability</CardHeader>
           <CardContent className="text-2xl font-thin">
             <p>96%</p>
@@ -40,7 +40,7 @@ function Dashboard() {
 
         </Card>
 
-        <Card className="w-[20vw] flex-1 mr-5 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-white/5">
+        <Card className="w-[20vw] flex-1 mr-5 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-white/5 max-sm:w-full max-sm:mr-0">
           <CardHeader className="mt-0 font-thin text-xs opacity-30">Weekly Revenue</CardHeader>
           <CardContent className="text-2xl font-thin">
             <p>$305,000</p>

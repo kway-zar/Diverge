@@ -68,7 +68,7 @@ function getPlanAction(status: OfferTabProps["status"]) {
 function OfferTab() {
   return (
     <TabsContent value="offer">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
         {offerTabData.map((offer: OfferTabProps) => (
           <Card key={offer.planName} className="flex-1 ring-0 shadow-glassy-jeri bg-white/5">
             <CardHeader className="flex flex-row place-content-between">

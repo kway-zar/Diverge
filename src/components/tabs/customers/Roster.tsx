@@ -30,7 +30,7 @@ function RosterModal({
   return(
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-    className="min-w-[1090px] max-w-none h-[648px] bg-[#121212] text-white py-8 px-16 rounded-[30px] border-0 shadow-[0_0_12px_rgba(80,42,42,0.15)] [&>button]:hidden outline-none ring-0 focus:ring-0 focus-visible:ring-0">
+    className="min-w-[1090px] max-w-none h-[648px] bg-[#121212] text-white py-8 px-16 rounded-[30px] border-0 shadow-[0_0_12px_rgba(80,42,42,0.15)] [&>button]:hidden outline-none ring-0 focus:ring-0 focus-visible:ring-0 max-sm:min-w-0 max-sm:w-[calc(100vw-2rem)] max-sm:h-auto max-sm:px-4">
         <div className="flex flex-col gap-5">
           <div className="flex justify-between ">
           <div className="flex gap-5 items-center">

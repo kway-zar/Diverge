@@ -28,7 +28,7 @@ function AnalyticsPage() {
         </span>
          <Button className='w-40 bg-emerald-900 mr-5 shadow-glassy-jeri cursor-pointer'>Generate Invoice</Button>
       </div>
-      <div className="w-[70vw] mx-auto mt-5 flex flex-row place-content-center gap-10">
+      <div className="w-[70vw] mx-auto mt-5 flex flex-row place-content-center gap-10 max-sm:w-full max-sm:flex-col max-sm:gap-4">
         <Card className="w-[10vw] flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-white/5">
           <CardHeader className="mt-0 font-thin text-xs">CHURN RISK FLAGS</CardHeader>
           <CardContent className="text-3xl text-red-900 font-bold">

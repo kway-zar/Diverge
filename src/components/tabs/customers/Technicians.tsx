@@ -110,7 +110,7 @@ function Technicians() {
                     Ratings, fields reports & performance
                 </span>
             </div>
-            <div className="grid grid-cols-4 gap-20 w-full px-10">
+            <div className="grid grid-cols-4 gap-20 w-full px-10 max-sm:grid-cols-1 max-sm:gap-4 max-sm:px-2">
                 {stats.map((stat) => (
                     <Card key={stat.title} className="w-full h-[135px] bg-white/5 rounded-[15px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black">
                         <CardContent className="flex flex-col gap-3">

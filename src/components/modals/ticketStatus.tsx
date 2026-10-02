@@ -37,7 +37,7 @@ function TicketStatus({
     return(
         <>
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#121212]/50">
-        <Card className="relative w-[550px] h-auto  ring-0 bg-white/5 shadow-glassy-jeri rounded-[2vw] opacity-80 gap-2">
+        <Card className="relative w-[550px] h-auto  ring-0 bg-white/5 shadow-glassy-jeri rounded-[2vw] opacity-80 gap-2 max-sm:w-[calc(100vw-2rem)] max-sm:max-h-[90vh] max-sm:overflow-y-auto">
           <CardHeader className="flex flex-col ml-4 font-medium">
             <CardTitle className="font-ubuntu font-light opacity-30 text-[20px]">TICKET STATUS</CardTitle>
             <CardTitle className="font-ubuntu tracking-wider text-[25px]">{ticket.issue}</CardTitle>

@@ -21,7 +21,7 @@ function FieldEngineers() {
                     Evaluation, dispatch & map tracking
                 </span>
             </div>
-            <div className="grid grid-cols-5 gap-3 w-full px-10">
+            <div className="grid grid-cols-5 gap-3 w-full px-10 max-sm:grid-cols-1 max-sm:gap-4 max-sm:px-2">
                 {statusTracking.map((status, index) => (
                     <Card key={index} className="w-full h-[135px] bg-white/5 rounded-[15px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black">
                         <CardContent className="flex flex-col gap-5 items-center justify-center">

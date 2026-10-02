@@ -40,8 +40,8 @@ function MyAccount(){
           </span>
         </CardContent>
       </Card>
-      <span className="flex flex-row">
-        <Card className="w-[60%] font-ubuntu-mono mr-4 ring-0 shadow-glassy-jeri bg-white/5">
+      <span className="flex flex-row max-sm:flex-col max-sm:gap-4">
+        <Card className="w-[60%] font-ubuntu-mono mr-4 ring-0 shadow-glassy-jeri bg-white/5 max-sm:w-full max-sm:mr-0">
           <CardHeader className="flex flex-row place-content-between mx-5 text-2xl">
             <p>Current Plan</p>
             <div className='p-2 text-base bg-linear-to-b from-emerald-500/40 from-0% to-emerald-500/10 ring-emerald-500 ring-1 rounded-md px-5 text-emerald-500'>Active</div>
@@ -75,7 +75,7 @@ function MyAccount(){
             </div>
           </CardContent>
         </Card>
-        <Card className="flex-1 mr-4 ring-0 shadow-glassy-jeri bg-white/5 gap-0">
+        <Card className="flex-1 mr-4 ring-0 shadow-glassy-jeri bg-white/5 gap-0 max-sm:w-full max-sm:mr-0">
           <CardHeader className='text-2xl font-ubuntu-mono'>Balance</CardHeader>
           <CardContent className="flex flex-col font-ubuntu-mono justify-center items-center">
             <p className='text-base opacity-40'>Outstanding</p>
