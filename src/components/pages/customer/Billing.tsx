@@ -119,10 +119,10 @@ function Billing() {
                 {paymentHistory.map((payment) => (
                   <TableRow key={payment.invoice} className="border-white/10 hover:bg-white/[0.04]">
                     <TableCell className="px-4 py-2 font-medium text-[#3ACF98] sm:px-5">{payment.invoice}</TableCell>
-                    <TableCell className="py-2 text-white/80">{payment.period}</TableCell>
-                    <TableCell className="py-2 tabular-nums">{payment.amount}</TableCell>
-                    <TableCell className="py-2  text-white/80">{payment.due}</TableCell>
-                    <TableCell className="py-2 text-white/80">{payment.method}</TableCell>
+                    <TableCell className="max-w-[150px] truncate py-2 text-white/80">{payment.period}</TableCell>
+                    <TableCell className="max-w-[110px] truncate py-2 tabular-nums">{payment.amount}</TableCell>
+                    <TableCell className="max-w-[150px] truncate py-2 text-white/80">{payment.due}</TableCell>
+                    <TableCell className="max-w-[120px] truncate py-2 text-white/80">{payment.method}</TableCell>
                     <TableCell className="py-2 pr-4 sm:pr-5">
                       <Badge
                         variant="outline"

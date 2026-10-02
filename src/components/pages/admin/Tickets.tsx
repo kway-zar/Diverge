@@ -219,8 +219,8 @@ function Tickets() {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-center whitespace-nowrap">
-                      <span>{tickets.issue}</span>
+                    <TableCell className="max-w-[180px] truncate text-center whitespace-nowrap">
+                      <span className="truncate">{tickets.issue}</span>
                     </TableCell>
                     <TableCell className="text-center max-w-[160px] truncate text-[#C4C4C4] font-light">
                       {tickets.category}
@@ -230,7 +230,7 @@ function Tickets() {
                     >
                       {tickets.priority}
                     </TableCell>
-                    <TableCell className="text-center whitespace-nowrap text-[#C4C4C4] font-light">
+                    <TableCell className="max-w-[180px] truncate text-center whitespace-nowrap text-[#C4C4C4] font-light">
                       {tickets.assignedTo}
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">

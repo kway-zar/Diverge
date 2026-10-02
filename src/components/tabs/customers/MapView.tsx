@@ -8,7 +8,7 @@ function MapView() {
         { name: 'Field Engineer 1', status: 'Traveling', color: 'bg-[#E1AE08]' },
     ];
     return(
-        <Card className="ml-8 mt-5 w-[97%] h-full bg-[#C4C4C4]/20 rounded-[15px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black">
+        <Card className="ml-8 mt-5 w-[97%] h-full bg-white/5 rounded-[15px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black">
             <h1 className="text-[36px] font-regular text-[#FFFFFF] opacity-75 pl-4"> 
                 Live Support Locations
             </h1>

@@ -29,7 +29,7 @@ function AnalyticsPage() {
          <Button className='w-40 bg-emerald-900 mr-5 shadow-glassy-jeri cursor-pointer'>Generate Invoice</Button>
       </div>
       <div className="w-[70vw] mx-auto mt-5 flex flex-row place-content-center gap-10">
-        <Card className="w-[10vw] flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-linear-[0deg,#1C1A1A_10%,#080808_90%]">
+        <Card className="w-[10vw] flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-white/5">
           <CardHeader className="mt-0 font-thin text-xs">CHURN RISK FLAGS</CardHeader>
           <CardContent className="text-3xl text-red-900 font-bold">
             <p>{analytic.churnRiskFlags}</p>
@@ -39,7 +39,7 @@ function AnalyticsPage() {
           </CardFooter>
 
         </Card>
-        <Card className="w-[10vw] flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-linear-[0deg,#1C1A1A_10%,#080808_90%]">
+        <Card className="w-[10vw] flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-white/5">
           <CardHeader className="mt-0 font-thin text-xs ">NETWORK ANOMALIES</CardHeader>
           <CardContent className="text-3xl text-amber-500/60 font-bold">
             <p>{analytic.networkAnomalies}</p>
@@ -49,7 +49,7 @@ function AnalyticsPage() {
           </CardFooter>
 
         </Card>
-        <Card className="w-[10vw] flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-linear-[0deg,#1C1A1A_10%,#080808_90%]">
+        <Card className="w-[10vw] flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-white/5">
           <CardHeader className="mt-0 font-thin text-xs ">UPGRADE OPPORTUNITIES</CardHeader>
           <CardContent className="text-3xl text-emerald-600 font-bold">
             <p>{analytic.upgradeOpportunities}</p>
@@ -59,7 +59,7 @@ function AnalyticsPage() {
           </CardFooter>
 
         </Card>
-        <Card className="w-[10vw] mr-5 flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-linear-[0deg,#1C1A1A_10%,#080808_90%]">
+        <Card className="w-[10vw] mr-5 flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-white/5">
           <CardHeader className="mt-0 font-thin text-xs ">FORECAST</CardHeader>
           <CardContent className="text-3xl font-bold text-blue-950">
             <p>{analytic.forecast}months</p>

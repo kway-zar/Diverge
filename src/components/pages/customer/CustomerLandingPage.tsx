@@ -47,7 +47,7 @@ function CustomerLandingPage() {
 
       <div className="bg-[#121212] flex flex-row-reverse">
 
-        <div className="w-[95vw] z-20 overflow-y-auto font-ubuntu text-white flex flex-col items-start ">
+        <div className="w-[95vw] z-20 mr-5 overflow-y-auto font-ubuntu text-white flex flex-col items-start ">
 
           {renderContent()}
 

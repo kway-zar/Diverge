@@ -7,7 +7,7 @@ function Dashboard() {
       <h2 className="text-md opacity-30 font-thin"><i>Wednesday, September 16, 2026 12:31AM PHT</i></h2>
 
       <div className="w-full mr-5 mt-5 flex flex-row place-content-evenly gap-10">
-        <Card className="w-[20vw] flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-linear-[0deg,#1C1A1A_10%,#080808_90%]">
+        <Card className="w-[20vw] flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-white/5">
           <CardHeader className="mt-0 font-thin text-xs opacity-30">Map Tracking Latency</CardHeader>
           <CardContent className="text-2xl font-thin">
             <p>100ms</p>
@@ -18,7 +18,7 @@ function Dashboard() {
 
         </Card>
 
-        <Card className="w-[20vw] flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-linear-[0deg,#1C1A1A_10%,#080808_90%]">
+        <Card className="w-[20vw] flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-white/5">
           <CardHeader className="mt-0 font-thin text-xs opacity-30">Responsive Design</CardHeader>
           <CardContent className="text-2xl font-thin">
             <p>250ms</p>
@@ -29,7 +29,7 @@ function Dashboard() {
 
         </Card>
 
-        <Card className="w-[20vw] flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-linear-[0deg,#1C1A1A_10%,#080808_90%]">
+        <Card className="w-[20vw] flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-white/5">
           <CardHeader className="mt-0 font-thin text-xs opacity-30">Scalability</CardHeader>
           <CardContent className="text-2xl font-thin">
             <p>96%</p>
@@ -40,7 +40,7 @@ function Dashboard() {
 
         </Card>
 
-        <Card className="w-[20vw] flex-1 mr-5 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-linear-[0deg,#1C1A1A_10%,#080808_90%]">
+        <Card className="w-[20vw] flex-1 mr-5 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-white/5">
           <CardHeader className="mt-0 font-thin text-xs opacity-30">Weekly Revenue</CardHeader>
           <CardContent className="text-2xl font-thin">
             <p>$305,000</p>
@@ -56,13 +56,13 @@ function Dashboard() {
         //TODO: implement a graph library in the container below
       }
       <h1 className="mt-5">Network Traffic</h1>
-      <Card className=" flex-1 h-40 p-2 ring-0 mr-5  shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-linear-[0deg,#1C1A1A_10%,#080808_90%]">
+      <Card className=" flex-1 h-40 p-2 ring-0 mr-5  shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-white/5">
 
       </Card>
 
 
       <div className="w-full mr-5 mt-5 flex flex-row place-content-evenly gap-10">
-        <Card className="w-[20vw] text-center flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-linear-[0deg,#1C1A1A_10%,#080808_90%]">
+        <Card className="w-[20vw] text-center flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-white/5">
           <CardHeader className="mt-0 font-thin text-xs opacity-30">Network Risks</CardHeader>
           <CardContent className="text-2xl font-thin">
             <p>Node PS = 34</p>
@@ -73,7 +73,7 @@ function Dashboard() {
           </CardFooter>
         </Card>
 
-        <Card className="w-[20vw] text-center flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-linear-[0deg,#1C1A1A_10%,#080808_90%]">
+        <Card className="w-[20vw] text-center flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-white/5">
           <CardHeader className="mt-0 font-thin text-xs opacity-30">ML Predictions</CardHeader>
           <CardContent className="text-2xl font-thin">
             <p>Churn Risk = 327</p>
@@ -83,7 +83,7 @@ function Dashboard() {
           </CardFooter>
 
         </Card>
-        <Card className="w-[20vw] text-center mr-5 flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-linear-[0deg,#1C1A1A_10%,#080808_90%]">
+        <Card className="w-[20vw] text-center mr-5 flex-1 p-2 ring-0 shadow-glassy-jeri [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-white/5">
           <CardHeader className="mt-0 font-thin text-xs opacity-30">Model Accuracy</CardHeader>
           <CardContent className="text-2xl font-thin">
             <p>91.4%</p>

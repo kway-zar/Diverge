@@ -70,7 +70,7 @@ function OfferTab() {
     <TabsContent value="offer">
       <div className="grid grid-cols-2 gap-4">
         {offerTabData.map((offer: OfferTabProps) => (
-          <Card key={offer.planName} className="flex-1 ring-0 shadow-glassy-jeri bg-neutral-500/40">
+          <Card key={offer.planName} className="flex-1 ring-0 shadow-glassy-jeri bg-white/5">
             <CardHeader className="flex flex-row place-content-between">
               <h1 className={`p-1 px-4 rounded-md ${offer.status === "Active" ? "bg-emerald-500/20 text-emerald-500 ring-emerald-500/80" : "bg-red-500/20 text-red-500 ring-red-500/80"} ring-1`}>{offer.status}</h1>
               <h1 className="text-pink-600">{offer.planType}</h1>
@@ -118,7 +118,7 @@ function OfferTab() {
         ))}
       </div>
 
-      <Card className="flex-1 ring-0 shadow-glassy-jeri bg-neutral-500/40 mt-4">
+      <Card className="flex-1 ring-0 shadow-glassy-jeri bg-white/5 mt-4">
         <CardHeader className="flex flex-row">
           <i className="fa-solid fa-circle-info fa-xl"></i>
           <h1 className="opacity-60">Self Service Upgrade Plan Rules</h1>

@@ -73,10 +73,10 @@ function UpgradeReqTab() {
               <TableCell className="text-center max-w-[160px] truncate text-[#C4C4C4] font-light">
                 {upgradeReq.name}
               </TableCell>
-              <TableCell className="text-center whitespace-nowrap font-light opacity-40">
+              <TableCell className="max-w-[160px] truncate text-center whitespace-nowrap font-light opacity-40">
                 {upgradeReq.initialPlan}
               </TableCell>
-              <TableCell className="text-center whitespace-nowrap text-emerald-500">
+              <TableCell className="max-w-[160px] truncate text-center whitespace-nowrap text-emerald-500">
                 {upgradeReq.finalPlan}
               </TableCell>
               <TableCell className="text-center whitespace-nowrap text-[#C4C4C4] font-light">

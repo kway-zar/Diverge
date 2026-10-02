@@ -22,7 +22,7 @@ function MyAccount(){
 
   return (
     <div className="text-left w-full flex flex-col gap-4">
-      <Card className="flex-1 mr-4 ring-0 shadow-glassy-jeri bg-neutral-500/40">
+      <Card className="flex-1 mr-4 ring-0 shadow-glassy-jeri bg-white/5">
         <CardContent className="w-full flex flex-row ml-4 pb-2">
           <span className="w-full flex flex-row gap-x-5">
             <div className="w-24 h-24 rounded-full bg-white"></div>
@@ -41,7 +41,7 @@ function MyAccount(){
         </CardContent>
       </Card>
       <span className="flex flex-row">
-        <Card className="w-[60%] font-ubuntu-mono mr-4 ring-0 shadow-glassy-jeri bg-neutral-500/40">
+        <Card className="w-[60%] font-ubuntu-mono mr-4 ring-0 shadow-glassy-jeri bg-white/5">
           <CardHeader className="flex flex-row place-content-between mx-5 text-2xl">
             <p>Current Plan</p>
             <div className='p-2 text-base bg-linear-to-b from-emerald-500/40 from-0% to-emerald-500/10 ring-emerald-500 ring-1 rounded-md px-5 text-emerald-500'>Active</div>
@@ -75,11 +75,11 @@ function MyAccount(){
             </div>
           </CardContent>
         </Card>
-        <Card className="flex-1 mr-4 ring-0 shadow-glassy-jeri bg-neutral-500/40 gap-0">
+        <Card className="flex-1 mr-4 ring-0 shadow-glassy-jeri bg-white/5 gap-0">
           <CardHeader className='text-2xl font-ubuntu-mono'>Balance</CardHeader>
           <CardContent className="flex flex-col font-ubuntu-mono justify-center items-center">
             <p className='text-base opacity-40'>Outstanding</p>
-            <p className="text-8xl">₱{account.balance}</p>
+            <p className="text-5xl">₱{account.balance}</p>
             <p className='text-base text-emerald-400 '>Paid ✓</p>
             <Button className='w-full mx-5 shadow-glassy-jeri rounded-4xl text-xl py-5 cursor-pointer bg-blue-500/20'>Pay Now</Button>
 
@@ -87,7 +87,7 @@ function MyAccount(){
         </Card>
 
       </span>
-      <Card className="flex-1 mr-4 ring-0 h-full shadow-glassy-jeri bg-neutral-500/40 gap-0">
+      <Card className="flex-1 mr-4 ring-0 h-full shadow-glassy-jeri bg-white/5 gap-0">
         <CardHeader className='text-2xl font-ubuntu-mono'>Internet Consumption</CardHeader>
         <CardContent>
           {

@@ -23,7 +23,7 @@ function FieldEngineers() {
             </div>
             <div className="grid grid-cols-5 gap-3 w-full px-10">
                 {statusTracking.map((status, index) => (
-                    <Card key={index} className="w-full h-[135px] bg-[#C4C4C4]/20 rounded-[15px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black">
+                    <Card key={index} className="w-full h-[135px] bg-white/5 rounded-[15px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black">
                         <CardContent className="flex flex-col gap-5 items-center justify-center">
                             <h1 className={`text-[48px] font-ubuntu font-bold tracking-[0.05em] leading-[100%] ${status.textColor}`}>
                                 {status.count}

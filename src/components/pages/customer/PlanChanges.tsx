@@ -26,7 +26,7 @@ function PlanChanges() {
           {
             //Request style
           }
-          <Card className="ml-2 flex-1 shadow-glassy-jeri bg-neutral-400/40 ring-0">
+          <Card className="ml-2 flex-1 shadow-glassy-jeri bg-white/5 ring-0">
             <CardHeader className="flex flex-row place-content-between">
             </CardHeader>
             <CardContent className="flex flex-col gap-y-10">
@@ -61,7 +61,7 @@ function PlanChanges() {
           {
             //Current Plan style
           }
-          <Card className="ml-2 flex-1 shadow-glassy-jeri bg-neutral-400/40 ring-blue-500 ring-1">
+          <Card className="ml-2 flex-1 shadow-glassy-jeri bg-white/5 ring-blue-500 ring-1">
             <CardHeader className="flex flex-row place-content-between">
               <h1 className="p-1 px-4 bg-blue-500/20 text-blue-500 ring-1 ring-blue-500/80 rounded-md">Current Plan</h1>
             </CardHeader>
@@ -94,7 +94,7 @@ function PlanChanges() {
           {
             //Upgrade Plan Style
           }
-          <Card className="ml-2 flex-1 shadow-glassy-jeri bg-neutral-400/40 ring-0">
+          <Card className="ml-2 flex-1 shadow-glassy-jeri bg-white/5 ring-0">
             <CardHeader className="flex flex-row place-content-between">
             </CardHeader>
             <CardContent className="flex flex-col gap-y-10">
