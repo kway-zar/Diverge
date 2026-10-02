@@ -1,48 +1,9 @@
 import { useState } from "react"
 import { Navigation, Phone, TriangleAlert } from "lucide-react"
 import type { CompletedJob, Job, JobPriority, JobStatus } from "@/components/types/job"
- 
-const initialJobs: Job[] = [
-  {
-    ticketID: "TK - 231231",
-    customer: "Vanna Hernandez",
-    address: "Blk 0 Lot 00 St, Brngy, Rizal",
-    phone: "+63 912 345 6789",
-    priority: "High",
-    status: "Assigned",
-    timeLeft: "4h remaining",
-    issue: "No internet connection - modem not syncing",
-    accessNote: "Access via subdivision gate, call customer upon arrival",
-  },
-  {
-    ticketID: "TK - 231232",
-    customer: "Jojo Landoy",
-    address: "Blk 0 Lot 00 St, Brngy, Rizal",
-    phone: "+63 912 345 6789",
-    priority: "High",
-    status: "En Route",
-    timeLeft: "7h remaining",
-    issue: "New installation - no signal",
-    accessNote: "New subscriber. Bring full install kit.",
-  },
-  {
-    ticketID: "TK - 231233",
-    customer: "Jojo Corp.",
-    address: "Blk 0 Lot 00 St, Brngy, Rizal",
-    phone: "+63 912 345 6789",
-    priority: "Critical",
-    status: "On-Site",
-    timeLeft: "BREACHED",
-    issue: "Static IP not resolving after firmware update",
-    accessNote: "Corporate client. Ask for IT admin at reception.",
-  },
-]
- 
-const initialCompleted: CompletedJob[] = [
-  { ticketID: "TK - 231228", customer: "Jojo Corp.", issue: "Static IP not resolving after firmware update", outcome: "Cannot Complete" },
-  { ticketID: "TK - 231227", customer: "Jojo Corp.", issue: "Static IP not resolving after firmware update", outcome: "Completed" },
-]
- 
+import { initialJobs, initialCompleted} from "@/components/data/ticketData"
+
+
 const priorityStyles: Record<JobPriority, string> = {
   High: "border-[#ff006a] bg-[rgba(255,0,106,0.2)] text-[#ff006a]",
   Critical: "border-[#dd0002] bg-[rgba(221,0,2,0.2)] text-[#dd0002]",
@@ -86,7 +47,7 @@ function Jobs() {
   function finish(job: Job, outcome: CompletedJob["outcome"]) {
     setJobs((prev) => prev.filter((j) => j.ticketID !== job.ticketID))
     setCompleted((prev) => [
-      { ticketID: job.ticketID, customer: job.customer, issue: job.issue, outcome },
+      { ticketID: job.ticketID, subscriber: job.subscriber, issue: job.issue, outcome },
       ...prev,
     ])
   }
@@ -149,7 +110,7 @@ function Jobs() {
                       {job.status}
                     </span>
                   </div>
-                  <h3 className="mt-1 text-2xl font-medium tracking-[1.6px] text-[#fffefe] lg:text-[32px]">{job.customer}</h3>
+                  <h3 className="mt-1 text-2xl font-medium tracking-[1.6px] text-[#fffefe] lg:text-[32px]">{job.subscriber}</h3>
                   <p className="font-ubuntu-mono text-base tracking-[1px] text-white/85 lg:text-[20px]">{job.address}</p>
                 </div>
                 <span
@@ -230,7 +191,7 @@ function Jobs() {
               </span>
             </div>
             <div>
-              <h3 className="text-2xl font-medium tracking-[1.6px] text-[#fffefe] lg:text-[32px]">{job.customer}</h3>
+              <h3 className="text-2xl font-medium tracking-[1.6px] text-[#fffefe] lg:text-[32px]">{job.subscriber}</h3>
               <p className="font-ubuntu-mono text-base tracking-[1px] text-[#3acf98] lg:text-[20px]">
                 {job.ticketID} <span className="text-white">• {job.issue}</span>
               </p>
