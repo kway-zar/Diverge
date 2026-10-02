@@ -252,8 +252,8 @@ function Tickets() {
             </Table>
           </div>
 
-          <div className="flex flex-row mt-5 gap-3">
-            <div className="w-full min-w-[640px]  h-auto overflow-hidden shadow-glassy-jeri rounded-[15px] content-center  bg-white/5 shadow-glassy-jeri p-4">
+          <div className="flex flex-row w-full mt-5 gap-3">
+            <div className="w-full h-auto overflow-hidden shadow-glassy-jeri rounded-[15px] content-center  bg-white/5 shadow-glassy-jeri p-4">
               <h1 className="text-white text-xl font-bold tracking-wider text-left">
                 Auto - Assignment
               </h1>
@@ -304,7 +304,7 @@ function Tickets() {
                 </TableBody>
               </Table>
             </div>
-            <div className="w-full min-w-[640px] h-auto overflow-hidden shadow-glassy-jeri rounded-[15px] content-center  bg-white/5 shadow-glassy-jeri p-4">
+            <div className="w-full ah-auto overflow-hidden shadow-glassy-jeri rounded-[15px] content-center  bg-white/5 shadow-glassy-jeri p-4">
               <h1 className="text-white text-xl font-bold tracking-wider text-left">
                 Escalation Matrix
               </h1>
