@@ -1,4 +1,6 @@
 
+import type { CustomerType, PlanStatus } from "./common";
+
 
 export interface MyAccount {
   accountID: string,
@@ -9,7 +11,7 @@ export interface MyAccount {
   downloadSpeed:number,
   uploadSpeed:number,
   nextBilling: string,
-  planType: string,
+  planType: CustomerType,
   planCost: number,
-  planStatus: string
+  planStatus: PlanStatus
 }

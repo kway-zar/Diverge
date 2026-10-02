@@ -1,5 +1,7 @@
-export type CustomerType = "Residential" | "Business" | "Government" | "Commercial";
-export type CustomerStatus = "Active" | "Inactive" | "Pending" | "Suspended";
+import type { CustomerType, PlanStatus } from "./common";
+
+export type { CustomerType } from "./common";
+export type CustomerStatus = PlanStatus;
 
 export interface Customer {
     accountID: string;

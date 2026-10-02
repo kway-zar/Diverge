@@ -1,4 +1,4 @@
-export type PaymentMethod = "Gcash" | "Bank Transfer" | "Maya" | "-";
+export type PaymentMethod = "Gcash" | "GCash" | "Bank Transfer" | "Maya" | "-";
 export type InvoiceStatus = "Paid" | "Pending" | "Overdue";
 
 export interface Invoice {

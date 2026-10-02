@@ -11,7 +11,7 @@ function Anomalies() {
       status: "CRITICAL",
       problem: "Packet Loss",
       totalAffected: 678,
-      recommentdation: "Speed check visits and payment extension.",
+      recommendation: "Speed check visits and payment extension.",
       percentage: 18.4
 
     },
@@ -20,7 +20,7 @@ function Anomalies() {
       status: "LOW",
       problem: "Packet Loss",
       totalAffected: 678,
-      recommentdation: "Speed check visits and payment extension.",
+      recommendation: "Speed check visits and payment extension.",
       percentage: 18.4
 
     },
@@ -61,7 +61,7 @@ function Anomalies() {
                 <h1 className="opacity-40">{"Threshold: < 5%"}</h1>
               </span>
               <div className="flex flex-1 flex-row shadow-glassy-jeri text-emerald-500 rounded-2xl p-2 bg-emerald-400/20">
-                Recommendation: {item.recommentdation}
+                Recommendation: {item.recommendation}
               </div>
             </span>
           </CardContent>
