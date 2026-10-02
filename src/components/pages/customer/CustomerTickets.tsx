@@ -93,7 +93,7 @@ function CustomerTickets() {
               >
                 <h1 className="font-mono text-emerald-400 text-start">{ticket.ticketID}</h1>
                 <div className="justify-between items-center w-full flex gap-4">
-                  <h2 className="font-bold text-[20px]">{ticket.issue}</h2>
+                  <h2 className="min-w-0 flex-1 truncate font-bold text-[20px]">{ticket.issue}</h2>
                   <span className={`h-8 flex items-center justify-center px-3 font-ubuntu border-2 text-[12px] whitespace-nowrap rounded-[12px] shadow-glassy-jeri ${getStatusBadge(ticket.status)}`}>
                     {ticket.status}
                   </span>

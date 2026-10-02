@@ -31,9 +31,9 @@ function TechnicianOverview({engineer} : TechnicianOverviewProps) {
 
     return(
         <div className="flex flex-col gap-5 mt-5 mr-10">
-            <div className="grid grid-cols-3 gap-20 w-full  ">
+                <div className="grid grid-cols-3 gap-20 w-full max-sm:grid-cols-1 max-sm:gap-4">
                 {overviewCards.map((item) => (
-                    <Card key={item.description} className="w-full h-[135px] bg-[#C4C4C4]/20 rounded-[15px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black">
+                    <Card key={item.description} className="w-full h-[135px] bg-white/5 rounded-[15px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black">
                         <CardContent className="flex flex-col items-center justify-center gap-4">
                             <h1 className="text-[40px] font-bold text-[#FFFFFF] tracking-[0.05em] leading-[100%]">
                                 {item.value}

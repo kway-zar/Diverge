@@ -14,7 +14,8 @@ const offerTabData: OfferTabProps[] = [
     planSLA: "99.6%",
     planContract: "12mo",
     planFeatures: ["Feature 1", "Feature 2", "Feature 3"],
-    planType: 'Residential'
+    planType: 'Residential',
+    status: "Active"
   },
   {
     planName: "Business 500 MBPS",
@@ -25,7 +26,8 @@ const offerTabData: OfferTabProps[] = [
     planSLA: "99.6%",
     planContract: "12mo",
     planFeatures: ["Feature A", "Feature B", "Feature C"],
-    planType: 'Business'
+    planType: 'Business',
+    status: "Active"
   },
   {
     planName: "Enterprise 1 GBPS",
@@ -36,7 +38,8 @@ const offerTabData: OfferTabProps[] = [
     planSLA: "99.9%",
     planContract: "24mo",
     planFeatures: ["Feature X", "Feature Y", "Feature Z"],
-    planType: 'Enterprise'
+    planType: 'Enterprise',
+    status: "Inactive"
   },
   {
     planName: "Government 2 GBPS",
@@ -47,18 +50,29 @@ const offerTabData: OfferTabProps[] = [
     planSLA: "99.95%",
     planContract: "36mo",
     planFeatures: ["Feature Alpha", "Feature Beta", "Feature Gamma"],
-    planType: 'Government'
+    planType: 'Government',
+    status: "Active"
   }
 ]
+
+function getPlanStatusColor(status: OfferTabProps["status"]) {
+  return status === "Active" ? "text-emerald-500" : "text-red-500"
+}
+
+function getPlanAction(status: OfferTabProps["status"]) {
+  return status === "Active"
+    ? { label: "Deactivate", className: "bg-pink-600/20" }
+    : { label: "Activate", className: "bg-emerald-500/20" }
+}
 
 function OfferTab() {
   return (
     <TabsContent value="offer">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
         {offerTabData.map((offer: OfferTabProps) => (
-          <Card key={offer.planName} className="flex-1 ring-0 shadow-glassy-jeri bg-neutral-500/40">
+          <Card key={offer.planName} className="flex-1 ring-0 shadow-glassy-jeri bg-white/5">
             <CardHeader className="flex flex-row place-content-between">
-              <h1 className="p-1 px-4 bg-emerald-500/20 text-emerald-500 ring-1 ring-emerald-500/80 rounded-md">Active</h1>
+              <h1 className={`p-1 px-4 rounded-md ${offer.status === "Active" ? "bg-emerald-500/20 text-emerald-500 ring-emerald-500/80" : "bg-red-500/20 text-red-500 ring-red-500/80"} ring-1`}>{offer.status}</h1>
               <h1 className="text-pink-600">{offer.planType}</h1>
             </CardHeader>
             <CardContent>
@@ -70,7 +84,7 @@ function OfferTab() {
                   <p className="opacity-40 font-thin">{"/month"}</p>
                 </span>
                 <span className="place-items-end">
-                  <h1 className="text-base text-emerald-500">{offer.planSpeed}</h1>
+                  <h1 className={`text-base ${getPlanStatusColor(offer.status)}`}>{offer.planSpeed}</h1>
                   <p className="opacity-40 font-thin text-xs">{"↑ 25 mbps"}</p>
                 </span>
               </div>
@@ -96,13 +110,15 @@ function OfferTab() {
             </CardContent>
             <CardFooter className="border-none grid grid-cols-2 mx-4 gap-x-10">
               <EditPlan />
-              <Button className="w-full h-10 shadow-glassy-jeri bg-pink-600/20 rounded-4xl">Deactivate</Button>
+              <Button className={`w-full h-10 shadow-glassy-jeri rounded-4xl ${getPlanAction(offer.status).className}`}>
+                {getPlanAction(offer.status).label}
+              </Button>
             </CardFooter>
           </Card>
         ))}
       </div>
 
-      <Card className="flex-1 ring-0 shadow-glassy-jeri bg-neutral-500/40 mt-4">
+      <Card className="flex-1 ring-0 shadow-glassy-jeri bg-white/5 mt-4">
         <CardHeader className="flex flex-row">
           <i className="fa-solid fa-circle-info fa-xl"></i>
           <h1 className="opacity-60">Self Service Upgrade Plan Rules</h1>

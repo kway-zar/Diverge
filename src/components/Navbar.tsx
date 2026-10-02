@@ -14,13 +14,13 @@ function Navbar({ role = "Admin", status = "80% Uptime" }: { role?: string; stat
       </div>
 
 
-      <div className="absolute w-[20vw] right-0 flex flex-row place-content-end items-center">
-        <Card className="w-[10vw] cursor-pointer flex flex-row gap-0 items-center justify-center ring-0 shadow-glassy p-2 rounded-4xl [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-linear-[0deg,#1C1A1A_10%,#121212_90%]">
+      <div className="absolute w-[20vw] right-0 flex flex-row place-content-end items-center max-sm:w-[58vw] max-sm:gap-1">
+        <Card className="w-[10vw] cursor-pointer flex flex-row gap-0 items-center justify-center ring-0 shadow-glassy p-2 rounded-4xl [--glassy-color:79_79_79] inset-shadow-sm inset-ring-black bg-linear-[0deg,#1C1A1A_10%,#121212_90%] max-sm:w-[42vw] max-sm:p-1">
           <div className="bg-[#4BE0A9] w-1 h-1 rounded-full mr-2 animate-ping"></div>
          <span className="text-[#4BE0A9] opacity-55 font-thin font-ubuntu-mono tracking-widest truncate">{status}</span>
         </Card>
 
-        <i className="fa-regular fa-bell fa-xl text-[#b00049] mx-5 cursor-pointer"></i>
+        <i className="fa-regular fa-bell fa-xl text-[#b00049] mx-5 cursor-pointer max-sm:mx-2 max-sm:text-lg"></i>
 
 
       </div>

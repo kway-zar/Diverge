@@ -4,6 +4,12 @@ import { Progress, ProgressIndicator } from "@/components/ui/progress"
 import { Button } from '@/components/ui/button'
 import type { ChurnInfo } from "@/components/types/churn"
 
+function getChurnColor(value: number) {
+  const clampedValue = Math.min(Math.max(value, 0), 100)
+  const hue = 120 - (clampedValue * 120) / 100
+
+  return `hsl(${hue} 70% 45%)`
+}
 
 function ChurnRisk() {
 
@@ -40,7 +46,7 @@ function ChurnRisk() {
 
       {
         churnRisks.map((item: ChurnInfo, index: number) => (
-          <Card className="shadow-glassy-jeri ring-0 w-full bg-[rgba(75,75,75,0.1)] backdrop-contrast-60 gap-0 my-2" key={index}>
+          <Card className="shadow-glassy-jeri ring-0 w-full bg-white/5 backdrop-contrast-60 gap-0 my-2" key={index}>
             <CardHeader className="flex flex-row gap-4">
               <span className="flex flex-col">
                 <h1>{item.accountName}</h1>
@@ -66,12 +72,23 @@ function ChurnRisk() {
                 </div>
               </span>
               <span className="w-[10%] flex items-center flex-col my-auto">
-                <h1 className="text-4xl font-semibold text-orange-700">{item.churnPercentage}</h1>
+                <h1
+                  className="text-4xl font-semibold"
+                  style={{ color: getChurnColor(item.churnPercentage) }}
+                >
+                  {item.churnPercentage}
+                </h1>
                 <h1 className="text-[0.6rem] opacity-30 mt-0 mb-1">/100</h1>
                 <Progress value={item.churnPercentage} className="w-[80%] h-1 bg-[rgb(80,80,80)] rounded-md">
-                  <ProgressIndicator className="bg-orange-500 rounded-md" />
+                  <ProgressIndicator
+                    className="rounded-md"
+                    style={{ backgroundColor: getChurnColor(item.churnPercentage) }}
+                  />
                 </Progress>
-                <Button className="bg-orange-500 rounded-md p-1 text-xs mt-2">
+                <Button
+                  className="rounded-md p-1 text-xs mt-2"
+                  style={{ backgroundColor: getChurnColor(item.churnPercentage) }}
+                >
                   Reach Out
                 </Button>
               </span>
@@ -86,10 +103,10 @@ function ChurnRisk() {
 
       }
       <div className="flex flex-row relative gap-4 mt-4">
-        <Card className="shadow-glassy-jeri ring-0 w-full bg-[rgba(75,75,75,0.1)] backdrop-contrast-60 gap-0">
+        <Card className="shadow-glassy-jeri ring-0 w-full bg-white/5 backdrop-contrast-60 gap-0">
           <CardHeader>Churn Probability Distribution</CardHeader>
         </Card>
-        <Card className="shadow-glassy-jeri ring-0 w-full bg-[rgba(75,75,75,0.1)] backdrop-contrast-60 gap-0">
+        <Card className="shadow-glassy-jeri ring-0 w-full bg-white/5 backdrop-contrast-60 gap-0">
           <CardHeader>
             <h1>Churn Probability Distribution</h1>
             <h1 className='text-xs font-thin'>Top Churn Drivers</h1>
@@ -103,25 +120,37 @@ function ChurnRisk() {
                 {/* TODO: add logic to average out the churnInfos */}
                 <span className="flex flex-row items-center place-content-between">
                   <Progress value={78} className="w-[80%] h-1 bg-[rgb(80,80,80)] rounded-md">
-                    <ProgressIndicator className="bg-orange-500 rounded-md" />
+                    <ProgressIndicator
+                      className="rounded-md"
+                      style={{ backgroundColor: getChurnColor(78) }}
+                    />
                   </Progress>
                   <h1>7.8</h1>
                 </span>
                 <span className="flex flex-row items-center place-content-between">
                   <Progress value={78} className="w-[80%] h-1 bg-[rgb(80,80,80)] rounded-md">
-                    <ProgressIndicator className="bg-orange-500 rounded-md" />
+                    <ProgressIndicator
+                      className="rounded-md"
+                      style={{ backgroundColor: getChurnColor(78) }}
+                    />
                   </Progress>
                   <h1>7.8</h1>
                 </span>
                 <span className="flex flex-row items-center place-content-between">
                   <Progress value={78} className="w-[80%] h-1 bg-[rgb(80,80,80)] rounded-md">
-                    <ProgressIndicator className="bg-orange-500 rounded-md" />
+                    <ProgressIndicator
+                      className="rounded-md"
+                      style={{ backgroundColor: getChurnColor(78) }}
+                    />
                   </Progress>
                   <h1>7.8</h1>
                 </span>
                 <span className="flex flex-row items-center place-content-between">
                   <Progress value={78} className="w-[80%] h-1 bg-[rgb(80,80,80)] rounded-md">
-                    <ProgressIndicator className="bg-orange-500 rounded-md" />
+                    <ProgressIndicator
+                      className="rounded-md"
+                      style={{ backgroundColor: getChurnColor(78) }}
+                    />
                   </Progress>
                   <h1>7.8</h1>
                 </span>

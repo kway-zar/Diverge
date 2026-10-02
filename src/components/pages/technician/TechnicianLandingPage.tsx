@@ -35,8 +35,8 @@ function TechnicianLandingPage() {
     <>
       <Navbar role="Technician" status="3 Jobs Today" />
  
-      <div className="bg-[#121212] flex flex-row-reverse">
-        <div className="w-[95vw] z-0 overflow-y-auto font-ubuntu text-white flex flex-col items-start ">
+      <div className="bg-[#121212] flex flex-row-reverse max-sm:flex-col">
+        <div className="w-[95vw] z-0 overflow-y-auto font-ubuntu text-white flex flex-col items-start max-sm:w-full max-sm:mr-0">
           {renderContent()}
         </div>
  

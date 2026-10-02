@@ -110,9 +110,9 @@ function Technicians() {
                     Ratings, fields reports & performance
                 </span>
             </div>
-            <div className="grid grid-cols-4 gap-20 w-full px-10">
+            <div className="grid grid-cols-4 gap-20 w-full px-10 max-sm:grid-cols-1 max-sm:gap-4 max-sm:px-2">
                 {stats.map((stat) => (
-                    <Card key={stat.title} className="w-full h-[135px] bg-[#C4C4C4]/20 rounded-[15px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black">
+                    <Card key={stat.title} className="w-full h-[135px] bg-white/5 rounded-[15px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black">
                         <CardContent className="flex flex-col gap-3">
                             <h2 className="text-[20px] font-light text-[#FFFFFF] tracking-[0.05em] leading-[100%]">
                                 {stat.title}
@@ -130,7 +130,7 @@ function Technicians() {
                 ))}
             </div>
             <div className="grid grid-cols-[1fr_3fr] gap-7 w-full px-10">
-                <Card className="h-[494px] bg-[#C4C4C4]/20 rounded-[15px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black p-4">
+                <Card className="h-[494px] bg-white/5 rounded-[15px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black p-4">
                     <div className="mb-5">
                         <p className="text-[16px] font-bold text-[#FFFFFF] opacity-75 tracking-[0.05em] leading-[100%]">
                             Field Engineers
@@ -179,7 +179,7 @@ function Technicians() {
 
                     ))}
                 </Card>
-                <Card className="h-full bg-[#C4C4C4]/20 rounded-[15px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black p-4">
+                <Card className="h-full bg-white/5 rounded-[15px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black p-4">
                     {selectedEngineer ? (
                         <div className="flex flex-col gap-3">
                             <div className="flex justify-between">

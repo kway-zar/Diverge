@@ -54,9 +54,9 @@ function AdminLandingPage() {
     <>
       <Navbar />
 
-      <div className="bg-[#121212] flex flex-row-reverse">
+      <div className="bg-[#121212] flex flex-row-reverse max-sm:flex-col">
 
-        <div className="w-[95vw] mr-5 z-0 overflow-y-auto font-ubuntu text-white flex flex-col items-start ">
+        <div className="w-[95vw] mr-5 z-10 overflow-y-auto font-ubuntu text-white flex flex-col items-start max-sm:w-full max-sm:mr-0">
 
           {renderContent()}
 

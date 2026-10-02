@@ -3,6 +3,13 @@ import { Separator } from "@/components/ui/separator"
 import { TabsContent } from "@/components/ui/tabs"
 import type { Anomalies } from "@/components/types/anomalies"
 
+function getAnomalyColor(value: number) {
+  const clampedValue = Math.min(Math.max(value, 0), 100)
+  const hue = 120 - (clampedValue * 120) / 100
+
+  return `hsl(${hue} 70% 45%)`
+}
+
 function Anomalies() {
 
   const anomalies: Anomalies[] = [
@@ -11,7 +18,7 @@ function Anomalies() {
       status: "CRITICAL",
       problem: "Packet Loss",
       totalAffected: 678,
-      recommentdation: "Speed check visits and payment extension.",
+      recommendation: "Speed check visits and payment extension.",
       percentage: 18.4
 
     },
@@ -20,7 +27,7 @@ function Anomalies() {
       status: "LOW",
       problem: "Packet Loss",
       totalAffected: 678,
-      recommentdation: "Speed check visits and payment extension.",
+      recommendation: "Speed check visits and payment extension.",
       percentage: 18.4
 
     },
@@ -42,7 +49,7 @@ function Anomalies() {
   return (
     <TabsContent value="anomalies" className="mr-5 font-ubuntu-mono">
       {anomalies.map((item, index) => (
-        <Card className="shadow-glassy-jeri ring-0 w-full bg-[rgba(75,75,75,0.1)] backdrop-contrast-60 gap-2 my-4" key={index}>
+        <Card className="shadow-glassy-jeri ring-0 w-full bg-white/5 backdrop-contrast-60 gap-2 my-4" key={index}>
           <CardHeader className="flex flex-row gap-4 tracking-widest">
             <span className="flex flex-col text-emerald-500">
               <h1>{item.locationCode}</h1>
@@ -57,11 +64,16 @@ function Anomalies() {
                 <h1 className="opacity-40 text-base">{item.totalAffected} Subscriber</h1>
               </span>
               <span className="absolute top-5 right-5">
-                <h1 className="text-red-500 text-4xl">{item.percentage}%</h1>
+                <h1
+                  className="text-4xl"
+                  style={{ color: getAnomalyColor(item.percentage) }}
+                >
+                  {item.percentage}%
+                </h1>
                 <h1 className="opacity-40">{"Threshold: < 5%"}</h1>
               </span>
               <div className="flex flex-1 flex-row shadow-glassy-jeri text-emerald-500 rounded-2xl p-2 bg-emerald-400/20">
-                Recommendation: {item.recommentdation}
+                Recommendation: {item.recommendation}
               </div>
             </span>
           </CardContent>
@@ -70,7 +82,7 @@ function Anomalies() {
 
       ))}
       <h1 className="mt-2">Node Heatmap</h1>
-      <Card className="shadow-glassy-jeri ring-0 w-full bg-[rgba(75,75,75,0.1)] backdrop-contrast-60 gap-2">
+      <Card className="shadow-glassy-jeri ring-0 w-full bg-white/5 backdrop-contrast-60 gap-2">
         <CardHeader>
           <span>
             Health scores (0-100) across simulated nodes.

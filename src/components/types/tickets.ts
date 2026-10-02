@@ -1,7 +1,7 @@
 export type TicketPriority = "High" | "Medium" | "Low";
 export type TicketStatus = "In Progress" | "Open" | "Pending" | "Resolved";
 
-export interface Tickets {
+export interface Ticket {
     ticketID: string;
     subscriber: string;
     issue: string;
@@ -13,4 +13,6 @@ export interface Tickets {
     created: string;
     updated: string;
 }
+
+export type Tickets = Ticket;
 

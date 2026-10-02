@@ -22,11 +22,11 @@ function PlanChanges() {
           <i className="fa-solid fa-bolt-lightning fa-xl"></i>
           <p>Upgrades to 200 Mbps or below take effect within 30 minutes — no technician needed. Downgrades have a 30-day lock-in</p>
         </div>
-        <div className="flex flex-1 flex-row gap-x-5">
+        <div className="flex flex-1 flex-row gap-x-5 max-sm:flex-col max-sm:gap-4">
           {
             //Request style
           }
-          <Card className="ml-2 flex-1 shadow-glassy-jeri bg-neutral-400/40 ring-0">
+          <Card className="ml-2 flex-1 shadow-glassy-jeri bg-white/5 ring-0 max-sm:ml-0 max-sm:w-full">
             <CardHeader className="flex flex-row place-content-between">
             </CardHeader>
             <CardContent className="flex flex-col gap-y-10">
@@ -61,7 +61,7 @@ function PlanChanges() {
           {
             //Current Plan style
           }
-          <Card className="ml-2 flex-1 shadow-glassy-jeri bg-neutral-400/40 ring-blue-500 ring-1">
+          <Card className="ml-2 flex-1 shadow-glassy-jeri bg-white/5 ring-blue-500 ring-1 max-sm:ml-0 max-sm:w-full">
             <CardHeader className="flex flex-row place-content-between">
               <h1 className="p-1 px-4 bg-blue-500/20 text-blue-500 ring-1 ring-blue-500/80 rounded-md">Current Plan</h1>
             </CardHeader>
@@ -94,7 +94,7 @@ function PlanChanges() {
           {
             //Upgrade Plan Style
           }
-          <Card className="ml-2 flex-1 shadow-glassy-jeri bg-neutral-400/40 ring-0">
+          <Card className="ml-2 flex-1 shadow-glassy-jeri bg-white/5 ring-0 max-sm:ml-0 max-sm:w-full">
             <CardHeader className="flex flex-row place-content-between">
             </CardHeader>
             <CardContent className="flex flex-col gap-y-10">
