@@ -1,58 +1,8 @@
-export type EngineerStatus =
-    | "On-Site"
-    | "Traveling"
-    | "Available"
-    | "Off-Duty"
-    | "Unavailable";
-
-export interface FieldReport {
-    ticketId: string;
-    engineerId: string;
-    date: string;
-    status: "Fully Resolved" | "In Progress";
-    description: string;
-    timeOnSite: string;
-    parts: string;
-}
-
-export interface EngineerReview {
-    reviewer: string;
-    rating: number;
-    date: string;
-    comment: string;
-}
-
-export interface EngineerMetric {
-    id: string;
-    label: string;
-    benchmark: number;
-    score: number;
-}
-
-export interface EngineerOverview {
-    jobsCompleted: number;
-    thisMonth: number;
-    avgResolution: number;
-    joined: string;
-}
-
-export interface Engineer {
-    id: string;
-    name: string;
-    location: string;
-    rating: number;
-    phoneNo: string;
-    status: EngineerStatus;
-
-
-    currentJob: string;
-    completed: number;
-    queue: number;
-
-
-    overview: EngineerOverview;
-    metrics: EngineerMetric[];
-
-    fieldReports: FieldReport[];
-    reviews: EngineerReview[];
-}
+export type {
+  Engineer,
+  EngineerStatus,
+  FieldReport,
+  EngineerReview,
+  EngineerMetric,
+  EngineerOverview,
+} from "./domain";

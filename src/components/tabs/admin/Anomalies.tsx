@@ -1,7 +1,7 @@
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { TabsContent } from "@/components/ui/tabs"
-import type { Anomalies } from "@/components/types/anomalies"
+import type { Anomaly as AnomalyRecord } from "@/components/types/anomalies"
 
 function getAnomalyColor(value: number) {
   const clampedValue = Math.min(Math.max(value, 0), 100)
@@ -12,7 +12,7 @@ function getAnomalyColor(value: number) {
 
 function Anomalies() {
 
-  const anomalies: Anomalies[] = [
+  const anomalies: AnomalyRecord[] = [
     {
       locationCode: "RZL-01",
       status: "CRITICAL",
@@ -34,7 +34,7 @@ function Anomalies() {
 
   ]
 
-    function getStatusBadge(status: Anomalies["status"]) {
+    function getStatusBadge(status: AnomalyRecord["status"]) {
       switch (status) {
         case "CRITICAL":
           return "ring-red-500 bg-red-500/20 text-red-500";
