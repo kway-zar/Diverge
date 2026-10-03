@@ -1,52 +1,81 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Customer } from "../../types/customer";
 import CustomerOverlay from "../../modals/customerOverlay";
 
+const fallbackCustomers: Customer[] = [
+  {
+    accountID: "000001",
+    name: "Jonathan Landoy",
+    email: "jonathan@example.com",
+    type: "Residential",
+    plan: "Standard",
+    usage: "5000 MB",
+    balance: "₱1,000.00",
+    status: "Active",
+    area: "Rizal",
+    since: "2023-01-15"
+  },
+  {
+    accountID: "000002",
+    name: "Guiller Santos",
+    email: "guiller.santos@example.com",
+    type: "Commercial",
+    plan: "Premium",
+    usage: "10000 MB",
+    balance: "₱2,500.00",
+    status: "Pending",
+    area: "Manila",
+    since: "2023-03-20"
+  },
+  {
+    accountID: "000003",
+    name: "Vanna Mae",
+    email: "vanna.mae@example.com",
+    type: "Government",
+    plan: "Standard",
+    usage: "5000 MB",
+    balance: "₱1,000.00",
+    status: "Suspended",
+    area: "Cebu",
+    since: "2023-01-15"
+  },
+];
 
 export function CustomersPage() {
 
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-    const customers: Customer[] = [
-        {
-            accountID: "000001",
-            name: "Jonathan Landoy",
-            email: "jonathan@example.com",
-            type: "Residential",
-            plan: "Standard",
-            usage: "5000 MB",
-            balance: "₱1,000.00",
-            status: "Active",
-            area: "Rizal",
-            since: "2023-01-15"
-        },
-        {
-            accountID: "000002",
-            name: "Guiller Santos",
-            email: "guiller.santos@example.com",
-            type: "Commercial",
-            plan: "Premium",
-            usage: "10000 MB",
-            balance: "₱2,500.00",
-            status: "Pending",
-            area: "Manila",
-            since: "2023-03-20"
-        },
-        {
-            accountID: "000003",
-            name: "Vanna Mae",
-            email: "vanna.mae@example.com",
-            type: "Government",
-            plan: "Standard",
-            usage: "5000 MB",
-            balance: "₱1,000.00",
-            status: "Suspended",
-            area: "Cebu",
-            since: "2023-01-15"
-        },
-    ];
+    const [customers, setCustomers] = useState<Customer[]>(fallbackCustomers);
+
+    useEffect(() => {
+      let isMounted = true;
+
+      async function loadCustomers() {
+        try {
+          const response = await fetch("http://localhost:4001/api/customers");
+          if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+
+          const payload = await response.json();
+          const nextCustomers = Array.isArray(payload?.data) ? payload.data : fallbackCustomers;
+
+          if (isMounted) {
+            setCustomers(nextCustomers);
+          }
+        } catch {
+          if (isMounted) {
+            setCustomers(fallbackCustomers);
+          }
+        }
+      }
+
+      loadCustomers();
+
+      return () => {
+        isMounted = false;
+      };
+    }, []);
 
 
     function getStatusBadge(status: Customer["status"]) {

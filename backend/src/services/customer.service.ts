@@ -131,6 +131,18 @@ export async function getCustomerById(id: string): Promise<CustomerRecord | unde
 export async function createCustomer(input: CreateCustomerInput): Promise<CustomerRecord> {
   try {
     const accountId = `ACC-${Date.now()}`;
+    const plan = await prisma.plan.upsert({
+      where: { name: input.plan },
+      update: {},
+      create: {
+        name: input.plan,
+        type: input.type,
+        speed: 'N/A',
+        cost: 0,
+        status: 'ACTIVE',
+      },
+    });
+
     const created = await prisma.user.create({
       data: {
         email: input.email,
@@ -142,6 +154,7 @@ export async function createCustomer(input: CreateCustomerInput): Promise<Custom
             name: input.name,
             email: input.email,
             type: input.type.toUpperCase().replace(/\s+/g, '_') as never,
+            planId: plan.id,
             usage: input.usage,
             balance: input.balance,
             status: input.status.toUpperCase() as never,
@@ -150,7 +163,7 @@ export async function createCustomer(input: CreateCustomerInput): Promise<Custom
           },
         },
       },
-      include: { customer: true },
+      include: { customer: { include: { plan: true } } },
     });
 
     const customer = created.customer;
