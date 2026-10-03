@@ -1,7 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 
-import { healthRouter } from './routes/index.js';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
+import { apiRouter } from './routes/index.js';
 
 export const app = express();
 
@@ -12,4 +13,6 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'diverge-backend' });
 });
 
-app.use('/api', healthRouter);
+app.use('/api', apiRouter);
+app.use(notFoundHandler);
+app.use(errorHandler);
