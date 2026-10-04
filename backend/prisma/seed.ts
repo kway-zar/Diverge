@@ -77,6 +77,20 @@ async function main() {
     },
   ];
 
+  const adminData = {
+    name: 'Diverge Admin',
+    email: 'admin@diverge.com',
+  };
+
+  const technicianData = {
+    name: 'Rizal Service Tech',
+    email: 'tech@diverge.com',
+    location: 'Rizal',
+    phone: '+639171234567',
+    status: 'AVAILABLE',
+    rating: 4.8,
+  };
+
   for (const customer of customerData) {
     const existingUser = await prisma.user.findUnique({ where: { email: customer.email } });
 
@@ -105,7 +119,43 @@ async function main() {
     }
   }
 
-  console.log('Sample plans and customers created successfully.');
+  const existingAdminUser = await prisma.user.findUnique({ where: { email: adminData.email } });
+  if (!existingAdminUser) {
+    await prisma.user.create({
+      data: {
+        email: adminData.email,
+        password: 'seed-password',
+        role: 'ADMIN',
+        admin: {
+          create: {
+            name: adminData.name,
+          },
+        },
+      },
+    });
+  }
+
+  const existingTechnicianUser = await prisma.user.findUnique({ where: { email: technicianData.email } });
+  if (!existingTechnicianUser) {
+    await prisma.user.create({
+      data: {
+        email: technicianData.email,
+        password: 'seed-password',
+        role: 'TECHNICIAN',
+        technician: {
+          create: {
+            name: technicianData.name,
+            location: technicianData.location,
+            phone: technicianData.phone,
+            status: technicianData.status,
+            rating: technicianData.rating,
+          },
+        },
+      },
+    });
+  }
+
+  console.log('Sample plans, customers, admin, and technician created successfully.');
 }
 
 main()
