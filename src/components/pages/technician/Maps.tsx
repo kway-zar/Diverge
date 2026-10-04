@@ -55,7 +55,7 @@ function Maps() {
         <p className="font-mono text-xs italic text-white opacity-30 sm:text-sm">{today}</p>
       </div>
  
-      <div className="overflow-hidden rounded-[20px] border border-[#7e7e7e] bg-white/20">
+      <div className="overflow-hidden rounded-[15px] border border-[#7e7e7e] bg-white/20">
         <div className="relative h-[500px] w-full">
           <span className="absolute left-4 top-4 z-[1000] rounded-[41px] border border-[#7e7e7e] bg-[#393939] px-4 py-1 font-ubuntu-mono text-sm tracking-[1px] text-white">
             NCR - Manila/Quezon City
