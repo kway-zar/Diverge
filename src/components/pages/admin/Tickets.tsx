@@ -12,13 +12,14 @@ import type { Tickets as Ticket } from "../../types/tickets";
 import TicketStatus from "../../modals/ticketStatus";
 import SubmitTicket from "../../modals/SubmitTicket";
 
-const filterOptions = ["All", "Open", "In Progress", "Resolved", "Escalated"];
+const filterOptions = ["All", "Open", "In Progress", "Pending", "Resolved"];
 
-const intensityFilter = ["All", "Low", "Medium", "High", "Critical"];
+const intensityFilter = ["All", "Low", "Medium", "High"];
 
 function Tickets() {
-  const [activeFilter, setActiveFilter] = useState("All");
-  const [activeIntensity, setActiveIntensity] = useState("All");
+  const [activeStatusFilter, setActiveStatusFilter] = useState<"All" | Ticket["status"]>("All");
+  const [activePriorityFilter, setActivePriorityFilter] = useState<"All" | Ticket["priority"]>("All");
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedSubscriber, setSelectedSubscriber] = useState<Ticket | null>(null);
   const [showSubmitTicket, setShowSubmitTicket] = useState(false);
   const tickets: Ticket[] = [
@@ -60,14 +61,30 @@ function Tickets() {
     },
   ];
 
+  const filteredTickets = tickets.filter((ticket) => {
+    const matchesStatus = activeStatusFilter === "All" || ticket.status === activeStatusFilter;
+    const matchesPriority = activePriorityFilter === "All" || ticket.priority === activePriorityFilter;
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+    const matchesSearch =
+      normalizedSearch.length === 0 ||
+      [ticket.ticketID, ticket.subscriber, ticket.issue, ticket.category]
+        .some((value) => value.toLowerCase().includes(normalizedSearch));
+
+    return matchesStatus && matchesPriority && matchesSearch;
+  });
+
   function getStatusBadge(status: Ticket["status"]) {
     switch (status) {
       case "In Progress":
         return "bg-emerald-500/10 text-emerald-400 border-emerald-500/60";
+      case "Open":
+        return "bg-[#197AF9]/10 text-[#197AF9] border-[#197AF9]/60";
       case "Pending":
         return "bg-amber-500/10 text-amber-400 border-amber-500/60";
       case "Resolved":
         return "bg-rose-500/10 text-rose-400 border-rose-500/60";
+      default:
+        return "bg-slate-500/10 text-slate-300 border-slate-500/60";
     }
   }
 
@@ -135,14 +152,24 @@ function Tickets() {
             </div>
           </div>
 
+          <div className="mb-4 ml-10 flex w-full flex-wrap items-center gap-3">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Search by ticket ID, customer, or issue"
+              className="w-full max-w-md rounded-[14px] border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40 focus:outline-none"
+            />
+          </div>
+
           <div className="flex flex-row gap-3 w-full justify-left items-center ml-10">
             <div className="flex flex-row items-center shadow-glassy-jeri rounded-[40px]">
               {filterOptions.map((filter) => {
-                const isActive = activeIntensity === filter;
+                const isActive = activeStatusFilter === filter;
                 return (
                   <Button
                     key={filter}
-                    onClick={() => setActiveIntensity(filter)}
+                    onClick={() => setActiveStatusFilter(filter as "All" | Ticket["status"])}
                     className={`w-25 rounded-[40px] font-ubuntu transition-colors duration-200 ease-in-out text-white text-[18px]  ${isActive
                         ? "bg-[#3ACF98]/30 text-white shadow-glassy-jeri"
                         : "bg-transparent text-white opacity-30 hover:bg-white/10"
@@ -156,11 +183,11 @@ function Tickets() {
 
             <div className="flex flex-row items-center shadow-glassy-jeri rounded-[40px]">
               {intensityFilter.map((filter) => {
-                const isActive = activeFilter === filter;
+                const isActive = activePriorityFilter === filter;
                 return (
                   <Button
                     key={filter}
-                    onClick={() => setActiveFilter(filter)}
+                    onClick={() => setActivePriorityFilter(filter as "All" | Ticket["priority"])}
                     className={`w-20 rounded-[40px] font-ubuntu transition-colors duration-200 ease-in-out text-white  text-[18px] ${isActive
                         ? "bg-[#3ACF98]/30 text-white shadow-glassy-jeri"
                         : "bg-transparent text-white opacity-30 hover:bg-white/10"
@@ -207,47 +234,55 @@ function Tickets() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {tickets.map((tickets: Ticket) => (
-                  <TableRow className="border-b  border-white/10  text-slate-300">
-                    <TableCell className="text-center font-mono whitespace-nowrap text-[#3ACF98]">
-                      {tickets.ticketID}
-                    </TableCell>
-                    <TableCell className="text-center max-w-[150px] cursor-pointer" onClick={() => setSelectedSubscriber(tickets)}>
-                      <div className="flex flex-col truncate">
-                        <span className="font-semibold text-slate-100 truncate">
-                          {tickets.subscriber}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="max-w-[180px] truncate text-center whitespace-nowrap">
-                      <span className="truncate">{tickets.issue}</span>
-                    </TableCell>
-                    <TableCell className="text-center max-w-[160px] truncate text-[#C4C4C4] font-light">
-                      {tickets.category}
-                    </TableCell>
-                    <TableCell
-                      className={`text-center whitespace-nowrap ${getPriority(tickets.priority)}`}
-                    >
-                      {tickets.priority}
-                    </TableCell>
-                    <TableCell className="max-w-[180px] truncate text-center whitespace-nowrap text-[#C4C4C4] font-light">
-                      {tickets.assignedTo}
-                    </TableCell>
-                    <TableCell className="text-center whitespace-nowrap">
-                      <span
-                        className={`px-2 py-0.5 rounded-full border-2 text-[10px] ${getStatusBadge(tickets.status)}`}
-                      >
-                        {tickets.status}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-center whitespace-nowrap text-[#C4C4C4] font-light">
-                      {tickets.SLA}
-                    </TableCell>
-                    <TableCell className="text-center font-mono whitespace-nowrap text-[#C4C4C4] font-light">
-                      {tickets.updated}
+                {filteredTickets.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={9} className="py-8 text-center text-slate-300">
+                      No tickets match the current search and filters.
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  filteredTickets.map((ticket: Ticket) => (
+                    <TableRow key={ticket.ticketID} className="border-b border-white/10 text-slate-300">
+                      <TableCell className="text-center font-mono whitespace-nowrap text-[#3ACF98]">
+                        {ticket.ticketID}
+                      </TableCell>
+                      <TableCell className="text-center max-w-[150px] cursor-pointer" onClick={() => setSelectedSubscriber(ticket)}>
+                        <div className="flex flex-col truncate">
+                          <span className="font-semibold text-slate-100 truncate">
+                            {ticket.subscriber}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="max-w-[180px] truncate text-center whitespace-nowrap">
+                        <span className="truncate">{ticket.issue}</span>
+                      </TableCell>
+                      <TableCell className="text-center max-w-[160px] truncate text-[#C4C4C4] font-light">
+                        {ticket.category}
+                      </TableCell>
+                      <TableCell
+                        className={`text-center whitespace-nowrap ${getPriority(ticket.priority)}`}
+                      >
+                        {ticket.priority}
+                      </TableCell>
+                      <TableCell className="max-w-[180px] truncate text-center whitespace-nowrap text-[#C4C4C4] font-light">
+                        {ticket.assignedTo}
+                      </TableCell>
+                      <TableCell className="text-center whitespace-nowrap">
+                        <span
+                          className={`px-2 py-0.5 rounded-full border-2 text-[10px] ${getStatusBadge(ticket.status)}`}
+                        >
+                          {ticket.status}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-center whitespace-nowrap text-[#C4C4C4] font-light">
+                        {ticket.SLA}
+                      </TableCell>
+                      <TableCell className="text-center font-mono whitespace-nowrap text-[#C4C4C4] font-light">
+                        {ticket.updated}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
