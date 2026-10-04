@@ -83,8 +83,8 @@ async function main() {
   };
 
   const technicianData = {
-    name: 'Rizal Service Tech',
-    email: 'tech@diverge.com',
+    name: 'Christian Devera',
+    email: 'deveratech@diverge.com',
     location: 'Rizal',
     phone: '+639171234567',
     status: 'AVAILABLE',
