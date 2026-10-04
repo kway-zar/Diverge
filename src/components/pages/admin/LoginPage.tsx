@@ -1,21 +1,57 @@
 
 import { useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 import logo from "@/assets/logo.png"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 
-function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+const SAMPLE_CUSTOMER = {
+  email: "jonathan@example.com",
+  password: "seed-password",
+}
 
-  const handleSubmit = (e: React.FormEvent) => {
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001"
+
+function LoginPage() {
+  const navigate = useNavigate()
+  const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState(SAMPLE_CUSTOMER.email)
+  const [password, setPassword] = useState(SAMPLE_CUSTOMER.password)
+  const [error, setError] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: auth API/backend
-    console.log({ email, password })
+    setError("")
+    setIsSubmitting(true)
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const payload = await response.json().catch(() => ({ message: "Login failed" }))
+
+      if (!response.ok) {
+        throw new Error(payload?.message ?? "Invalid email or password")
+      }
+
+      localStorage.setItem("diverge_token", payload.token)
+      localStorage.setItem("diverge_user", JSON.stringify(payload.user))
+
+      navigate("/customers")
+    } catch (loginError) {
+      setError(loginError instanceof Error ? loginError.message : "Unable to sign in right now.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -46,7 +82,7 @@ function LoginPage() {
             Access your Diverge account from anywhere, anytime.
           </p>
 
-          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+          <form onSubmit={handleSubmit} className="mt-8 w-full space-y-5">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-white">Email</Label>
               <Input
@@ -90,11 +126,18 @@ function LoginPage() {
               </Label>
             </div>
 
+            {error ? (
+              <p className="rounded-md border border-red-400/50 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+                {error}
+              </p>
+            ) : null}
+
             <Button
               type="submit"
-              className="w-70 bg-emerald-800 py-6 text-base text-white hover:bg-emerald-900 ml-11"
+              disabled={isSubmitting}
+              className="w-70 bg-emerald-800 py-6 text-base text-white hover:bg-emerald-900 ml-11 disabled:cursor-not-allowed disabled:opacity-70"
             >
-              Sign In
+              {isSubmitting ? "Signing in..." : "Sign In"}
             </Button>
           </form>
         </div>

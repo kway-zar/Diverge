@@ -1,3 +1,5 @@
+// for dummy and initial sample data
+
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -52,8 +54,8 @@ async function main() {
       since: new Date('2023-01-15T00:00:00.000Z'),
     },
     {
-      name: 'Guiller Santos',
-      email: 'guiller.santos@example.com',
+      name: 'Guiller DelaCruz',
+      email: 'guiller.delaCruz@example.com',
       type: 'COMMERCIAL',
       planId: businessPlan?.id,
       usage: '10000 MB',
@@ -63,8 +65,8 @@ async function main() {
       since: new Date('2023-03-20T00:00:00.000Z'),
     },
     {
-      name: 'Vanna Mae',
-      email: 'vanna.mae@example.com',
+      name: 'Vanna Banana',
+      email: 'vanna.banana@example.com',
       type: 'GOVERNMENT',
       planId: governmentPlan?.id,
       usage: '5000 MB',
