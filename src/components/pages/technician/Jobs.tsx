@@ -32,6 +32,8 @@ const actionBtn =
 function Jobs() {
   const [jobs, setJobs] = useState<Job[]>(initialJobs)
   const [completed, setCompleted] = useState<CompletedJob[]>(initialCompleted)
+  const technicianName = "Rizal Service Tech"
+  const technicianLocation = "RIZAL"
  
   const today =
     new Date().toLocaleString("en-US", {
@@ -73,10 +75,10 @@ function Jobs() {
         <div className="flex items-center gap-4">
           <div className="size-[60px] shrink-0 rounded-full bg-[#D9D9D9]" />
           <div>
-            <h2 className="text-lg font-medium tracking-[1px] text-[#fffefe] lg:text-xl">Technician 1</h2>
-            <div className="mt-1 flex flex-wrap gap-x-4 font-ubuntu-mono text-xs tracking-[0.5px] lg:text-sm">
-              <span className="text-[#3acf98]">ENG-0001</span>
-              <span className="text-white/85">MANILA/QUEZON CITY</span>
+            <h2 className="text-2xl font-medium tracking-[1.6px] text-[#fffefe] lg:text-[32px]">{technicianName}</h2>
+            <div className="mt-1 flex flex-wrap gap-x-6 font-ubuntu-mono text-base tracking-[1px] lg:text-[20px]">
+              <span className="text-[#3acf98]">TECH-0001</span>
+              <span className="text-white/85">{technicianLocation}</span>
             </div>
           </div>
         </div>

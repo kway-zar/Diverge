@@ -1,12 +1,4 @@
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import type { Customer } from "../types/customer";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -16,6 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { X } from "lucide-react";
+import type { Customer } from "../types/customer";
 
 function ManageAccount({
   customer,
@@ -30,107 +25,166 @@ function ManageAccount({
   ];
 
   const plan = [
-    { value: "Diverge Netflix", label: "Diverge"},
-    { value: "Fiber 50 MBps", label: "Fiber 50 MBps" } ,
-
-  ]
+    { value: "Diverge Netflix", label: "Diverge" },
+    { value: "Fiber 50 MBps", label: "Fiber 50 MBps" },
+  ];
 
   return (
-    <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#121212]/50">
-        <Card className="relative w-[600px] h-auto  ring-0 bg-white/5 shadow-glassy-jeri rounded-[2vw] opacity-80 gap-2 max-sm:w-[calc(100vw-2rem)] max-sm:max-h-[90vh] max-sm:overflow-y-auto">
-          <CardHeader className="flex flex-col ml-4 font-medium">
-            <CardTitle className="font-ubuntu">{customer.name}</CardTitle>
-            <CardDescription className="font-ubuntu-mono text-[#DE0961]">
-              {customer.accountID}
-            </CardDescription>
-            <Button
-              className="absolute top-4 right-5 text-white rounded-full w-6 h-6 p-0 text-lg hover-glass-rim shrink-0"
-              onClick={onClose}
-            >
-              X
-            </Button>
-          </CardHeader>
-          <CardContent className="flex flex-col mt-0 mr-8">
-            <div className="grid grid-cols-1 md:grid-cols-2">
-              <div>
-                <h2 className="flex ml-4 mb-0.5 font-bold text-xs text-[#C4C4C4]">
-                  EMAIL
-                </h2>
-                <Input type="text" placeholder="name@example.com" className="bg-[#D9D9D9]/20 shadow-glassy-jeri rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-6 ml-4 text-xs"/>
-                <h2 className="flex ml-4 mb-0.5 font-bold text-xs text-[#C4C4C4] ">
-                  TYPE
-                </h2>
-                <Select items={type} defaultValue="Residential">
-                  <SelectTrigger id="form-type" className="w-full bg-[#D9D9D9]/20 shadow-glassy-jeri rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-2 ml-4 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#1a1a1a] shadow-glassy rounded-[1vw] border border-white/10 ring-0 text-white">
-                    <SelectGroup>
-                      {type.map((type) => (
-                        <SelectItem key={type.value} value={type.value} className="text-white focus:bg-white/10 focus:text-white">
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="min-w-[1090px] max-w-none h-[648px] bg-[#121212] text-white py-5 px-12 rounded-[30px] border-0 shadow-[0_0_12px_rgba(80,42,42,0.15)] [&>button]:hidden outline-none ring-0 focus:ring-0 focus-visible:ring-0">
+        <div className="flex flex-col gap-10">
+          <div className="flex justify-between">
+            <div className="flex flex-col gap-2 items-left">
+              <p className="text-[32px] font-light text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-30 uppercase">
+                Manage Account
+              </p>
+              <h2 className="text-[40px] font-medium text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-75 mt-3">
+                {customer.name}
+              </h2>
+              <p className="text-[20px] font-medium text-[#3ACF98] opacity-75 leading-[100%] tracking-[0.05em]">
+                {customer.accountID}
+              </p>
+            </div>
 
-                <h2 className="flex ml-4 mb-0.5 font-bold text-xs text-[#C4C4C4] ">
-                  PLAN
-                </h2>
-                <Select items={plan} defaultValue="Default MBps" >
-                  <SelectTrigger id="form-plan" className="w-full bg-[#D9D9D9]/20  shadow-glassy-jeri rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-2 ml-4 text-xs">
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-gray-400 hover:text-white transition-colors p-1 cursor-pointer"
+              aria-label="Close manage account"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-8 mt-6">
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-1">
+                <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]">
+                  EMAIL
+                </span>
+                <Input
+                  type="text"
+                  defaultValue={customer.email}
+                  className="bg-[#D9D9D9]/20 shadow-[inset_0_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] border-0 italic focus-visible:ring-0 h-12 text-[18px] text-white"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]">
+                  TYPE
+                </span>
+                <Select defaultValue="Residential">
+                  <SelectTrigger id="form-type" className="w-full bg-[#D9D9D9]/20 shadow-[inset_0_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] border-0 italic focus-visible:ring-0 h-12 text-[18px] text-white">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1a1a1a] shadow-glassy rounded-[10px] border border-white/10 ring-0 text-white">
                     <SelectGroup>
-                      {plan.map((plan) => (
-                        <SelectItem key={plan.value} value={plan.value} className="text-white focus:bg-white/10 focus:text-white">
-                          {plan.label}
+                      {type.map((item) => (
+                        <SelectItem key={item.value} value={item.value} className="text-white focus:bg-white/10 focus:text-white">
+                          {item.label}
                         </SelectItem>
                       ))}
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+              </div>
 
-                <h2 className="flex ml-4 mb-0.5 font-bold text-xs text-[#C4C4C4]">
+              <div className="flex flex-col gap-1">
+                <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]">
+                  PLAN
+                </span>
+                <Select defaultValue="Diverge Netflix">
+                  <SelectTrigger id="form-plan" className="w-full bg-[#D9D9D9]/20 shadow-[inset_0_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] border-0 italic focus-visible:ring-0 h-12 text-[18px] text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#1a1a1a] shadow-glassy rounded-[10px] border border-white/10 ring-0 text-white">
+                    <SelectGroup>
+                      {plan.map((item) => (
+                        <SelectItem key={item.value} value={item.value} className="text-white focus:bg-white/10 focus:text-white">
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]">
                   BALANCE
-                </h2>
-                <Input type="text" placeholder="Php 10,000.00" className="bg-[#D9D9D9]/20 shadow-glassy-jeri rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-6 ml-4 text-xs"/>
-              </div>
-              <div className="ml-5">
-                <h2 className="flex ml-4 mb-0.5 font-bold text-xs text-[#C4C4C4] ">
-                  USAGE
-                </h2>
-                <Input type="text" placeholder="100 MB" className="bg-[#D9D9D9]/20  shadow-glassy-jeri rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-6 ml-4 text-xs" />
-                <h2 className="flex ml-4 mb-0.5 font-bold text-xs text-[#C4C4C4] ">
-                  STATUS
-                </h2>
-                <Input type="text" placeholder="Suspended" className="bg-[#D9D9D9]/20 shadow-glassy-jeri rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-6 ml-4 text-xs"/>
-                <h2 className="flex ml-4 mb-0.5 font-bold text-xs text-[#C4C4C4] ">
-                  AREA
-                </h2>
-                      <Input type="text" placeholder="Bulacan"className="bg-[#D9D9D9]/20  shadow-glassy-jeri rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-6 ml-4 text-xs"/>
-                <h2 className="flex ml-4 mb-0.5 font-bold text-xs text-[#C4C4C4]">
-                  SINCE
-                </h2>
-                <Input type="text" placeholder="August 2012" className="bg-[#D9D9D9]/20 shadow-glassy-jeri rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-6 ml-4 text-xs"/>
+                </span>
+                <Input
+                  type="text"
+                  defaultValue={customer.balance}
+                  className="bg-[#D9D9D9]/20 shadow-[inset_0_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] border-0 italic focus-visible:ring-0 h-12 text-[18px] text-white"
+                />
               </div>
             </div>
 
-            <div className="flex justify-center gap-10 mt-5">
-              <Button className="bg-[#B00049] font-light w-40 rounded-2xl shadow-glassy-jeri text-xs tracking-widest">
-                Cancel
-              </Button>
-              <Button className="bg-[#3ACF98] font-light w-40 rounded-2xl shadoe-glassy-jeri text-xs tracking-widest">
-                Create Ticket
-              </Button>
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-1">
+                <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]">
+                  USAGE
+                </span>
+                <Input
+                  type="text"
+                  defaultValue={customer.usage}
+                  className="bg-[#D9D9D9]/20 shadow-[inset_0_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] border-0 italic focus-visible:ring-0 h-12 text-[18px] text-white"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]">
+                  STATUS
+                </span>
+                <Input
+                  type="text"
+                  defaultValue={customer.status}
+                  className="bg-[#D9D9D9]/20 shadow-[inset_0_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] border-0 italic focus-visible:ring-0 h-12 text-[18px] text-white"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]">
+                  AREA
+                </span>
+                <Input
+                  type="text"
+                  defaultValue={customer.area}
+                  className="bg-[#D9D9D9]/20 shadow-[inset_0_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] border-0 italic focus-visible:ring-0 h-12 text-[18px] text-white"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]">
+                  SINCE
+                </span>
+                <Input
+                  type="text"
+                  defaultValue={customer.since}
+                  className="bg-[#D9D9D9]/20 shadow-[inset_0_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] border-0 italic focus-visible:ring-0 h-12 text-[18px] text-white"
+                />
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-    </>
+          </div>
+
+          <div className="flex justify-between gap-6 mt-2">
+            <Button
+              onClick={onClose}
+              className="w-[399px] h-[71px] bg-[#B00049]/20 rounded-[30px] text-[32px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#B00049]/35"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              className="w-[399px] h-[71px] bg-[#3ACF98]/20 rounded-[30px] text-[32px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#3ACF98]/35"
+            >
+              Save Changes
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 

@@ -1,24 +1,78 @@
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import type { MyAccount as AccountSummary } from '@/components/types/myAccount'
 
-function MyAccount(){
-  const account: AccountSummary = {
-  accountID: "000001",
-  name: "Vanna Hernadez",
-  location: "Burgos Rodriguez, Rizal",
-  balance: 0.00,
-  currentPlan: "Diverge Netflix",
-  downloadSpeed: 100,
-  uploadSpeed: 50,
-  nextBilling: "Oct 15, 2026",
-  planType: "Residential",
-  planCost: 1499,
-  planStatus:"Active"
-    
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:4001'
+
+function MyAccount() {
+  const navigate = useNavigate()
+  const [account, setAccount] = useState<AccountSummary | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    const token = localStorage.getItem('diverge_token')
+
+    if (!token) {
+      navigate('/login')
+      return
+    }
+
+    async function loadCustomerProfile() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/customers/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (!response.ok) {
+          throw new Error('Unable to load customer profile')
+        }
+
+        const payload = await response.json()
+        const customer = payload?.data
+
+        const nextAccount: AccountSummary = {
+          accountID: customer?.accountId ?? customer?.id ?? 'N/A',
+          name: customer?.name ?? 'Customer',
+          location: customer?.area ?? 'Unknown location',
+          balance: Number(customer?.balance ?? 0),
+          currentPlan: customer?.plan?.name ?? 'No plan assigned',
+          downloadSpeed: Number(customer?.plan?.speed?.match(/\d+/)?.[0] ?? 0),
+          uploadSpeed: Number(customer?.plan?.speed?.match(/\d+/)?.[0] ?? 0) / 2,
+          nextBilling: customer?.since ? new Date(customer.since).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          }) : 'TBD',
+          planType: (customer?.type ? customer.type.charAt(0).toUpperCase() + customer.type.slice(1).toLowerCase() : 'Residential') as AccountSummary['planType'],
+          planCost: Number(customer?.plan?.cost ?? 0) / 100,
+          planStatus: (customer?.status ? customer.status.charAt(0).toUpperCase() + customer.status.slice(1).toLowerCase() : 'Active') as AccountSummary['planStatus'],
+        }
+
+        setAccount(nextAccount)
+      } catch (loadError) {
+        console.error(loadError)
+        setError('Unable to load your profile right now.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    void loadCustomerProfile()
+  }, [navigate])
+
+  if (loading) {
+    return <div className="p-8 text-white">Loading your account...</div>
   }
 
+  if (error || !account) {
+    return <div className="p-8 text-red-300">{error || 'No customer profile found.'}</div>
+  }
 
   return (
     <div className="text-left w-full flex flex-col gap-4">
@@ -44,7 +98,7 @@ function MyAccount(){
         <Card className="w-[60%] font-ubuntu-mono mr-4 ring-0 shadow-glassy-jeri bg-white/5 max-sm:w-full max-sm:mr-0">
           <CardHeader className="flex flex-row place-content-between mx-5 text-2xl">
             <p>Current Plan</p>
-            <div className='p-2 text-base bg-linear-to-b from-emerald-500/40 from-0% to-emerald-500/10 ring-emerald-500 ring-1 rounded-md px-5 text-emerald-500'>Active</div>
+            <div className='p-2 text-base bg-linear-to-b from-emerald-500/40 from-0% to-emerald-500/10 ring-emerald-500 ring-1 rounded-md px-5 text-emerald-500'>{account.planStatus}</div>
           </CardHeader>
           <CardContent className="ml-5 flex flex-col gap-4">
             <div className="flex flex-row w-full place-content-between">
@@ -69,7 +123,7 @@ function MyAccount(){
               </div>
               <div className="flex flex-col font-ubuntu-mono justify-center items-center shadow-glassy-jeri py-2 rounded-2xl bg-zinc-300/20">
                 <p className="text-2xl text-emerald-400">{account.nextBilling}</p>
-                <p className='text-base opacity-40'>Download</p>
+                <p className='text-base opacity-40'>Billing</p>
               </div>
 
             </div>
