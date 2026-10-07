@@ -1,5 +1,5 @@
 import type { RatingBreakdown, Metric, Feedback } from "../../types/evaluation";
-
+ 
 const ratingBreakdown: RatingBreakdown[] = [
   { stars: 5, count: 14 },
   { stars: 4, count: 3 },
@@ -23,7 +23,7 @@ const feedback: Feedback[] = [
   { name: "Jepoy", date: "Sep 12", stars: 4, quote: "Resolved the issue but took longer than expected." },
 ]
  
-function Stars({ count, size = 20 }: { count: number; size?: number }) {
+function Stars({ count, size = 14 }: { count: number; size?: number }) {
   return (
     <div className="flex gap-1">
       {Array.from({ length: 5 }).map((_, i) => (
@@ -53,56 +53,56 @@ function Evaluation() {
  
   return (
     <div className="w-full px-4 pb-10 pt-2 text-left text-white lg:px-10">
-      <div className="mb-5">
-        <h1 className="text-2xl font-bold tracking-wider text-white">My Evaluation</h1>
-        <p className="font-mono text-xs italic text-white opacity-30 sm:text-sm">{today}</p>
+      <div className="mb-4">
+        <h1 className="text-xl font-bold tracking-wider text-white">My Evaluation</h1>
+        <p className="font-mono text-xs italic text-white opacity-30">{today}</p>
       </div>
  
       {/* Overall rating */}
-      <div className="flex flex-col gap-8 rounded-[20px] border border-[#7e7e7e] bg-white/20 p-8 lg:flex-row lg:items-center lg:p-12">
+      <div className="flex flex-col gap-5 rounded-[14px] border border-[#7e7e7e] bg-white/20 p-5 lg:flex-row lg:items-center lg:p-8">
         <div className="flex shrink-0 flex-col items-center gap-1 lg:items-start">
-          <span className="text-6xl font-medium text-[#fffefe] lg:text-[80px]">4.5</span>
-          <Stars count={5} size={28} />
-          <span className="text-sm uppercase tracking-[1.2px] text-white/60">overall rating</span>
+          <span className="text-4xl font-medium text-[#fffefe] lg:text-5xl">4.5</span>
+          <Stars count={5} size={18} />
+          <span className="text-xs uppercase tracking-[1px] text-white/60">overall rating</span>
         </div>
-        <div className="flex-1 space-y-3">
+        <div className="flex-1 space-y-2">
           {ratingBreakdown.map((row) => (
-            <div key={row.stars} className="flex items-center gap-3">
-              <span className="w-10 shrink-0 font-ubuntu-mono text-sm text-white/85">{row.stars} ★</span>
-              <div className="h-[15px] flex-1 overflow-hidden rounded-full bg-[#757575]">
+            <div key={row.stars} className="flex items-center gap-2">
+              <span className="w-8 shrink-0 font-ubuntu-mono text-xs text-white/85">{row.stars} ★</span>
+              <div className="h-[10px] flex-1 overflow-hidden rounded-full bg-[#757575]">
                 <div
                   className="h-full rounded-full bg-[#e1ae08]"
                   style={{ width: `${maxRatingCount ? (row.count / maxRatingCount) * 100 : 0}%` }}
                 />
               </div>
-              <span className="w-6 shrink-0 text-right text-sm text-white/60">{row.count}</span>
+              <span className="w-5 shrink-0 text-right text-xs text-white/60">{row.count}</span>
             </div>
           ))}
         </div>
       </div>
  
       {/* Performance metrics */}
-      <h2 className="mb-4 mt-6 text-2xl font-medium tracking-[1.6px] text-[#fffefe] lg:text-[32px]">
+      <h2 className="mb-3 mt-4 text-lg font-medium tracking-[1px] text-[#fffefe] lg:text-xl">
         Performance Metrics
       </h2>
-      <div className="rounded-[20px] border border-[#7e7e7e] bg-white/20">
+      <div className="rounded-[14px] border border-[#7e7e7e] bg-white/20">
         {metrics.map((m, i) => (
           <div
             key={m.label}
-            className={`flex flex-col gap-3 px-8 py-6 lg:flex-row lg:items-center lg:justify-between ${
+            className={`flex flex-col gap-2 px-5 py-4 lg:flex-row lg:items-center lg:justify-between ${
               i !== metrics.length - 1 ? "border-b border-white/10" : ""
             }`}
           >
             <div>
-              <p className="text-lg font-medium tracking-[1.2px] text-white lg:text-2xl">{m.label}</p>
-              <p className="text-sm text-white/60">{m.benchmark}</p>
+              <p className="text-sm font-medium tracking-[0.5px] text-white lg:text-base">{m.label}</p>
+              <p className="text-xs text-white/60">{m.benchmark}</p>
             </div>
-            <div className="flex items-center gap-4">
-              <span className="font-ubuntu-mono text-lg text-white lg:text-2xl">{m.value}</span>
-              <div className="h-[15px] w-[150px] overflow-hidden rounded-full bg-[#7e7e7e]">
+            <div className="flex items-center gap-3">
+              <span className="font-ubuntu-mono text-sm text-white lg:text-base">{m.value}</span>
+              <div className="h-[10px] w-[100px] overflow-hidden rounded-full bg-[#7e7e7e]">
                 <div className="h-full rounded-full bg-[#3acf98]" style={{ width: `${m.percent}%` }} />
               </div>
-              <span className="rounded-[10px] border border-[#3acf98] bg-[rgba(75,224,169,0.2)] px-3 py-1 text-xs text-[#3acf98]">
+              <span className="rounded-[8px] border border-[#3acf98] bg-[rgba(75,224,169,0.2)] px-2 py-0.5 text-[10px] text-[#3acf98]">
                 ✓ Passed
               </span>
             </div>
@@ -111,18 +111,18 @@ function Evaluation() {
       </div>
  
       {/* Customer feedback */}
-      <h2 className="mb-4 mt-8 text-2xl font-medium tracking-[1.6px] text-[#fffefe] lg:text-[32px]">
+      <h2 className="mb-3 mt-6 text-lg font-medium tracking-[1px] text-[#fffefe] lg:text-xl">
         Customer Feedback
       </h2>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         {feedback.map((f) => (
-          <div key={f.name + f.date} className="rounded-[20px] border border-[#7e7e7e] bg-white/20 p-6">
+          <div key={f.name + f.date} className="rounded-[14px] border border-[#7e7e7e] bg-white/20 p-4">
             <div className="flex items-center justify-between">
-              <span className="text-lg font-medium tracking-[1.2px] text-white">{f.name}</span>
+              <span className="text-sm font-medium tracking-[0.5px] text-white">{f.name}</span>
               <span className="text-xs text-white/60">{f.date}</span>
             </div>
-            <div className="mt-2 flex items-center justify-between gap-4">
-              <p className="italic text-white/80">"{f.quote}"</p>
+            <div className="mt-1 flex items-center justify-between gap-3">
+              <p className="text-sm italic text-white/80">"{f.quote}"</p>
               <Stars count={f.stars} />
             </div>
           </div>
