@@ -41,7 +41,17 @@ async function main() {
   const businessPlan = await prisma.plan.findUnique({ where: { name: 'Business Pro' } });
   const governmentPlan = await prisma.plan.findUnique({ where: { name: 'Government Plus' } });
 
-  const customerData = [
+  const customerData: Array<{
+    name: string;
+    email: string;
+    type: 'RESIDENTIAL' | 'BUSINESS' | 'GOVERNMENT' | 'COMMERCIAL';
+    planId?: string | null;
+    usage: string;
+    balance: string;
+    status: 'ACTIVE' | 'INACTIVE' | 'PENDING' | 'SUSPENDED';
+    area: string;
+    since: Date;
+  }> = [
     {
       name: 'Jonathan Landoy',
       email: 'jonathan@example.com',
@@ -82,7 +92,14 @@ async function main() {
     email: 'admin@diverge.com',
   };
 
-  const technicianData = {
+  const technicianData: {
+    name: string;
+    email: string;
+    location: string;
+    phone: string;
+    status: 'ON_SITE' | 'TRAVELING' | 'AVAILABLE' | 'OFF_DUTY' | 'UNAVAILABLE';
+    rating: number;
+  } = {
     name: 'Christian Devera',
     email: 'deveratech@diverge.com',
     location: 'Rizal',
@@ -155,7 +172,97 @@ async function main() {
     });
   }
 
-  console.log('Sample plans, customers, admin, and technician created successfully.');
+  const seededCustomers = await prisma.customer.findMany({
+    include: {
+      plan: true,
+    },
+  });
+
+  const invoiceTemplates = [
+    {
+      customerEmail: 'jonathan@example.com',
+      invoiceNumber: 'INV-2026-09-001',
+      amount: 99900,
+      dueDate: new Date('2026-09-24T00:00:00.000Z'),
+      paymentMethod: 'GCASH',
+      status: 'PENDING',
+      period: 'September 2026',
+      paymentStatus: 'PENDING',
+      paymentMethodLabel: 'Gcash',
+    },
+    {
+      customerEmail: 'guiller.delaCruz@example.com',
+      invoiceNumber: 'INV-2026-09-002',
+      amount: 249900,
+      dueDate: new Date('2026-09-30T00:00:00.000Z'),
+      paymentMethod: 'GCASH',
+      status: 'PAID',
+      period: 'September 2026',
+      paymentStatus: 'PAID',
+      paymentMethodLabel: 'Gcash',
+    },
+    {
+      customerEmail: 'vanna.banana@example.com',
+      invoiceNumber: 'INV-2026-08-001',
+      amount: 499900,
+      dueDate: new Date('2026-08-30T00:00:00.000Z'),
+      paymentMethod: 'BANK_TRANSFER',
+      status: 'PAID',
+      period: 'August 2026',
+      paymentStatus: 'PAID',
+      paymentMethodLabel: 'Bank Transfer',
+    },
+  ] as const;
+
+  for (const invoiceTemplate of invoiceTemplates) {
+    const customer = seededCustomers.find((entry) => entry.email === invoiceTemplate.customerEmail);
+
+    if (!customer) continue;
+
+    const existingInvoice = await prisma.invoice.findUnique({
+      where: { invoiceNumber: invoiceTemplate.invoiceNumber },
+    });
+
+    if (!existingInvoice) {
+      const createdInvoice = await prisma.invoice.create({
+        data: {
+          customerId: customer.id,
+          planId: customer.planId ?? undefined,
+          invoiceNumber: invoiceTemplate.invoiceNumber,
+          email: customer.email,
+          contact: '+639123456789',
+          amount: invoiceTemplate.amount,
+          dueDate: invoiceTemplate.dueDate,
+          paymentMethod: invoiceTemplate.paymentMethodLabel,
+          status: invoiceTemplate.status,
+        },
+      });
+
+      const invoicePayment = await prisma.payment.findFirst({
+        where: {
+          customerId: customer.id,
+          invoiceId: createdInvoice.id,
+          period: invoiceTemplate.period,
+        },
+      });
+
+      if (!invoicePayment) {
+        await prisma.payment.create({
+          data: {
+            customerId: customer.id,
+            invoiceId: createdInvoice.id,
+            period: invoiceTemplate.period,
+            amount: invoiceTemplate.amount,
+            due: invoiceTemplate.dueDate,
+            method: invoiceTemplate.paymentMethodLabel,
+            status: invoiceTemplate.paymentStatus,
+          },
+        });
+      }
+    }
+  }
+
+  console.log('Sample plans, customers, admin, technician, invoices, and payments created successfully.');
 }
 
 main()

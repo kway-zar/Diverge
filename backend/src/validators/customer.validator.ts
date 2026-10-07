@@ -11,4 +11,9 @@ export const createCustomerSchema = z.object({
   balance: z.string().default('0'),
 });
 
+export const updateCustomerSchema = createCustomerSchema.partial().extend({
+  since: z.string().optional(),
+});
+
 export type CreateCustomerInput = z.infer<typeof createCustomerSchema>;
+export type UpdateCustomerInput = z.infer<typeof updateCustomerSchema> & { id: string };

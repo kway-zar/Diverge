@@ -2,28 +2,98 @@ import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { AlertTriangle } from "lucide-react"
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { invoices as initialInvoices } from "../../data/invoiceData";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import type { Invoice, InvoiceStatus } from "../../types/invoice";
 import BillingStatus from "../../modals/BillingStatus";
+import {
+  getStoredBillingInvoices,
+  parseCurrencyAmount,
+  persistBillingInvoices,
+} from "../../data/billingData";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
 
 function BillingPage() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [invoices, setInvoices] = useState<Invoice[]>(() => getStoredBillingInvoices());
+
+  useEffect(() => {
+    let isMounted = true;
+    const token = localStorage.getItem("diverge_token");
+
+    async function loadBillingInvoices() {
+      if (!token) {
+        setInvoices(getStoredBillingInvoices());
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/customers/billing`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Billing fetch failed: ${response.status}`);
+        }
+
+        const payload = await response.json();
+        const nextInvoices = Array.isArray(payload?.data)
+          ? payload.data.map((invoice: any) => ({
+              invoiceID: invoice.invoiceID,
+              account: invoice.account,
+              email: invoice.email,
+              contact: invoice.contact,
+              plan: invoice.plan,
+              amount: invoice.amount,
+              dueDate: invoice.dueDate,
+              paymentMethod: invoice.paymentMethod ?? "-",
+              status: invoice.status === "Paid" ? "Paid" : invoice.status === "Overdue" ? "Overdue" : "Pending",
+            }))
+          : getStoredBillingInvoices();
+
+        if (isMounted) {
+          setInvoices(nextInvoices);
+          persistBillingInvoices(nextInvoices);
+        }
+      } catch {
+        if (isMounted) {
+          setInvoices(getStoredBillingInvoices());
+        }
+      }
+    }
+
+    void loadBillingInvoices();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleRowClick = (invoice: Invoice) => {
     setSelectedInvoice(invoice)
     setIsModalOpen(true)
   }
-  const stats = [
-    { title: "Collected Weekly", amount: "₱305, 000", border: "58, 207, 152" },
-    { title: "Pending Invoices", amount: "₱180, 200", border: "34, 100, 231" },
-    { title: "Overdue Payments", amount: "₱60, 900", border: "255, 24, 28" },
-    { title: "Refunds Issued", amount: "₱9, 102", border: "255, 216, 24" },
-  ]
 
-const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
+  const formatCurrency = (value: number) => `₱${value.toLocaleString("en-PH")}`;
+
+  const totalPaid = invoices
+    .filter((invoice) => invoice.status === "Paid")
+    .reduce((sum, invoice) => sum + parseCurrencyAmount(invoice.amount), 0);
+  const totalPending = invoices
+    .filter((invoice) => invoice.status === "Pending")
+    .reduce((sum, invoice) => sum + parseCurrencyAmount(invoice.amount), 0);
+  const totalOverdue = invoices
+    .filter((invoice) => invoice.status === "Overdue")
+    .reduce((sum, invoice) => sum + parseCurrencyAmount(invoice.amount), 0);
+
+  const stats = [
+    { title: "Collected Weekly", amount: formatCurrency(totalPaid), border: "58, 207, 152" },
+    { title: "Pending Invoices", amount: formatCurrency(totalPending), border: "34, 100, 231" },
+    { title: "Overdue Payments", amount: formatCurrency(totalOverdue), border: "255, 24, 28" },
+    { title: "Refunds Issued", amount: "₱9, 102", border: "255, 216, 24" },
+  ];
 
   function getStatusBadge(status: Invoice["status"]) {
     switch (status) {
@@ -36,19 +106,78 @@ const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
     }
   }
 
-  const handleStatusChange = (
-    invoiceID: string,
-    newStatus: InvoiceStatus
-    ) => {
-    setInvoices((prevInvoices) =>
-    prevInvoices.map((invoice) =>
-      invoice.invoiceID === invoiceID
-        ? { ...invoice, status: newStatus }
-        : invoice
-    )
-  );
-};
+  const handleStatusChange = async (invoiceID: string, newStatus: InvoiceStatus) => {
+    const token = localStorage.getItem("diverge_token");
 
+    setInvoices((prevInvoices) => {
+      const updatedInvoices = prevInvoices.map((invoice) =>
+        invoice.invoiceID === invoiceID ? { ...invoice, status: newStatus } : invoice
+      );
+
+      persistBillingInvoices(updatedInvoices);
+      return updatedInvoices;
+    });
+
+    if (!token) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/customers/billing/${invoiceID}/status`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        throw new Error();
+      }
+
+      const payload = await response.json();
+      const updatedInvoice = payload?.data;
+
+      if (updatedInvoice) {
+        setInvoices((prevInvoices) => {
+          const updatedInvoices = prevInvoices.map((invoice) =>
+            invoice.invoiceID === updatedInvoice.invoiceID ? {
+              ...invoice,
+              status: updatedInvoice.status,
+              paymentMethod: updatedInvoice.paymentMethod ?? invoice.paymentMethod,
+              amount: updatedInvoice.amount ?? invoice.amount,
+            } : invoice,
+          );
+
+          persistBillingInvoices(updatedInvoices);
+          return updatedInvoices;
+        });
+      }
+    } catch {
+      // keep local fallback state for offline or permission issues
+    }
+  };
+
+  const handleGenerateInvoice = () => {
+    const generatedInvoice: Invoice = {
+      invoiceID: `INV-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${String(invoices.length + 1).padStart(3, "0")}`,
+      account: "New Diverge Customer",
+      email: "new.customer@example.com",
+      contact: "+63 955 123 4567",
+      plan: "Diverge Netflix",
+      amount: "₱1,499",
+      dueDate: "Oct 15, 2026",
+      paymentMethod: "-",
+      status: "Pending",
+    };
+
+    setInvoices((prevInvoices) => {
+      const updatedInvoices = [generatedInvoice, ...prevInvoices];
+      persistBillingInvoices(updatedInvoices);
+      return updatedInvoices;
+    });
+  };
 
   return (
     <div className="w-full pr-10 mb-20 ">
@@ -63,6 +192,7 @@ const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
         </div>
 
         <Button 
+          onClick={handleGenerateInvoice}
           className="shrink-0 w-[200px] h-[44px] bg-[#3ACF98]/25 rounded-[12px] text-[18px] font-normal tracking-wide text-white cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#3ACF98]/35">
           Generate Invoice
         </Button>

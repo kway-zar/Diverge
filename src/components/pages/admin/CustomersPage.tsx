@@ -5,49 +5,49 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/
 import type { Customer } from "../../types/customer";
 import CustomerOverlay from "../../modals/customerOverlay";
 
-const fallbackCustomers: Customer[] = [
+const seededCustomers: Customer[] = [
   {
-    accountID: "000001",
+    accountID: "ACC-SEED-001",
     name: "Jonathan Landoy",
     email: "jonathan@example.com",
     type: "Residential",
-    plan: "Standard",
+    plan: "Fiber 200",
     usage: "5000 MB",
-    balance: "₱1,000.00",
+    balance: "1000",
     status: "Active",
     area: "Rizal",
-    since: "2023-01-15"
+    since: "2023-01-15T00:00:00.000Z",
   },
   {
-    accountID: "000002",
-    name: "Guiller Santos",
-    email: "guiller.santos@example.com",
+    accountID: "ACC-SEED-002",
+    name: "Guiller DelaCruz",
+    email: "guiller.delaCruz@example.com",
     type: "Commercial",
-    plan: "Premium",
+    plan: "Business Pro",
     usage: "10000 MB",
-    balance: "₱2,500.00",
+    balance: "2500",
     status: "Pending",
     area: "Manila",
-    since: "2023-03-20"
+    since: "2023-03-20T00:00:00.000Z",
   },
   {
-    accountID: "000003",
-    name: "Vanna Mae",
-    email: "vanna.mae@example.com",
+    accountID: "ACC-SEED-003",
+    name: "Vanna Banana",
+    email: "vanna.banana@example.com",
     type: "Government",
-    plan: "Standard",
+    plan: "Government Plus",
     usage: "5000 MB",
-    balance: "₱1,000.00",
+    balance: "1000",
     status: "Suspended",
     area: "Cebu",
-    since: "2023-01-15"
+    since: "2023-01-15T00:00:00.000Z",
   },
 ];
 
 export function CustomersPage() {
 
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-    const [customers, setCustomers] = useState<Customer[]>(fallbackCustomers);
+    const [customers, setCustomers] = useState<Customer[]>(seededCustomers);
     const [searchTerm, setSearchTerm] = useState("");
     const [activeStatus, setActiveStatus] = useState<"All" | Customer["status"]>("All");
 
@@ -73,14 +73,14 @@ export function CustomersPage() {
           if (!response.ok) throw new Error(`Request failed: ${response.status}`);
 
           const payload = await response.json();
-          const nextCustomers = Array.isArray(payload?.data) ? payload.data : fallbackCustomers;
+          const nextCustomers = Array.isArray(payload?.data) ? payload.data : seededCustomers;
 
           if (isMounted) {
             setCustomers(nextCustomers);
           }
         } catch {
           if (isMounted) {
-            setCustomers(fallbackCustomers);
+            setCustomers(seededCustomers);
           }
         }
       }

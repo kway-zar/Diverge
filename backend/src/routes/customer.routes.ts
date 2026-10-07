@@ -3,7 +3,11 @@ import { Router } from 'express';
 import {
   createCustomerController,
   getCustomer,
+  getCustomerBilling,
+  listBillingInvoices,
   listCustomers,
+  updateBillingStatus,
+  updateCustomerController,
 } from '../controllers/customer.controller.js';
 import { requireAuth, requireRole } from '../middleware/authMiddleware.js';
 import { prisma } from '../db/prisma.js';
@@ -33,6 +37,11 @@ customerRouter.get('/me', requireAuth, requireRole(['CUSTOMER']), async (req, re
   }
 });
 
+customerRouter.get('/me/billing', requireAuth, requireRole(['CUSTOMER']), getCustomerBilling);
+customerRouter.get('/billing', requireAuth, requireRole(['ADMIN']), listBillingInvoices);
+customerRouter.patch('/billing/:invoiceId/status', requireAuth, requireRole(['ADMIN']), updateBillingStatus);
+
 customerRouter.get('/', listCustomers);
 customerRouter.get('/:id', getCustomer);
 customerRouter.post('/', createCustomerController);
+customerRouter.put('/:id', updateCustomerController);

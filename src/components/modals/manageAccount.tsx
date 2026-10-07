@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,19 +16,79 @@ import type { Customer } from "../types/customer";
 function ManageAccount({
   customer,
   onClose,
+  onSave,
 }: {
   customer: Customer;
   onClose: () => void;
+  onSave: (updatedCustomer: Customer) => void;
 }) {
-  const type = [
-    { value: "Residential", label: "Residential" },
-    { value: "Commercial", label: "Commercial" },
-  ];
+  const typeOptions = ["Residential", "Commercial", "Government", "Business"];
+  const statusOptions = ["Active", "Pending", "Suspended", "Inactive"];
+  const planOptions = useMemo<string[]>(
+    () =>
+      Array.from(
+        new Set(
+          [customer.plan, "Diverge Netflix", "Fiber 50 MBps", "Business Pro", "Premium"].filter(
+            (plan): plan is string => Boolean(plan),
+          ),
+        ),
+      ),
+    [customer.plan],
+  );
 
-  const plan = [
-    { value: "Diverge Netflix", label: "Diverge" },
-    { value: "Fiber 50 MBps", label: "Fiber 50 MBps" },
-  ];
+  const [formData, setFormData] = useState({
+    email: customer.email,
+    type: customer.type,
+    plan: customer.plan,
+    balance: customer.balance,
+    usage: customer.usage,
+    status: customer.status,
+    area: customer.area,
+    since: customer.since,
+  });
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (!customer.id) {
+      onClose();
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const response = await fetch(`http://localhost:4001/api/customers/${customer.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          name: customer.name,
+          since: formData.since || customer.since,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || "Unable to save customer changes.");
+      }
+
+      const payload = await response.json();
+      const updatedCustomer = {
+        ...customer,
+        ...formData,
+        ...payload.data,
+      } as Customer;
+
+      onSave(updatedCustomer);
+    } catch (error) {
+      console.error("Failed to save customer changes:", error);
+      alert(error instanceof Error ? error.message : "Unable to save customer changes.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -64,7 +125,8 @@ function ManageAccount({
                 </span>
                 <Input
                   type="text"
-                  defaultValue={customer.email}
+                  value={formData.email}
+                  onChange={(event) => setFormData((prev) => ({ ...prev, email: event.target.value }))}
                   className="bg-[#D9D9D9]/20 shadow-[inset_0_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] border-0 italic focus-visible:ring-0 h-12 text-[18px] text-white"
                 />
               </div>
@@ -73,15 +135,23 @@ function ManageAccount({
                 <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]">
                   TYPE
                 </span>
-                <Select defaultValue="Residential">
+                <Select
+                  value={formData.type}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      type: (value ?? prev.type) as Customer["type"],
+                    }))
+                  }
+                >
                   <SelectTrigger id="form-type" className="w-full bg-[#D9D9D9]/20 shadow-[inset_0_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] border-0 italic focus-visible:ring-0 h-12 text-[18px] text-white">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1a1a1a] shadow-glassy rounded-[10px] border border-white/10 ring-0 text-white">
                     <SelectGroup>
-                      {type.map((item) => (
-                        <SelectItem key={item.value} value={item.value} className="text-white focus:bg-white/10 focus:text-white">
-                          {item.label}
+                      {typeOptions.map((value) => (
+                        <SelectItem key={value} value={value} className="text-white focus:bg-white/10 focus:text-white">
+                          {value}
                         </SelectItem>
                       ))}
                     </SelectGroup>
@@ -93,15 +163,23 @@ function ManageAccount({
                 <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]">
                   PLAN
                 </span>
-                <Select defaultValue="Diverge Netflix">
+                <Select
+                  value={formData.plan}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      plan: value ?? prev.plan,
+                    }))
+                  }
+                >
                   <SelectTrigger id="form-plan" className="w-full bg-[#D9D9D9]/20 shadow-[inset_0_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] border-0 italic focus-visible:ring-0 h-12 text-[18px] text-white">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1a1a1a] shadow-glassy rounded-[10px] border border-white/10 ring-0 text-white">
                     <SelectGroup>
-                      {plan.map((item) => (
-                        <SelectItem key={item.value} value={item.value} className="text-white focus:bg-white/10 focus:text-white">
-                          {item.label}
+                      {planOptions.map((plan) => (
+                        <SelectItem key={plan} value={plan} className="text-white focus:bg-white/10 focus:text-white">
+                          {plan}
                         </SelectItem>
                       ))}
                     </SelectGroup>
@@ -115,7 +193,8 @@ function ManageAccount({
                 </span>
                 <Input
                   type="text"
-                  defaultValue={customer.balance}
+                  value={formData.balance}
+                  onChange={(event) => setFormData((prev) => ({ ...prev, balance: event.target.value }))}
                   className="bg-[#D9D9D9]/20 shadow-[inset_0_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] border-0 italic focus-visible:ring-0 h-12 text-[18px] text-white"
                 />
               </div>
@@ -128,7 +207,8 @@ function ManageAccount({
                 </span>
                 <Input
                   type="text"
-                  defaultValue={customer.usage}
+                  value={formData.usage}
+                  onChange={(event) => setFormData((prev) => ({ ...prev, usage: event.target.value }))}
                   className="bg-[#D9D9D9]/20 shadow-[inset_0_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] border-0 italic focus-visible:ring-0 h-12 text-[18px] text-white"
                 />
               </div>
@@ -137,11 +217,28 @@ function ManageAccount({
                 <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]">
                   STATUS
                 </span>
-                <Input
-                  type="text"
-                  defaultValue={customer.status}
-                  className="bg-[#D9D9D9]/20 shadow-[inset_0_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] border-0 italic focus-visible:ring-0 h-12 text-[18px] text-white"
-                />
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      status: (value ?? prev.status) as Customer["status"],
+                    }))
+                  }
+                >
+                  <SelectTrigger className="w-full bg-[#D9D9D9]/20 shadow-[inset_0_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] border-0 italic focus-visible:ring-0 h-12 text-[18px] text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#1a1a1a] shadow-glassy rounded-[10px] border border-white/10 ring-0 text-white">
+                    <SelectGroup>
+                      {statusOptions.map((value) => (
+                        <SelectItem key={value} value={value} className="text-white focus:bg-white/10 focus:text-white">
+                          {value}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="flex flex-col gap-1">
@@ -150,7 +247,8 @@ function ManageAccount({
                 </span>
                 <Input
                   type="text"
-                  defaultValue={customer.area}
+                  value={formData.area}
+                  onChange={(event) => setFormData((prev) => ({ ...prev, area: event.target.value }))}
                   className="bg-[#D9D9D9]/20 shadow-[inset_0_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] border-0 italic focus-visible:ring-0 h-12 text-[18px] text-white"
                 />
               </div>
@@ -161,7 +259,8 @@ function ManageAccount({
                 </span>
                 <Input
                   type="text"
-                  defaultValue={customer.since}
+                  value={formData.since}
+                  onChange={(event) => setFormData((prev) => ({ ...prev, since: event.target.value }))}
                   className="bg-[#D9D9D9]/20 shadow-[inset_0_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] border-0 italic focus-visible:ring-0 h-12 text-[18px] text-white"
                 />
               </div>
@@ -177,9 +276,11 @@ function ManageAccount({
             </Button>
             <Button
               type="button"
-              className="w-[399px] h-[71px] bg-[#3ACF98]/20 rounded-[30px] text-[32px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#3ACF98]/35"
+              onClick={handleSave}
+              disabled={isSaving}
+              className="w-[399px] h-[71px] bg-[#3ACF98]/20 rounded-[30px] text-[32px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#3ACF98]/35 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Save Changes
+              {isSaving ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </div>
