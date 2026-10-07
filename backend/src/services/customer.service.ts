@@ -156,32 +156,62 @@ function serializeCustomerRecord(data: {
   };
 }
 
-function toUiInvoiceStatus(status: string): BillingInvoiceRecord['status'] {
-  switch (status) {
-    case 'PAID':
-      return 'Paid';
-    case 'OVERDUE':
-      return 'Overdue';
-    default:
-      return 'Pending';
-  }
+function isPastDueDate(dueDate: Date): boolean {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const due = new Date(dueDate);
+  due.setHours(0, 0, 0, 0);
+
+  return due < today;
 }
 
-function toUiPaymentMethod(method?: string | null): BillingInvoiceRecord['paymentMethod'] {
-  switch (method?.toUpperCase()) {
-    case 'GCASH':
-      return 'Gcash';
-    case 'BANK_TRANSFER':
-      return 'Bank Transfer';
-    case 'MAYA':
-      return 'Maya';
-    default:
-      return '-';
+function toUiInvoiceStatus(status: string, dueDate: Date): BillingInvoiceRecord['status'] {
+  if (status === 'PAID') {
+    return 'Paid';
   }
+
+  if (isPastDueDate(dueDate)) {
+    return 'Overdue';
+  }
+
+  return 'Pending';
+}
+
+function toUiPaymentMethod(method?: string | null, status?: string): BillingInvoiceRecord['paymentMethod'] {
+  const normalized = method?.trim();
+
+  if (normalized) {
+    switch (normalized.toUpperCase()) {
+      case 'GCASH':
+        return 'Gcash';
+      case 'BANK_TRANSFER':
+        return 'Bank Transfer';
+      case 'MAYA':
+        return 'Maya';
+      default:
+        break;
+    }
+  }
+
+  if (status === 'PAID') {
+    return 'Gcash';
+  }
+
+  return '-';
 }
 
 function formatInvoiceAmount(amount: number): string {
   return `₱${(amount / 100).toLocaleString('en-PH')}`;
+}
+
+function buildInvoiceLookup(invoiceKey: string) {
+  const trimmedKey = invoiceKey.trim();
+  const isMongoId = /^[0-9a-fA-F]{24}$/.test(trimmedKey);
+
+  return isMongoId
+    ? { id: trimmedKey }
+    : { invoiceNumber: trimmedKey };
 }
 
 function serializeInvoiceRecord(data: {
@@ -206,8 +236,8 @@ function serializeInvoiceRecord(data: {
     plan: data.plan?.name ?? 'Unassigned',
     amount: formatInvoiceAmount(data.amount),
     dueDate: new Date(data.dueDate).toISOString().slice(0, 10),
-    paymentMethod: toUiPaymentMethod(data.paymentMethod),
-    status: toUiInvoiceStatus(data.status),
+    paymentMethod: toUiPaymentMethod(data.paymentMethod, data.status),
+    status: toUiInvoiceStatus(data.status, data.dueDate),
   };
 }
 
@@ -306,16 +336,24 @@ export async function getCustomerBillingByCustomerId(customerId: string): Promis
   }));
 }
 
-export async function updateInvoiceStatus(
+export async function payCustomerInvoice(
+  userId: string,
   invoiceKey: string,
-  status: 'Paid' | 'Pending' | 'Overdue',
-): Promise<BillingInvoiceRecord> {
-  const prismaStatus = status === 'Paid' ? 'PAID' : status === 'Overdue' ? 'OVERDUE' : 'PENDING';
-  const paymentStatus = status === 'Paid' ? 'PAID' : 'PENDING';
+  paymentMethod: string = '-',
+): Promise<{ currentInvoice: BillingInvoiceRecord; nextInvoice: BillingInvoiceRecord }> {
+  const customer = await prisma.customer.findFirst({
+    where: { userId },
+    include: { plan: true },
+  });
+
+  if (!customer) {
+    throw new Error('Customer not found');
+  }
 
   const existingInvoice = await prisma.invoice.findFirst({
     where: {
-      OR: [{ id: invoiceKey }, { invoiceNumber: invoiceKey }],
+      customerId: customer.id,
+      ...buildInvoiceLookup(invoiceKey),
     },
     include: {
       customer: true,
@@ -327,10 +365,126 @@ export async function updateInvoiceStatus(
     throw new Error('Invoice not found');
   }
 
+  const selectedMethod = paymentMethod && paymentMethod !== '-' ? paymentMethod : existingInvoice.paymentMethod || 'GCASH';
+
+  const paidInvoice = await prisma.invoice.update({
+    where: { id: existingInvoice.id },
+    data: {
+      status: 'PAID',
+      paymentMethod: selectedMethod,
+    },
+    include: {
+      customer: true,
+      plan: true,
+    },
+  });
+
+  await prisma.payment.updateMany({
+    where: { invoiceId: existingInvoice.id },
+    data: {
+      status: 'PAID',
+      method: selectedMethod,
+    },
+  });
+
+  const nextDueDate = new Date(existingInvoice.dueDate);
+  nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+  const nextInvoiceNumber = `INV-${nextDueDate.getFullYear()}-${String(nextDueDate.getMonth() + 1).padStart(2, '0')}-${String(Date.now() % 10000).padStart(4, '0')}`;
+
+  const nextInvoice = await prisma.invoice.create({
+    data: {
+      customerId: customer.id,
+      planId: existingInvoice.planId ?? customer.planId ?? undefined,
+      invoiceNumber: nextInvoiceNumber,
+      email: customer.email,
+      contact: existingInvoice.contact,
+      amount: existingInvoice.amount,
+      dueDate: nextDueDate,
+      paymentMethod: '-',
+      status: 'PENDING',
+    },
+    include: {
+      customer: true,
+      plan: true,
+    },
+  });
+
+  await prisma.payment.create({
+    data: {
+      customerId: customer.id,
+      invoiceId: nextInvoice.id,
+      period: nextDueDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+      amount: nextInvoice.amount,
+      due: nextDueDate,
+      method: '-',
+      status: 'PENDING',
+    },
+  });
+
+  return {
+    currentInvoice: serializeInvoiceRecord({
+      id: paidInvoice.id,
+      customerId: paidInvoice.customerId,
+      invoiceNumber: paidInvoice.invoiceNumber,
+      customer: {
+        name: paidInvoice.customer.name,
+        email: paidInvoice.customer.email,
+        accountId: paidInvoice.customer.accountId,
+      },
+      plan: paidInvoice.plan,
+      contact: paidInvoice.contact,
+      amount: paidInvoice.amount,
+      dueDate: paidInvoice.dueDate,
+      paymentMethod: paidInvoice.paymentMethod,
+      status: paidInvoice.status,
+    }),
+    nextInvoice: serializeInvoiceRecord({
+      id: nextInvoice.id,
+      customerId: nextInvoice.customerId,
+      invoiceNumber: nextInvoice.invoiceNumber,
+      customer: {
+        name: nextInvoice.customer.name,
+        email: nextInvoice.customer.email,
+        accountId: nextInvoice.customer.accountId,
+      },
+      plan: nextInvoice.plan,
+      contact: nextInvoice.contact,
+      amount: nextInvoice.amount,
+      dueDate: nextInvoice.dueDate,
+      paymentMethod: nextInvoice.paymentMethod,
+      status: nextInvoice.status,
+    }),
+  };
+}
+
+export async function updateInvoiceStatus(
+  invoiceKey: string,
+  status: 'Paid' | 'Pending' | 'Overdue',
+): Promise<BillingInvoiceRecord> {
+  const prismaStatus = status === 'Paid' ? 'PAID' : status === 'Overdue' ? 'OVERDUE' : 'PENDING';
+  const paymentStatus = status === 'Paid' ? 'PAID' : 'PENDING';
+
+  const existingInvoice = await prisma.invoice.findFirst({
+    where: buildInvoiceLookup(invoiceKey),
+    include: {
+      customer: true,
+      plan: true,
+    },
+  });
+
+  if (!existingInvoice) {
+    throw new Error('Invoice not found');
+  }
+
+  const nextPaymentMethod = status === 'Paid'
+    ? (existingInvoice.paymentMethod && existingInvoice.paymentMethod !== '-' ? existingInvoice.paymentMethod : 'GCASH')
+    : '-';
+
   const invoice = await prisma.invoice.update({
     where: { id: existingInvoice.id },
     data: {
       status: prismaStatus,
+      paymentMethod: nextPaymentMethod,
     },
     include: {
       customer: true,
@@ -342,6 +496,7 @@ export async function updateInvoiceStatus(
     where: { invoiceId: invoice.id },
     data: {
       status: paymentStatus,
+      method: nextPaymentMethod,
     },
   });
 

@@ -6,6 +6,7 @@ import {
   buildPaymentHistory,
   getStoredCustomerBillingInvoices,
   persistCustomerBillingInvoices,
+  resolveInvoiceStatus,
 } from "../../data/billingData"
 import { useEffect, useMemo, useState } from "react"
 import type { Invoice } from "../../types/invoice"
@@ -32,6 +33,35 @@ function getCurrentCustomerEmail() {
   } catch {
     return ""
   }
+}
+
+function buildNextMonthlyInvoice(baseInvoice: Invoice): Invoice {
+  const nextDueDate = new Date(baseInvoice.dueDate)
+  nextDueDate.setMonth(nextDueDate.getMonth() + 1)
+
+  const month = String(nextDueDate.getMonth() + 1).padStart(2, "0")
+  const day = String(nextDueDate.getDate()).padStart(2, "0")
+
+  return {
+    invoiceID: `INV-${nextDueDate.getFullYear()}-${month}-${day}`,
+    account: baseInvoice.account,
+    email: baseInvoice.email,
+    contact: baseInvoice.contact,
+    plan: baseInvoice.plan,
+    amount: baseInvoice.amount,
+    dueDate: nextDueDate.toISOString().slice(0, 10),
+    paymentMethod: "-",
+    status: "Pending",
+  }
+}
+
+function announceBillingRefresh() {
+  if (typeof window === "undefined") {
+    return
+  }
+
+  window.localStorage.setItem("diverge-billing-refresh", String(Date.now()))
+  window.dispatchEvent(new Event("billing-updated"))
 }
 
 function Billing() {
@@ -64,17 +94,21 @@ function Billing() {
         const nextInvoices = Array.isArray(payload?.data)
           ? payload.data
               .filter((invoice: any) => !email || (invoice.email ?? "").toLowerCase() === email.toLowerCase())
-              .map((invoice: any) => ({
-                invoiceID: invoice.invoiceID,
-                account: invoice.account,
-                email: invoice.email,
-                contact: invoice.contact,
-                plan: invoice.plan,
-                amount: invoice.amount,
-                dueDate: invoice.dueDate,
-                paymentMethod: invoice.paymentMethod ?? "-",
-                status: invoice.status === "Paid" ? "Paid" : invoice.status === "Overdue" ? "Overdue" : "Pending",
-              }))
+              .map((invoice: any) => {
+                const rawStatus = invoice.status === "Paid" ? "Paid" : invoice.status === "Overdue" ? "Overdue" : "Pending";
+
+                return {
+                  invoiceID: invoice.invoiceID,
+                  account: invoice.account,
+                  email: invoice.email,
+                  contact: invoice.contact,
+                  plan: invoice.plan,
+                  amount: invoice.amount,
+                  dueDate: invoice.dueDate,
+                  paymentMethod: invoice.paymentMethod ?? "-",
+                  status: resolveInvoiceStatus(rawStatus, invoice.dueDate),
+                };
+              })
           : getStoredCustomerBillingInvoices(email)
 
         if (isMounted) {
@@ -146,10 +180,72 @@ function Billing() {
             </dl>
             <PayNowModal
               accountNumber={currentBill.invoiceID}
+              invoiceId={currentBill.invoiceID}
               billingPeriod={new Date(currentBill.dueDate).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
               dueDate={currentBill.dueDate}
               amount={`${currentBill.amount}.00`}
               planName={currentBill.plan}
+              onPaymentSuccess={async ({ invoiceId, method }) => {
+                const token = localStorage.getItem("diverge_token")
+
+                const nextInvoices: Invoice[] = invoices.map((invoice): Invoice =>
+                  invoice.invoiceID === invoiceId
+                    ? { ...invoice, status: "Paid", paymentMethod: method }
+                    : invoice,
+                )
+
+                setInvoices(nextInvoices)
+                persistCustomerBillingInvoices(nextInvoices)
+
+                if (!token || !invoiceId) {
+                  const created = buildNextMonthlyInvoice(currentBill)
+                  const generated: Invoice[] = [...nextInvoices, created]
+                  setInvoices(generated)
+                  persistCustomerBillingInvoices(generated)
+                  announceBillingRefresh()
+                  return
+                }
+
+                try {
+                  const response = await fetch(`${API_BASE_URL}/api/customers/me/billing/pay`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ invoiceId, paymentMethod: method }),
+                  })
+
+                  if (!response.ok) {
+                    throw new Error("Unable to process payment")
+                  }
+
+                  const payload = await response.json()
+                  const refreshed: Invoice[] = Array.isArray(payload?.data)
+                    ? payload.data.map((invoice: any) => ({
+                        invoiceID: invoice.invoiceID,
+                        account: invoice.account,
+                        email: invoice.email,
+                        contact: invoice.contact,
+                        plan: invoice.plan,
+                        amount: invoice.amount,
+                        dueDate: invoice.dueDate,
+                        paymentMethod: invoice.paymentMethod ?? "-",
+                        status: resolveInvoiceStatus(invoice.status === "Paid" ? "Paid" : invoice.status === "Overdue" ? "Overdue" : "Pending", invoice.dueDate),
+                      }))
+                    : nextInvoices
+
+                  setInvoices(refreshed)
+                  persistCustomerBillingInvoices(refreshed)
+                  announceBillingRefresh()
+                } catch {
+                  const created = buildNextMonthlyInvoice(currentBill)
+                  const generatedInvoices: Invoice[] = [...nextInvoices, created]
+                  setInvoices(generatedInvoices)
+                  persistCustomerBillingInvoices(generatedInvoices)
+                  announceBillingRefresh()
+                }
+              }}
             />
           </CardContent>
         </Card>

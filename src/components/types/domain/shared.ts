@@ -16,9 +16,9 @@ export type TicketStatus = "In Progress" | "Open" | "Pending" | "Resolved";
 export type JobPriority = "High" | "Critical";
 export type JobStatus = "Assigned" | "En Route" | "On-Site";
 
-export type PaymentMethod = "Gcash" | "GCash" | "Bank Transfer" | "Maya" | "-";
+export type PaymentMethod = "Gcash" | "GCash" | "Bank Transfer" | "Maya" | "Visa / Mastercard" | "-";
 export type InvoiceStatus = "Paid" | "Pending" | "Overdue";
-export type PaymentStatus = "Paid" | "Pending";
+export type PaymentStatus = "Paid" | "Pending" | "Overdue";
 
 export type UpgradeRequestStatus = "Approved" | "Pending" | "On Hold";
 export type AnomalyStatus = "CRITICAL" | "MODERATE" | "LOW";

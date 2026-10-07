@@ -6,6 +6,7 @@ import {
   getAllCustomers,
   getCustomerBillingByUserId,
   getCustomerById,
+  payCustomerInvoice,
   updateCustomer,
   updateInvoiceStatus,
 } from '../services/customer.service.js';

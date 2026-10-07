@@ -51,6 +51,24 @@ export const initialBillingInvoices: Invoice[] = [
   },
 ];
 
+function isPastDueDate(dueDate: string | Date): boolean {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const due = new Date(dueDate);
+  due.setHours(0, 0, 0, 0);
+
+  return Number.isFinite(due.getTime()) && due < today;
+}
+
+export function resolveInvoiceStatus(status: Invoice["status"], dueDate: string | Date): Invoice["status"] {
+  if (status === "Paid") {
+    return "Paid";
+  }
+
+  return isPastDueDate(dueDate) ? "Overdue" : "Pending";
+}
+
 export function getStoredBillingInvoices(): Invoice[] {
   if (typeof window === "undefined") {
     return initialBillingInvoices;
@@ -154,7 +172,7 @@ export function buildPaymentHistory(invoices: Invoice[]): CustomerPayment[] {
       amount: invoice.amount,
       due: invoice.dueDate,
       method: invoice.paymentMethod,
-      status: invoice.status === "Paid" ? "Paid" : "Pending",
+      status: invoice.status === "Paid" ? "Paid" : invoice.status === "Overdue" ? "Overdue" : "Pending",
     };
   });
 }

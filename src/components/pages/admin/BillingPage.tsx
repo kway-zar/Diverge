@@ -9,6 +9,7 @@ import {
   getStoredBillingInvoices,
   parseCurrencyAmount,
   persistBillingInvoices,
+  resolveInvoiceStatus,
 } from "../../data/billingData";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
@@ -18,30 +19,31 @@ function BillingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [invoices, setInvoices] = useState<Invoice[]>(() => getStoredBillingInvoices());
 
-  useEffect(() => {
-    let isMounted = true;
+  const loadBillingInvoices = async () => {
     const token = localStorage.getItem("diverge_token");
 
-    async function loadBillingInvoices() {
-      if (!token) {
-        setInvoices(getStoredBillingInvoices());
-        return;
+    if (!token) {
+      setInvoices(getStoredBillingInvoices());
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/customers/billing`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Billing fetch failed: ${response.status}`);
       }
 
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/customers/billing`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+      const payload = await response.json();
+      const nextInvoices = Array.isArray(payload?.data)
+        ? payload.data.map((invoice: any) => {
+            const rawStatus = invoice.status === "Paid" ? "Paid" : invoice.status === "Overdue" ? "Overdue" : "Pending";
 
-        if (!response.ok) {
-          throw new Error(`Billing fetch failed: ${response.status}`);
-        }
-
-        const payload = await response.json();
-        const nextInvoices = Array.isArray(payload?.data)
-          ? payload.data.map((invoice: any) => ({
+            return {
               invoiceID: invoice.invoiceID,
               account: invoice.account,
               email: invoice.email,
@@ -50,24 +52,44 @@ function BillingPage() {
               amount: invoice.amount,
               dueDate: invoice.dueDate,
               paymentMethod: invoice.paymentMethod ?? "-",
-              status: invoice.status === "Paid" ? "Paid" : invoice.status === "Overdue" ? "Overdue" : "Pending",
-            }))
-          : getStoredBillingInvoices();
+              status: resolveInvoiceStatus(rawStatus, invoice.dueDate),
+            };
+          })
+        : getStoredBillingInvoices();
 
-        if (isMounted) {
-          setInvoices(nextInvoices);
-          persistBillingInvoices(nextInvoices);
-        }
-      } catch {
-        if (isMounted) {
-          setInvoices(getStoredBillingInvoices());
-        }
-      }
+      setInvoices(nextInvoices);
+      persistBillingInvoices(nextInvoices);
+    } catch {
+      setInvoices(getStoredBillingInvoices());
     }
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const handleBillingRefresh = () => {
+      if (isMounted) {
+        void loadBillingInvoices();
+      }
+    };
+
+    const handleStorageRefresh = (event: StorageEvent) => {
+      if (event.key === "diverge-billing-refresh") {
+        handleBillingRefresh();
+      }
+    };
 
     void loadBillingInvoices();
+    const refreshTimer = window.setInterval(handleBillingRefresh, 8000);
+
+    window.addEventListener("billing-updated", handleBillingRefresh);
+    window.addEventListener("storage", handleStorageRefresh);
+
     return () => {
       isMounted = false;
+      window.clearInterval(refreshTimer);
+      window.removeEventListener("billing-updated", handleBillingRefresh);
+      window.removeEventListener("storage", handleStorageRefresh);
     };
   }, []);
 
@@ -111,7 +133,13 @@ function BillingPage() {
 
     setInvoices((prevInvoices) => {
       const updatedInvoices = prevInvoices.map((invoice) =>
-        invoice.invoiceID === invoiceID ? { ...invoice, status: newStatus } : invoice
+        invoice.invoiceID === invoiceID
+          ? {
+              ...invoice,
+              status: newStatus,
+              paymentMethod: newStatus === "Overdue" ? "-" : invoice.paymentMethod,
+            }
+          : invoice
       );
 
       persistBillingInvoices(updatedInvoices);
@@ -145,7 +173,7 @@ function BillingPage() {
             invoice.invoiceID === updatedInvoice.invoiceID ? {
               ...invoice,
               status: updatedInvoice.status,
-              paymentMethod: updatedInvoice.paymentMethod ?? invoice.paymentMethod,
+              paymentMethod: updatedInvoice.status === "Overdue" ? "-" : updatedInvoice.paymentMethod ?? invoice.paymentMethod,
               amount: updatedInvoice.amount ?? invoice.amount,
             } : invoice,
           );
@@ -160,14 +188,18 @@ function BillingPage() {
   };
 
   const handleGenerateInvoice = () => {
+    const baseDate = invoices[0]?.dueDate ? new Date(invoices[0].dueDate) : new Date();
+    const nextDueDate = new Date(baseDate);
+    nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+
     const generatedInvoice: Invoice = {
-      invoiceID: `INV-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${String(invoices.length + 1).padStart(3, "0")}`,
+      invoiceID: `INV-${nextDueDate.getFullYear()}-${String(nextDueDate.getMonth() + 1).padStart(2, "0")}-${String(nextDueDate.getDate()).padStart(2, "0")}`,
       account: "New Diverge Customer",
       email: "new.customer@example.com",
       contact: "+63 955 123 4567",
       plan: "Diverge Netflix",
       amount: "₱1,499",
-      dueDate: "Oct 15, 2026",
+      dueDate: nextDueDate.toISOString().slice(0, 10),
       paymentMethod: "-",
       status: "Pending",
     };
