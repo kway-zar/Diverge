@@ -21,6 +21,7 @@ interface BillingStatusProps {
     invoiceID: string,
     status: InvoiceStatus
   ) => void;
+  onDelete?: (invoiceID: string) => void;
 }
 
 function BillingStatus({
@@ -28,6 +29,7 @@ function BillingStatus({
   isOpen,
   onClose,
   onStatusChange,
+  onDelete,
 }: BillingStatusProps) {
   const [selectedStatus, setSelectedStatus] = useState<InvoiceStatus>(
     invoice?.status ?? "Pending"
@@ -45,7 +47,13 @@ const handleSave = () => {
   onStatusChange(invoice.invoiceID, selectedStatus)
   onClose()
 }
- 
+
+const handleDelete = () => {
+  if (onDelete) {
+    onDelete(invoice.invoiceID)
+  }
+}
+
   return(
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
@@ -135,11 +143,14 @@ const handleSave = () => {
               </div>
             </div>
           </div>
-          <div className="flex justify-between">
-            <Button onClick={onClose} className="w-[399px] h-[71px] bg-[#B00049]/20 rounded-[30px] text-[32px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#B00049]/35">
+          <div className="flex justify-between gap-4">
+            <Button onClick={handleDelete} className="w-[250px] h-[71px] bg-[#B00049]/20 rounded-[30px] text-[24px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#B00049]/35">
+              Delete
+            </Button>
+            <Button onClick={onClose} className="w-[250px] h-[71px] bg-[#B00049]/20 rounded-[30px] text-[24px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#B00049]/35">
               Cancel
             </Button>
-            <Button onClick={handleSave} className="w-[399px] h-[71px] bg-[#3ACF98]/20 rounded-[30px] text-[32px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#3ACF98]/35">
+            <Button onClick={handleSave} className="w-[250px] h-[71px] bg-[#3ACF98]/20 rounded-[30px] text-[24px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#3ACF98]/35">
               Save Changes
             </Button>
           </div>
