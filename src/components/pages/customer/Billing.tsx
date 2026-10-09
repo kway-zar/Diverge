@@ -2,7 +2,14 @@
 import { Badge } from "../../ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card"
 import PayNowModal from "../../modals/PayNowModal"
-import {paymentHistory} from "../../data/paymentHistory"
+import {
+  buildPaymentHistory,
+  getStoredCustomerBillingInvoices,
+  persistCustomerBillingInvoices,
+  resolveInvoiceStatus,
+} from "../../data/billingData"
+import { useEffect, useMemo, useState } from "react"
+import type { Invoice } from "../../types/invoice"
 import {
   Table,
   TableBody,
@@ -12,8 +19,127 @@ import {
   TableRow,
 } from "../../ui/table"
 
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001"
+
+function getCurrentCustomerEmail() {
+  try {
+    const rawUser = localStorage.getItem("diverge_user")
+    if (!rawUser) {
+      return ""
+    }
+
+    const user = JSON.parse(rawUser) as { email?: string }
+    return user.email ?? ""
+  } catch {
+    return ""
+  }
+}
+
+function buildNextMonthlyInvoice(baseInvoice: Invoice): Invoice {
+  const nextDueDate = new Date(baseInvoice.dueDate)
+  nextDueDate.setMonth(nextDueDate.getMonth() + 1)
+
+  const month = String(nextDueDate.getMonth() + 1).padStart(2, "0")
+  const day = String(nextDueDate.getDate()).padStart(2, "0")
+
+  return {
+    invoiceID: `INV-${nextDueDate.getFullYear()}-${month}-${day}`,
+    account: baseInvoice.account,
+    email: baseInvoice.email,
+    contact: baseInvoice.contact,
+    plan: baseInvoice.plan,
+    amount: baseInvoice.amount,
+    dueDate: nextDueDate.toISOString().slice(0, 10),
+    paymentMethod: "-",
+    status: "Pending",
+  }
+}
+
+function announceBillingRefresh() {
+  if (typeof window === "undefined") {
+    return
+  }
+
+  window.localStorage.setItem("diverge-billing-refresh", String(Date.now()))
+  window.dispatchEvent(new Event("billing-updated"))
+}
 
 function Billing() {
+  const customerEmail = getCurrentCustomerEmail()
+  const [invoices, setInvoices] = useState<Invoice[]>(() => getStoredCustomerBillingInvoices(customerEmail))
+
+  useEffect(() => {
+    let isMounted = true
+    const token = localStorage.getItem("diverge_token")
+    const email = getCurrentCustomerEmail()
+
+    async function loadCustomerBilling() {
+      if (!token) {
+        setInvoices(getStoredCustomerBillingInvoices(email))
+        return
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/customers/me/billing`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (!response.ok) {
+          throw new Error(`Unable to load billing: ${response.status}`)
+        }
+
+        const payload = await response.json()
+        const nextInvoices = Array.isArray(payload?.data)
+          ? payload.data
+              .filter((invoice: any) => !email || (invoice.email ?? "").toLowerCase() === email.toLowerCase())
+              .map((invoice: any) => {
+                const rawStatus = invoice.status === "Paid" ? "Paid" : invoice.status === "Overdue" ? "Overdue" : "Pending";
+
+                return {
+                  invoiceID: invoice.invoiceID,
+                  account: invoice.account,
+                  email: invoice.email,
+                  contact: invoice.contact,
+                  plan: invoice.plan,
+                  amount: invoice.amount,
+                  dueDate: invoice.dueDate,
+                  paymentMethod: invoice.paymentMethod ?? "-",
+                  status: resolveInvoiceStatus(rawStatus, invoice.dueDate),
+                };
+              })
+          : getStoredCustomerBillingInvoices(email)
+
+        if (isMounted) {
+          setInvoices(nextInvoices)
+          persistCustomerBillingInvoices(nextInvoices)
+        }
+      } catch {
+        if (isMounted) {
+          const fallback = getStoredCustomerBillingInvoices(email)
+          setInvoices(fallback.length > 0 ? fallback.slice(0, 1) : fallback)
+        }
+      }
+    }
+
+    void loadCustomerBilling()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const currentBill = useMemo(
+    () => invoices.find((invoice) => invoice.status !== "Paid") ?? invoices[0],
+    [invoices],
+  )
+  const paymentHistory = useMemo(() => buildPaymentHistory(invoices), [invoices])
+
+  if (!currentBill) {
+    return null
+  }
+
   return (
     <div className="w-full min-w-0 px-4 py-6 text-left font-ubuntu text-white sm:px-6 lg:px-10">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
@@ -24,10 +150,12 @@ function Billing() {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="font-ubuntu-mono text-[10px] uppercase tracking-[0.12em] text-white/50">Current bill</p>
-                <CardTitle className="mt-1 text-xl font-semibold sm:text-2xl">September 2026</CardTitle>
+                <CardTitle className="mt-1 text-xl font-semibold sm:text-2xl">
+                  {new Date(currentBill.dueDate).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+                </CardTitle>
               </div>
               <Badge variant="outline" className="h-6 rounded-md border-[#3ACF98]/30 bg-[#3ACF98]/10 font-ubuntu-mono text-xs text-[#3ACF98]">
-                Due Oct 15
+                Due {currentBill.dueDate}
               </Badge>
             </div>
           </CardHeader>
@@ -35,11 +163,11 @@ function Billing() {
             <dl className="grid grid-cols-2 gap-2 font-ubuntu-mono md:grid-cols-4">
               <div className="min-w-0 rounded-lg border border-white/10 bg-white/5 p-2 shadow-glassy-jeri">
                 <dt className="text-xs text-white/65">Plan</dt>
-                <dd className="mt-1 text-sm font-medium sm:text-base">Diverge Netflix</dd>
+                <dd className="mt-1 text-sm font-medium sm:text-base">{currentBill.plan}</dd>
               </div>
               <div className="min-w-0 rounded-lg border border-white/10 bg-white/5 p-2 shadow-glassy-jeri">
                 <dt className="text-xs text-white/65">Monthly rate</dt>
-                <dd className="mt-1 text-xl font-semibold tabular-nums sm:text-2xl">₱1,499</dd>
+                <dd className="mt-1 text-xl font-semibold tabular-nums sm:text-2xl">{currentBill.amount}</dd>
               </div>
               <div className="min-w-0 rounded-lg border border-white/10 bg-white/5 p-2 shadow-glassy-jeri">
                 <dt className="text-xs text-white/65">Other charges</dt>
@@ -47,15 +175,77 @@ function Billing() {
               </div>
               <div className="min-w-0 rounded-lg border border-white/10 bg-white/5 p-2 shadow-glassy-jeri">
                 <dt className="text-xs text-white/65">Total due</dt>
-                <dd className="mt-1 text-xl font-semibold tabular-nums sm:text-2xl">₱1,499</dd>
+                <dd className="mt-1 text-xl font-semibold tabular-nums sm:text-2xl">{currentBill.amount}</dd>
               </div>
             </dl>
             <PayNowModal
-              accountNumber="00001"
-              billingPeriod="September 2026"
-              dueDate="October 1, 2026"
-              amount="₱1,499.00"
-              planName="Diverge Netflix"
+              accountNumber={currentBill.invoiceID}
+              invoiceId={currentBill.invoiceID}
+              billingPeriod={new Date(currentBill.dueDate).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+              dueDate={currentBill.dueDate}
+              amount={`${currentBill.amount}.00`}
+              planName={currentBill.plan}
+              onPaymentSuccess={async ({ invoiceId, method }) => {
+                const token = localStorage.getItem("diverge_token")
+
+                const nextInvoices: Invoice[] = invoices.map((invoice): Invoice =>
+                  invoice.invoiceID === invoiceId
+                    ? { ...invoice, status: "Paid", paymentMethod: method }
+                    : invoice,
+                )
+
+                setInvoices(nextInvoices)
+                persistCustomerBillingInvoices(nextInvoices)
+
+                if (!token || !invoiceId) {
+                  const created = buildNextMonthlyInvoice(currentBill)
+                  const generated: Invoice[] = [...nextInvoices, created]
+                  setInvoices(generated)
+                  persistCustomerBillingInvoices(generated)
+                  announceBillingRefresh()
+                  return
+                }
+
+                try {
+                  const response = await fetch(`${API_BASE_URL}/api/customers/me/billing/pay`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ invoiceId, paymentMethod: method }),
+                  })
+
+                  if (!response.ok) {
+                    throw new Error("Unable to process payment")
+                  }
+
+                  const payload = await response.json()
+                  const refreshed: Invoice[] = Array.isArray(payload?.data)
+                    ? payload.data.map((invoice: any) => ({
+                        invoiceID: invoice.invoiceID,
+                        account: invoice.account,
+                        email: invoice.email,
+                        contact: invoice.contact,
+                        plan: invoice.plan,
+                        amount: invoice.amount,
+                        dueDate: invoice.dueDate,
+                        paymentMethod: invoice.paymentMethod ?? "-",
+                        status: resolveInvoiceStatus(invoice.status === "Paid" ? "Paid" : invoice.status === "Overdue" ? "Overdue" : "Pending", invoice.dueDate),
+                      }))
+                    : nextInvoices
+
+                  setInvoices(refreshed)
+                  persistCustomerBillingInvoices(refreshed)
+                  announceBillingRefresh()
+                } catch {
+                  const created = buildNextMonthlyInvoice(currentBill)
+                  const generatedInvoices: Invoice[] = [...nextInvoices, created]
+                  setInvoices(generatedInvoices)
+                  persistCustomerBillingInvoices(generatedInvoices)
+                  announceBillingRefresh()
+                }
+              }}
             />
           </CardContent>
         </Card>
@@ -67,8 +257,8 @@ function Billing() {
           <CardContent className="px-0">
             <dl className="divide-y divide-white/10 font-ubuntu-mono text-sm">
               <div className="flex items-center justify-between gap-4 px-4 py-2 sm:px-5">
-                <dt>Diverge Netflix Subscription</dt>
-                <dd className="shrink-0 tabular-nums">₱1,499</dd>
+                <dt>{currentBill.plan} Subscription</dt>
+                <dd className="shrink-0 tabular-nums">{currentBill.amount}</dd>
               </div>
               <div className="flex items-center justify-between gap-4 px-4 py-2 sm:px-5">
                 <div>
@@ -93,7 +283,7 @@ function Billing() {
               </div>
               <div className="flex items-center justify-between gap-4 px-4 py-2 font-medium sm:px-5">
                 <dt>Total</dt>
-                <dd className="shrink-0 tabular-nums">₱1,499</dd>
+                <dd className="shrink-0 tabular-nums">{currentBill.amount}</dd>
               </div>
             </dl>
           </CardContent>

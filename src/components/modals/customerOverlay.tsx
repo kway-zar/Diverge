@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -13,9 +13,23 @@ function CustomerOverlay({
   onClose: () => void;
 }) {
   const [showManage, setShowManage] = useState(false);
+  const [customerData, setCustomerData] = useState<Customer>(customer);
+
+  useEffect(() => {
+    setCustomerData(customer);
+  }, [customer]);
 
   if (showManage) {
-    return <ManageAccount customer={customer} onClose={() => setShowManage(false)} />;
+    return (
+      <ManageAccount
+        customer={customerData}
+        onClose={() => setShowManage(false)}
+        onSave={(updatedCustomer) => {
+          setCustomerData(updatedCustomer);
+          setShowManage(false);
+        }}
+      />
+    );
   }
 
   return (
@@ -28,10 +42,10 @@ function CustomerOverlay({
                 Customer Profile
               </p>
               <h2 className="text-[40px] font-medium text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-75 mt-3">
-                {customer.name}
+                {customerData.name}
               </h2>
               <p className="text-[20px] font-medium text-[#3ACF98] opacity-75 leading-[100%] tracking-[0.05em]">
-                {customer.accountID}
+                {customerData.accountID}
               </p>
             </div>
 
@@ -52,7 +66,7 @@ function CustomerOverlay({
                   EMAIL
                 </span>
                 <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-70 ml-1">
-                  {customer.email}
+                  {customerData.email}
                 </p>
               </div>
 
@@ -61,7 +75,7 @@ function CustomerOverlay({
                   TYPE
                 </span>
                 <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-70 ml-1">
-                  {customer.type}
+                  {customerData.type}
                 </p>
               </div>
 
@@ -70,7 +84,7 @@ function CustomerOverlay({
                   PLAN
                 </span>
                 <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-70 ml-1">
-                  {customer.plan}
+                  {customerData.plan}
                 </p>
               </div>
 
@@ -79,7 +93,7 @@ function CustomerOverlay({
                   BALANCE
                 </span>
                 <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-70 ml-1">
-                  {customer.balance}
+                  {customerData.balance}
                 </p>
               </div>
             </div>
@@ -90,7 +104,7 @@ function CustomerOverlay({
                   USAGE
                 </span>
                 <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-70 ml-1">
-                  {customer.usage}
+                  {customerData.usage}
                 </p>
               </div>
 
@@ -99,7 +113,7 @@ function CustomerOverlay({
                   STATUS
                 </span>
                 <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-70 ml-1">
-                  {customer.status}
+                  {customerData.status}
                 </p>
               </div>
 
@@ -108,7 +122,7 @@ function CustomerOverlay({
                   AREA
                 </span>
                 <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-70 ml-1">
-                  {customer.area}
+                  {customerData.area}
                 </p>
               </div>
 
@@ -117,7 +131,7 @@ function CustomerOverlay({
                   SINCE
                 </span>
                 <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-70 ml-1">
-                  {customer.since}
+                  {customerData.since}
                 </p>
               </div>
             </div>
@@ -134,7 +148,7 @@ function CustomerOverlay({
               type="button"
               className="w-[399px] h-[71px] bg-[#3ACF98]/20 rounded-[30px] text-[32px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#3ACF98]/35"
             >
-              Create Ticket
+              Cancel
             </Button>
           </div>
         </div>

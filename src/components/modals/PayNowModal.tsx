@@ -20,6 +20,8 @@ type PayNowModalProps = {
   dueDate: string
   amount: string
   planName: string
+  invoiceId?: string
+  onPaymentSuccess?: (details: { invoiceId?: string; amount: string; method: PaymentMethod }) => void | Promise<void>
 }
 
 const paymentMethods: { value: PaymentMethod; label: string; className: string }[] = [
@@ -28,7 +30,7 @@ const paymentMethods: { value: PaymentMethod; label: string; className: string }
   { value: "Visa / Mastercard", label: "VISA  ● Mastercard", className: "bg-[#f3f3ef] text-[#25234f]" },
 ]
 
-function PayNowModal({ accountNumber, billingPeriod, dueDate, amount, planName }: PayNowModalProps) {
+function PayNowModal({ accountNumber, billingPeriod, dueDate, amount, planName, invoiceId, onPaymentSuccess }: PayNowModalProps) {
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<PaymentStep>("method")
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("Gcash")
@@ -44,8 +46,17 @@ function PayNowModal({ accountNumber, billingPeriod, dueDate, amount, planName }
     setOpen(true)
   }
 
-  const confirmPayment = () => {
+  const confirmPayment = async () => {
     setTransactionId(`TXN-${Date.now().toString().slice(-9)}`)
+
+    if (onPaymentSuccess) {
+      await onPaymentSuccess({
+        invoiceId,
+        amount,
+        method: paymentMethod,
+      })
+    }
+
     setStep("success")
   }
 
