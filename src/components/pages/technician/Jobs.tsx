@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Navigation, Phone, TriangleAlert } from "lucide-react"
 import type { CompletedJob, Job, JobPriority, JobStatus } from "@/components/types/job"
-import { initialJobs, initialCompleted } from "@/components/data/ticketData"
+import { publishDataChange, useDataRefresh } from "@/hooks/useDataRefresh"
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
  
  
 const priorityStyles: Record<JobPriority, string> = {
@@ -18,7 +19,7 @@ const statusStyles: Record<JobStatus, string> = {
 const nextLabel: Record<JobStatus, string> = {
   Assigned: "Mark as En Route",
   "En Route": "Mark as On-Site",
-  "On-Site": "Mark as Completed",
+  "On-Site": "Open Field Report",
 }
  
 const nextStatus: Partial<Record<JobStatus, JobStatus>> = {
@@ -30,10 +31,11 @@ const actionBtn =
   "flex h-[36px] items-center justify-center gap-2 rounded-[8px] border px-3 font-ubuntu-mono text-xs tracking-[0.5px] lg:text-sm"
  
 function Jobs() {
-  const [jobs, setJobs] = useState<Job[]>(initialJobs)
-  const [completed, setCompleted] = useState<CompletedJob[]>(initialCompleted)
-  const technicianName = "Rizal Service Tech"
-  const technicianLocation = "RIZAL"
+  const [jobs, setJobs] = useState<Job[]>([])
+  const [completed, setCompleted] = useState<CompletedJob[]>([])
+  const [technician, setTechnician] = useState<{ name: string; location: string; status: string } | null>(null)
+  const [errorMessage, setErrorMessage] = useState("")
+  const [isLoading, setIsLoading] = useState(true)
  
   const today =
     new Date().toLocaleString("en-US", {
@@ -46,20 +48,75 @@ function Jobs() {
       minute: "2-digit",
     }) + " PHT"
  
-  function finish(job: Job, outcome: CompletedJob["outcome"]) {
-    setJobs((prev) => prev.filter((j) => j.ticketID !== job.ticketID))
-    setCompleted((prev) => [
-      { ticketID: job.ticketID, subscriber: job.subscriber, issue: job.issue, outcome },
-      ...prev,
-    ])
+  async function loadJobs() {
+    const token = localStorage.getItem("diverge_token")
+    if (!token) {
+      setErrorMessage("Technician sign-in is required to view assigned jobs.")
+      setIsLoading(false)
+      return
+    }
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/technician/jobs`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const payload = await response.json()
+      if (!response.ok) throw new Error(payload?.message ?? "Unable to load jobs.")
+      setJobs(Array.isArray(payload?.data) ? payload.data : [])
+      setCompleted(Array.isArray(payload?.completed) ? payload.completed.map((job: Job) => ({ ...job, outcome: "Completed" as const })) : [])
+      setTechnician(payload?.technician ?? null)
+      setErrorMessage("")
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Unable to load jobs.")
+    } finally {
+      setIsLoading(false)
+    }
   }
  
-  function advance(job: Job) {
+  useDataRefresh(loadJobs)
+  useEffect(() => { void loadJobs() }, [])
+
+  async function advance(job: Job) {
     const next = nextStatus[job.status]
-    if (next) {
-      setJobs((prev) => prev.map((j) => (j.ticketID === job.ticketID ? { ...j, status: next } : j)))
-    } else {
-      finish(job, "Completed")
+    if (!next) {
+      window.dispatchEvent(new Event("technician-open-field-report"))
+      return
+    }
+    const token = localStorage.getItem("diverge_token")
+    if (!token || !job.id) return
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/technician/jobs/${job.id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status: next === "En Route" ? "EN_ROUTE" : "ON_SITE" }),
+      })
+      const payload = await response.json()
+      if (!response.ok) throw new Error(payload?.message ?? "Unable to update job status.")
+      publishDataChange()
+      await loadJobs()
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Unable to update job status.")
+    }
+  }
+
+  async function cannotComplete(job: Job) {
+    const token = localStorage.getItem("diverge_token")
+    if (!token || !job.id) return
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/technician/jobs/${job.id}/field-reports`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          description: "Technician could not complete the assigned work. Follow-up is required.",
+          timeOnSite: "0 min",
+          outcome: "CANNOT_COMPLETE",
+        }),
+      })
+      const payload = await response.json()
+      if (!response.ok) throw new Error(payload?.message ?? "Unable to submit follow-up report.")
+      publishDataChange()
+      await loadJobs()
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Unable to submit follow-up report.")
     }
   }
  
@@ -75,28 +132,29 @@ function Jobs() {
         <div className="flex items-center gap-4">
           <div className="size-[60px] shrink-0 rounded-full bg-[#D9D9D9]" />
           <div>
-            <h2 className="text-2xl font-medium tracking-[1.6px] text-[#fffefe] lg:text-[32px]">{technicianName}</h2>
+            <h2 className="text-2xl font-medium tracking-[1.6px] text-[#fffefe] lg:text-[32px]">{technician?.name ?? "Technician"}</h2>
             <div className="mt-1 flex flex-wrap gap-x-6 font-ubuntu-mono text-base tracking-[1px] lg:text-[20px]">
-              <span className="text-[#3acf98]">TECH-0001</span>
-              <span className="text-white/85">{technicianLocation}</span>
+              <span className="text-white/85">{technician?.location ?? "Location unavailable"}</span>
             </div>
           </div>
         </div>
         <div className="flex flex-col items-end gap-1 font-ubuntu-mono">
           <div className="flex items-center gap-2 text-sm tracking-[1.5px] text-[#72a1ff] lg:text-base">
             <span className="size-[10px] rounded-full bg-[#3d7bff]" />
-            On-Site
+            {technician?.status?.replaceAll("_", " ") ?? (jobs.some((job) => job.status === "On-Site") ? "On-Site" : "Available")}
           </div>
           <span className="text-xs tracking-[0.5px] text-white/75">{jobs.length} active jobs</span>
         </div>
       </div>
  
       {/* Active jobs */}
+      {errorMessage && <p role="alert" className="mb-3 text-sm text-red-300">{errorMessage}</p>}
       <h2 className="mb-3 mt-4 text-lg font-medium tracking-[1px] text-[#fffefe] lg:text-xl">
         Active({jobs.length})
       </h2>
       <div className="flex flex-col gap-4">
-        {jobs.length === 0 && <p className="text-white/60">No active jobs right now.</p>}
+        {isLoading && <p className="text-white/60">Loading assigned jobs...</p>}
+        {!isLoading && jobs.length === 0 && <p className="text-white/60">No active jobs right now.</p>}
         {jobs.map((job) => {
           const breached = job.timeLeft === "BREACHED"
           return (
@@ -160,7 +218,7 @@ function Jobs() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => finish(job, "Cannot Complete")}
+                  onClick={() => void cannotComplete(job)}
                   className={`${actionBtn} min-w-[120px] border-[#dd0002] bg-[rgba(221,0,2,0.2)] text-white/85`}
                 >
                   Cannot Complete

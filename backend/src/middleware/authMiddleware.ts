@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 
 import type { AuthRole, AuthTokenPayload } from '../utils/jwt.js';
 import { verifyToken } from '../utils/jwt.js';
+import { prisma } from '../db/prisma.js';
 
 declare global {
   namespace Express {
@@ -11,7 +12,7 @@ declare global {
   }
 }
 
-export function requireAuth(req: Request, res: Response, next: NextFunction) {
+export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -27,8 +28,25 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
     return;
   }
 
-  req.user = decoded;
-  next();
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { id: true, email: true, role: true },
+    });
+    if (!user) {
+      res.status(401).json({ message: 'User account is no longer available' });
+      return;
+    }
+
+    req.user = {
+      userId: user.id,
+      email: user.email,
+      role: user.role as AuthRole,
+    };
+    next();
+  } catch (error) {
+    next(error);
+  }
 }
 
 export function requireRole(allowedRoles: AuthRole[]) {

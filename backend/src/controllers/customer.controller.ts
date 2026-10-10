@@ -4,11 +4,10 @@ import {
   createCustomer,
   getAllBillingInvoices,
   getAllCustomers,
+  getCustomerActivePlanByUserId,
   getCustomerBillingByUserId,
   getCustomerById,
-  payCustomerInvoice,
   updateCustomer,
-  updateInvoiceStatus,
 } from '../services/customer.service.js';
 import { createCustomerSchema, updateCustomerSchema } from '../validators/customer.validator.js';
 
@@ -45,8 +44,11 @@ export async function getCustomerBilling(req: Request, res: Response, next: Next
       return;
     }
 
-    const invoices = await getCustomerBillingByUserId(req.user.userId);
-    res.status(200).json({ data: invoices });
+    const [invoices, activePlan] = await Promise.all([
+      getCustomerBillingByUserId(req.user.userId),
+      getCustomerActivePlanByUserId(req.user.userId),
+    ]);
+    res.status(200).json({ data: invoices, activePlan });
   } catch (error) {
     next(error);
   }
@@ -56,24 +58,6 @@ export async function listBillingInvoices(req: Request, res: Response, next: Nex
   try {
     const invoices = await getAllBillingInvoices();
     res.status(200).json({ data: invoices, total: invoices.length });
-  } catch (error) {
-    next(error);
-  }
-}
-
-export async function updateBillingStatus(req: Request, res: Response, next: NextFunction) {
-  try {
-    const { invoiceId } = req.params;
-    const invoiceKey = Array.isArray(invoiceId) ? invoiceId[0] : invoiceId;
-    const status = req.body?.status;
-
-    if (!status || !['Paid', 'Pending', 'Overdue'].includes(status)) {
-      res.status(400).json({ message: 'A valid invoice status is required' });
-      return;
-    }
-
-    const invoice = await updateInvoiceStatus(invoiceKey, status);
-    res.status(200).json({ data: invoice, message: 'Invoice status updated successfully' });
   } catch (error) {
     next(error);
   }

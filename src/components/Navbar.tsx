@@ -1,5 +1,7 @@
 
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { LogOut } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import logo from '@/assets/logo.png'
 
@@ -12,6 +14,7 @@ const DEMO_USER_DETAILS: Record<string, { name: string; role: string }> = {
 }
 
 function Navbar({ role = 'Admin', status = '80% Uptime' }: { role?: string; status?: string }) {
+  const navigate = useNavigate()
   const [profile, setProfile] = useState({
     name: 'Diverge Admin',
     role,
@@ -65,6 +68,19 @@ function Navbar({ role = 'Admin', status = '80% Uptime' }: { role?: string; stat
         </Card>
 
         <i className="fa-regular fa-bell fa-xl text-[#b00049] mx-5 cursor-pointer max-sm:mx-2 max-sm:text-lg"></i>
+        <button
+          type="button"
+          title="Sign out"
+          aria-label="Sign out"
+          onClick={() => {
+            localStorage.removeItem('diverge_token')
+            localStorage.removeItem('diverge_user')
+            navigate('/login', { replace: true })
+          }}
+          className="mr-4 inline-flex size-9 items-center justify-center rounded-md text-white/70 transition hover:bg-white/10 hover:text-white"
+        >
+          <LogOut size={18} />
+        </button>
       </div>
     </Card>
   )

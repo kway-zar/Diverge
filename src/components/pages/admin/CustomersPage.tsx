@@ -5,53 +5,17 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/
 import type { Customer } from "../../types/customer";
 import CustomerOverlay from "../../modals/customerOverlay";
 
-const seededCustomers: Customer[] = [
-  {
-    accountID: "ACC-SEED-001",
-    name: "Jonathan Landoy",
-    email: "jonathan@example.com",
-    type: "Residential",
-    plan: "Fiber 200",
-    usage: "5000 MB",
-    balance: "1000",
-    status: "Active",
-    area: "Rizal",
-    since: "2023-01-15T00:00:00.000Z",
-  },
-  {
-    accountID: "ACC-SEED-002",
-    name: "Guiller DelaCruz",
-    email: "guiller.delaCruz@example.com",
-    type: "Commercial",
-    plan: "Business Pro",
-    usage: "10000 MB",
-    balance: "2500",
-    status: "Pending",
-    area: "Manila",
-    since: "2023-03-20T00:00:00.000Z",
-  },
-  {
-    accountID: "ACC-SEED-003",
-    name: "Vanna Banana",
-    email: "vanna.banana@example.com",
-    type: "Government",
-    plan: "Government Plus",
-    usage: "5000 MB",
-    balance: "1000",
-    status: "Suspended",
-    area: "Cebu",
-    since: "2023-01-15T00:00:00.000Z",
-  },
-];
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
 
 export function CustomersPage() {
 
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-    const [customers, setCustomers] = useState<Customer[]>(seededCustomers);
+    const [customers, setCustomers] = useState<Customer[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [activeStatus, setActiveStatus] = useState<"All" | Customer["status"]>("All");
+    const [errorMessage, setErrorMessage] = useState("");
 
-    const statusOptions: Array<"All" | Customer["status"]> = ["All", "Active", "Pending", "Suspended"];
+    const statusOptions: Array<"All" | Customer["status"]> = ["All", "Active", "Inactive", "Pending", "Suspended"];
 
     const filteredCustomers = customers.filter((customer) => {
       const matchesStatus = activeStatus === "All" || customer.status === activeStatus;
@@ -69,26 +33,36 @@ export function CustomersPage() {
 
       async function loadCustomers() {
         try {
-          const response = await fetch("http://localhost:4001/api/customers");
-          if (!response.ok) throw new Error(`Request failed: ${response.status}`);
-
+          const token = localStorage.getItem("diverge_token");
+          if (!token) throw new Error("Administrator sign-in is required to view customers.");
+          const response = await fetch(`${API_BASE_URL}/api/customers`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
           const payload = await response.json();
-          const nextCustomers = Array.isArray(payload?.data) ? payload.data : seededCustomers;
+          if (!response.ok) throw new Error(payload?.message ?? `Request failed: ${response.status}`);
+
+          const nextCustomers = Array.isArray(payload?.data) ? payload.data : [];
 
           if (isMounted) {
             setCustomers(nextCustomers);
+            setErrorMessage("");
           }
-        } catch {
+        } catch (error) {
           if (isMounted) {
-            setCustomers(seededCustomers);
+            setCustomers([]);
+            setErrorMessage(error instanceof Error ? error.message : "Unable to load customers.");
           }
         }
       }
 
       loadCustomers();
+      window.addEventListener("diverge:data-changed", loadCustomers);
+      const refreshTimer = window.setInterval(loadCustomers, 15000);
 
       return () => {
         isMounted = false;
+        window.removeEventListener("diverge:data-changed", loadCustomers);
+        window.clearInterval(refreshTimer);
       };
     }, []);
 
@@ -129,6 +103,8 @@ export function CustomersPage() {
               Wednesday, September 16, 2026 12:31AM PHT
             </p>
           </div>
+
+          {errorMessage && <p role="alert" className="mb-4 ml-4 text-sm text-red-300 lg:ml-10">{errorMessage}</p>}
 
           <div className="mb-5 ml-10 pr-10 flex flex-wrap items-center gap-2">
             <Input
@@ -251,7 +227,14 @@ export function CustomersPage() {
       </div>
 
       {selectedCustomer && (
-        <CustomerOverlay customer={selectedCustomer} onClose={() => setSelectedCustomer(null)} />
+        <CustomerOverlay
+          customer={selectedCustomer}
+          onClose={() => setSelectedCustomer(null)}
+          onUpdated={(updatedCustomer) => {
+            setCustomers((current) => current.map((item) => item.id === updatedCustomer.id ? updatedCustomer : item));
+            setSelectedCustomer(updatedCustomer);
+          }}
+        />
       )}
     </>
   );

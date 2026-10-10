@@ -34,7 +34,7 @@ const DEMO_ACCOUNTS: Array<{
   },
   {
     label: "Technician",
-    email: "tech@diverge.com",
+    email: "deveratech@diverge.com",
     password: "seed-password",
     role: "TECHNICIAN",
   },

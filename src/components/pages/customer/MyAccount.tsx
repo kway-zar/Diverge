@@ -64,6 +64,14 @@ function MyAccount() {
     }
 
     void loadCustomerProfile()
+    const handleRefresh = () => void loadCustomerProfile()
+    window.addEventListener('diverge:data-changed', handleRefresh)
+    const refreshTimer = window.setInterval(handleRefresh, 15000)
+
+    return () => {
+      window.removeEventListener('diverge:data-changed', handleRefresh)
+      window.clearInterval(refreshTimer)
+    }
   }, [navigate])
 
   if (loading) {
@@ -135,7 +143,12 @@ function MyAccount() {
             <p className='text-base opacity-40'>Outstanding</p>
             <p className="text-5xl">₱{account.balance}</p>
             <p className='text-base text-emerald-400 '>Paid ✓</p>
-            <Button className='w-full mx-5 shadow-glassy-jeri rounded-4xl text-xl py-5 cursor-pointer bg-blue-500/20'>Pay Now</Button>
+            <Button
+              onClick={() => window.dispatchEvent(new Event('customer-open-billing'))}
+              className='w-full mx-5 shadow-glassy-jeri rounded-4xl text-xl py-5 cursor-pointer bg-blue-500/20'
+            >
+              View Billing
+            </Button>
 
           </CardContent>
         </Card>

@@ -3,56 +3,49 @@ import {
   DialogContent,
 } from "@/components/ui/dialog"
 import {X} from "lucide-react";
-import {useState, useEffect} from "react";
-import type { Invoice, InvoiceStatus } from "../types/invoice";
+import {useState} from "react";
+import type { Invoice } from "../types/invoice";
 import { Button } from "@/components/ui/button"
-
-const STATUS_OPTIONS: InvoiceStatus[] = [
-  "Paid",
-  "Pending",
-  "Overdue",
-];
 
 interface BillingStatusProps {
   invoice: Invoice | null;
   isOpen: boolean;
   onClose: () => void;
-  onStatusChange: (
-    invoiceID: string,
-    status: InvoiceStatus
-  ) => void;
-  onDelete?: (invoiceID: string) => void;
+  onIssueCreditNote: (invoiceID: string, amountCents: number, reason: string) => Promise<void>;
 }
 
 function BillingStatus({
   invoice,
   isOpen,
   onClose,
-  onStatusChange,
-  onDelete,
+  onIssueCreditNote,
 }: BillingStatusProps) {
-  const [selectedStatus, setSelectedStatus] = useState<InvoiceStatus>(
-    invoice?.status ?? "Pending"
-  )
+  const [creditAmount, setCreditAmount] = useState("");
+  const [creditReason, setCreditReason] = useState("");
+  const [creditError, setCreditError] = useState("");
+  const [isIssuingCredit, setIsIssuingCredit] = useState(false);
 
-  useEffect(() => {
-    if (invoice) {
-      setSelectedStatus(invoice.status)
+  if (!invoice) return null
+
+  const handleIssueCredit = async () => {
+    const amountCents = Math.round(Number(creditAmount) * 100);
+    if (!Number.isSafeInteger(amountCents) || amountCents <= 0 || creditReason.trim().length < 5) {
+      setCreditError("Enter a positive amount and a reason of at least five characters.");
+      return;
     }
-  }, [invoice])
 
-    if (!invoice) return null
-
-const handleSave = () => {
-  onStatusChange(invoice.invoiceID, selectedStatus)
-  onClose()
-}
-
-const handleDelete = () => {
-  if (onDelete) {
-    onDelete(invoice.invoiceID)
-  }
-}
+    setIsIssuingCredit(true);
+    setCreditError("");
+    try {
+      await onIssueCreditNote(invoice.invoiceID, amountCents, creditReason.trim());
+      setCreditAmount("");
+      setCreditReason("");
+    } catch (error) {
+      setCreditError(error instanceof Error ? error.message : "Unable to issue credit note.");
+    } finally {
+      setIsIssuingCredit(false);
+    }
+  };
 
   return(
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -119,20 +112,9 @@ const handleDelete = () => {
               <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]"> 
                 STATUS
               </span>
-              <select
-                value={selectedStatus}
-                onChange={(e) =>  {
-          
-                  setSelectedStatus(e.target.value as InvoiceStatus);
-                }}
-                className="w-[310px] h-[35px] rounded-lg bg-[#D9D9D9]/20 radius-[10px] shadow-[inset_0_4px_4px_rgba(0,0,0,0.25)] font-regular text-[#FFFFFF] text-[24px] font-ubuntu-mono opacity-75 px-4 outline-none cursor-pointer"
-              >
-                {STATUS_OPTIONS.map((status) => (
-                <option key={status} value={status} className="bg-[#1E1E1E] text-[24px] font-regular text-[#FFFFFF] font-ubuntu-mono opacity-75">
-                  {status}
-                </option>
-                ))}
-              </select>
+              <p className="w-fit rounded-lg bg-[#D9D9D9]/10 px-4 py-2 font-ubuntu-mono text-[24px] text-white/75">
+                {invoice.status}
+              </p>
               <div className="flex flex-col gap-1">
                   <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]"> 
                     DUE DATE
@@ -143,15 +125,35 @@ const handleDelete = () => {
               </div>
             </div>
           </div>
-          <div className="flex justify-between gap-4">
-            <Button onClick={handleDelete} className="w-[250px] h-[71px] bg-[#B00049]/20 rounded-[30px] text-[24px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#B00049]/35">
-              Delete
+          <div className="grid grid-cols-[1fr_2fr_auto] items-end gap-4 border-t border-white/10 pt-5">
+            <label className="flex flex-col gap-2 text-sm text-white/65">
+              Credit amount (PHP)
+              <input
+                type="number"
+                min="0.01"
+                step="0.01"
+                value={creditAmount}
+                onChange={(event) => setCreditAmount(event.target.value)}
+                className="h-10 rounded-md border border-white/15 bg-white/5 px-3 text-white"
+              />
+            </label>
+            <label className="flex flex-col gap-2 text-sm text-white/65">
+              Reason
+              <input
+                value={creditReason}
+                maxLength={500}
+                onChange={(event) => setCreditReason(event.target.value)}
+                className="h-10 rounded-md border border-white/15 bg-white/5 px-3 text-white"
+              />
+            </label>
+            <Button onClick={handleIssueCredit} disabled={isIssuingCredit} className="h-10 bg-amber-500/15 px-4 text-amber-200 hover:bg-amber-500/25">
+              {isIssuingCredit ? "Issuing..." : "Issue Credit"}
             </Button>
-            <Button onClick={onClose} className="w-[250px] h-[71px] bg-[#B00049]/20 rounded-[30px] text-[24px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#B00049]/35">
-              Cancel
-            </Button>
-            <Button onClick={handleSave} className="w-[250px] h-[71px] bg-[#3ACF98]/20 rounded-[30px] text-[24px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#3ACF98]/35">
-              Save Changes
+          </div>
+          {creditError && <p role="alert" className="text-sm text-red-300">{creditError}</p>}
+          <div className="flex justify-end">
+            <Button onClick={onClose} className="w-[250px] h-[60px] bg-[#3ACF98]/20 rounded-[20px] text-[20px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#3ACF98]/35">
+              Close
             </Button>
           </div>
         </div>

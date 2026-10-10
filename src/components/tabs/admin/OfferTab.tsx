@@ -1,134 +1,101 @@
-import { Button } from '@/components/ui/button'
-import { TabsContent } from '@/components/ui/tabs'
-import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
-import EditPlan from '../../modals/EditPlan.tsx'
-import type { OfferTabProps } from '../../types/OfferTab.ts'
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { TabsContent } from "@/components/ui/tabs";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { publishDataChange } from "@/hooks/useDataRefresh";
 
-const offerTabData: OfferTabProps[] = [
-  {
-    planName: "Fiber 50 MBPS",
-    planDescription: "Ideal for light browsing, streaming, and work-from-home setups",
-    planSpeed: "50 Mbps",
-    planPrice: 999,
-    planSubscribers: 5921,
-    planSLA: "99.6%",
-    planContract: "12mo",
-    planFeatures: ["Feature 1", "Feature 2", "Feature 3"],
-    planType: 'Residential',
-    status: "Active"
-  },
-  {
-    planName: "Business 500 MBPS",
-    planDescription: "Power users and smart homes with 10+ connected devices",
-    planSpeed: "300 Mbps",
-    planPrice: 1500,
-    planSubscribers: 5921,
-    planSLA: "99.6%",
-    planContract: "12mo",
-    planFeatures: ["Feature A", "Feature B", "Feature C"],
-    planType: 'Business',
-    status: "Active"
-  },
-  {
-    planName: "Enterprise 1 GBPS",
-    planDescription: "For large businesses and enterprises with high data demands",
-    planSpeed: "1 Gbps",
-    planPrice: 5000,
-    planSubscribers: 5921,
-    planSLA: "99.9%",
-    planContract: "24mo",
-    planFeatures: ["Feature X", "Feature Y", "Feature Z"],
-    planType: 'Enterprise',
-    status: "Inactive"
-  },
-  {
-    planName: "Government 2 GBPS",
-    planDescription: "Tailored for government institutions with critical data needs",
-    planSpeed: "2 Gbps",
-    planPrice: 10000,
-    planSubscribers: 5921,
-    planSLA: "99.95%",
-    planContract: "36mo",
-    planFeatures: ["Feature Alpha", "Feature Beta", "Feature Gamma"],
-    planType: 'Government',
-    status: "Active"
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
+type PlanOffering = {
+  id: string;
+  name: string;
+  type: string;
+  speed: string | null;
+  cost: number | null;
+  status: "ACTIVE" | "INACTIVE" | "PENDING" | "SUSPENDED";
+  _count?: { customers: number; subscriptions: number };
+};
+
+function OfferTab({ refreshKey = 0 }: { refreshKey?: number }) {
+  const [plans, setPlans] = useState<PlanOffering[]>([]);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loadingId, setLoadingId] = useState("");
+
+  async function loadPlans() {
+    const token = localStorage.getItem("diverge_token");
+    if (!token) {
+      setErrorMessage("Administrator sign-in is required.");
+      return;
+    }
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/admin/plans`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.message ?? "Unable to load plan offerings.");
+      setPlans(Array.isArray(payload?.data) ? payload.data : []);
+      setErrorMessage("");
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Unable to load plan offerings.");
+    }
   }
-]
 
-function getPlanStatusColor(status: OfferTabProps["status"]) {
-  return status === "Active" ? "text-emerald-500" : "text-red-500"
-}
+  useEffect(() => {
+    void loadPlans();
+  }, [refreshKey]);
 
-function getPlanAction(status: OfferTabProps["status"]) {
-  return status === "Active"
-    ? { label: "Deactivate", className: "bg-pink-600/20" }
-    : { label: "Activate", className: "bg-emerald-500/20" }
-}
+  async function togglePlan(plan: PlanOffering) {
+    const token = localStorage.getItem("diverge_token");
+    if (!token) return;
+    setLoadingId(plan.id);
+    setErrorMessage("");
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/admin/plans/${plan.id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status: plan.status === "ACTIVE" ? "INACTIVE" : "ACTIVE" }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.message ?? "Unable to update plan status.");
+      publishDataChange();
+      await loadPlans();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Unable to update plan status.");
+    } finally {
+      setLoadingId("");
+    }
+  }
 
-function OfferTab() {
   return (
     <TabsContent value="offer">
-      <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
-        {offerTabData.map((offer: OfferTabProps) => (
-          <Card key={offer.planName} className="flex-1 ring-0 shadow-glassy-jeri bg-white/5">
-            <CardHeader className="flex flex-row place-content-between">
-              <h1 className={`p-1 px-4 rounded-md ${offer.status === "Active" ? "bg-emerald-500/20 text-emerald-500 ring-emerald-500/80" : "bg-red-500/20 text-red-500 ring-red-500/80"} ring-1`}>{offer.status}</h1>
-              <h1 className="text-pink-600">{offer.planType}</h1>
+      {errorMessage && <p role="alert" className="mb-4 text-sm text-red-300">{errorMessage}</p>}
+      {plans.length === 0 && <p className="py-8 text-center text-white/50">No plan offerings are configured.</p>}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {plans.map((plan) => (
+          <Card key={plan.id} className="gap-3 bg-white/5 text-white shadow-glassy-jeri ring-0">
+            <CardHeader className="flex-row items-center justify-between">
+              <span className={`rounded-md px-3 py-1 text-sm ${plan.status === "ACTIVE" ? "bg-emerald-500/15 text-emerald-300" : "bg-white/10 text-white/50"}`}>
+                {plan.status[0] + plan.status.slice(1).toLowerCase()}
+              </span>
+              <span className="text-sm text-pink-300">{plan.type}</span>
             </CardHeader>
-            <CardContent>
-              <h1 className="text-4xl font-bold">{offer.planName}</h1>
-              <p className="opacity-40 font-light">{offer.planDescription}</p>
-              <div className="grid grid-cols-2">
-                <span>
-                  <h1 className="text-6xl">₱{offer.planPrice}</h1>
-                  <p className="opacity-40 font-thin">{"/month"}</p>
-                </span>
-                <span className="place-items-end">
-                  <h1 className={`text-base ${getPlanStatusColor(offer.status)}`}>{offer.planSpeed}</h1>
-                  <p className="opacity-40 font-thin text-xs">{"↑ 25 mbps"}</p>
-                </span>
+            <CardContent className="space-y-3">
+              <h2 className="text-2xl font-semibold">{plan.name}</h2>
+              <div className="flex items-end justify-between gap-3">
+                <p className="text-3xl font-semibold tabular-nums">₱{((plan.cost ?? 0) / 100).toLocaleString("en-PH", { minimumFractionDigits: 2 })}<span className="ml-1 text-sm font-normal text-white/45">/month</span></p>
+                <span className="text-sm text-white/65">{plan.speed ?? "Speed not set"}</span>
               </div>
-              <div className="grid grid-cols-3 py-2 mx-2 bg-neutral-500/40 rounded-xl text-xs shadow-glassy-jeri mt-2 font-ubuntu-mono">
-                <span className='flex flex-col items-center'>
-                  <h1>{offer.planSubscribers.toLocaleString()}</h1>
-                  <h1 className="opacity-40">subs</h1>
-                </span>
-                <span className='flex flex-col items-center'>
-                  <h1>{offer.planSLA}</h1>
-                  <h1 className="opacity-40">SLA</h1>
-                </span>
-                <span className='flex flex-col items-center'>
-                  <h1>{offer.planContract}</h1>
-                  <h1 className="opacity-40">contract</h1>
-                </span>
-              </div>
-              <section className="ml-2 mt-2 font-light">
-                <p>✔️{offer.planFeatures[0]}</p>
-                <p>✔️{offer.planFeatures[1]}</p>
-                <p>✔️{offer.planFeatures[2]}</p>
-              </section>
+              <p className="text-xs text-white/45">{plan._count?.subscriptions ?? plan._count?.customers ?? 0} subscribers</p>
             </CardContent>
-            <CardFooter className="border-none grid grid-cols-2 mx-4 gap-x-10">
-              <EditPlan />
-              <Button className={`w-full h-10 shadow-glassy-jeri rounded-4xl ${getPlanAction(offer.status).className}`}>
-                {getPlanAction(offer.status).label}
+            <CardFooter>
+              <Button variant="outline" disabled={Boolean(loadingId)} onClick={() => void togglePlan(plan)}>
+                {loadingId === plan.id ? "Saving..." : plan.status === "ACTIVE" ? "Deactivate" : "Activate"}
               </Button>
             </CardFooter>
           </Card>
         ))}
       </div>
-
-      <Card className="flex-1 ring-0 shadow-glassy-jeri bg-white/5 mt-4">
-        <CardHeader className="flex flex-row">
-          <i className="fa-solid fa-circle-info fa-xl"></i>
-          <h1 className="opacity-60">Self Service Upgrade Plan Rules</h1>
-        </CardHeader>
-        <CardContent className="ml-2 opacity-40">
-          <p>Subscribers can self-upgrade plans up to 200 Mbps via the customer portal. Business plans require agent approval. Downgrades have a 30-day lock-in period.</p>
-        </CardContent>
-      </Card>
     </TabsContent>
-  )
+  );
 }
 
-export default OfferTab
+export default OfferTab;

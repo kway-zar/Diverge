@@ -18,6 +18,7 @@ model User {
   customer  Customer?
   technician Technician?
   admin     Admin?
+  billingRuns BillingRun[]
 }
 
 enum Role {
@@ -57,6 +58,11 @@ model Customer {
   invoices  Invoice[]
   payments  Payment[]
   requests  UpgradeRequest[]
+  subscriptions Subscription[]
+  creditNotes CreditNote[]
+  billingRunItems BillingRunItem[]
+  provisioningActions ProvisioningAction[]
+  technicianReviews TechnicianReview[]
 }
 
 enum CustomerType {
@@ -84,6 +90,7 @@ model Plan {
   invoices   Invoice[]
   requests   UpgradeRequest[] @relation("InitialPlan")
   finalPlans UpgradeRequest[] @relation("FinalPlan")
+  subscriptions Subscription[]
 }
 
 model Technician {
@@ -122,6 +129,7 @@ model Ticket {
   assignedToId  String?                  @db.ObjectId
   ticketNumber  String                   @unique
   issue         String
+  description   String?
   category      String
   priority      TicketPriority
   status        TicketStatus
@@ -133,6 +141,7 @@ model Ticket {
   assignedTo    Technician?              @relation(fields: [assignedToId], references: [id])
   job           Job?
   fieldReports  TechnicianFieldReport[]
+  technicianReview TechnicianReview?
 }
 
 enum TicketPriority {
@@ -187,6 +196,7 @@ model Invoice {
   email         String
   contact       String
   amount        Int         // stored in smallest currency unit (cents), e.g. ₱499.00 => 49900
+  creditAmount  Int         @default(0)
   dueDate       DateTime
   paymentMethod String?
   status        InvoiceStatus
@@ -195,6 +205,9 @@ model Invoice {
   customer      Customer    @relation(fields: [customerId], references: [id])
   plan          Plan?       @relation(fields: [planId], references: [id])
   payments      Payment[]
+  lineItems     InvoiceLineItem[]
+  creditNotes   CreditNote[]
+  billingRunItems BillingRunItem[]
 }
 
 enum InvoiceStatus {
@@ -212,15 +225,155 @@ model Payment {
   due        DateTime?
   method     String?
   status     PaymentStatus
+  settledAt  DateTime?
   createdAt  DateTime      @default(now())
 
   customer   Customer      @relation(fields: [customerId], references: [id])
   invoice    Invoice       @relation(fields: [invoiceId], references: [id])
 }
 
+model Subscription {
+  id          String             @id @default(auto()) @map("_id") @db.ObjectId
+  customerId  String             @db.ObjectId
+  planId      String             @db.ObjectId
+  billingDay  Int                @default(1)
+  startedAt   DateTime           @default(now())
+  endedAt     DateTime?
+  status      SubscriptionStatus @default(ACTIVE)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  customer    Customer           @relation(fields: [customerId], references: [id])
+  plan        Plan               @relation(fields: [planId], references: [id])
+  billingRuns BillingRunItem[]
+
+  @@unique([customerId, planId, startedAt])
+  @@index([status, startedAt])
+}
+
+model InvoiceLineItem {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  invoiceId   String   @db.ObjectId
+  description String
+  quantity    Int      @default(1)
+  unitAmount  Int
+  amount      Int
+  createdAt   DateTime @default(now())
+
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id])
+
+  @@index([invoiceId])
+}
+
+model BillingRun {
+  id                String           @id @default(auto()) @map("_id") @db.ObjectId
+  periodKey         String           @unique
+  status            BillingRunStatus @default(RUNNING)
+  requestedByUserId String?          @db.ObjectId
+  createdAt         DateTime         @default(now())
+  completedAt       DateTime?
+  createdCount      Int              @default(0)
+  skippedCount      Int              @default(0)
+  failureCount      Int              @default(0)
+
+  requestedBy       User?            @relation(fields: [requestedByUserId], references: [id])
+  items             BillingRunItem[]
+}
+
+model BillingRunItem {
+  id             String               @id @default(auto()) @map("_id") @db.ObjectId
+  billingRunId   String               @db.ObjectId
+  subscriptionId String               @db.ObjectId
+  invoiceId      String?              @db.ObjectId
+  customerId     String               @db.ObjectId
+  status         BillingRunItemStatus @default(PENDING)
+  error          String?
+  createdAt      DateTime             @default(now())
+
+  billingRun     BillingRun           @relation(fields: [billingRunId], references: [id])
+  subscription   Subscription         @relation(fields: [subscriptionId], references: [id])
+  invoice        Invoice?             @relation(fields: [invoiceId], references: [id])
+  customer       Customer             @relation(fields: [customerId], references: [id])
+
+  @@unique([billingRunId, subscriptionId])
+  @@index([customerId, status])
+}
+
+model CreditNote {
+  id           String           @id @default(auto()) @map("_id") @db.ObjectId
+  creditNumber String           @unique
+  customerId   String           @db.ObjectId
+  invoiceId    String           @db.ObjectId
+  amount       Int
+  reason       String
+  status       CreditNoteStatus @default(ISSUED)
+  issuedAt     DateTime         @default(now())
+  createdById  String?          @db.ObjectId
+
+  customer     Customer         @relation(fields: [customerId], references: [id])
+  invoice      Invoice          @relation(fields: [invoiceId], references: [id])
+
+  @@index([issuedAt, status])
+  @@index([customerId, status])
+}
+
+model ProvisioningAction {
+  id          String                @id @default(auto()) @map("_id") @db.ObjectId
+  actionKey   String                @unique
+  customerId  String                @db.ObjectId
+  invoiceId   String                @db.ObjectId
+  action      ProvisioningActionType
+  status      ProvisioningActionStatus @default(PENDING)
+  reason      String
+  createdAt   DateTime              @default(now())
+  processedAt DateTime?
+  result      String?
+
+  customer    Customer              @relation(fields: [customerId], references: [id])
+
+  @@index([status, createdAt])
+  @@index([customerId, status])
+}
+
 enum PaymentStatus {
   PAID
   PENDING
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
+enum BillingRunStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum BillingRunItemStatus {
+  PENDING
+  CREATED
+  SKIPPED
+  FAILED
+}
+
+enum CreditNoteStatus {
+  ISSUED
+  VOID
+}
+
+enum ProvisioningActionType {
+  SUSPEND
+  RESTORE
+}
+
+enum ProvisioningActionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
 }
 
 model UpgradeRequest {
@@ -245,12 +398,18 @@ enum UpgradeStatus {
 model TechnicianReview {
   id           String     @id @default(auto()) @map("_id") @db.ObjectId
   technicianId String     @db.ObjectId
+  customerId   String?    @db.ObjectId
+  ticketId     String?    @unique @db.ObjectId
   reviewer     String
   rating       Int
   date         DateTime
   comment      String
 
   technician   Technician @relation(fields: [technicianId], references: [id])
+  customer     Customer?  @relation(fields: [customerId], references: [id])
+  ticket       Ticket?    @relation(fields: [ticketId], references: [id])
+
+  @@index([technicianId, date])
 }
 
 model TechnicianFieldReport {

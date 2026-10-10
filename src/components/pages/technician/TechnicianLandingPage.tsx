@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import SidebarApp from "@/components/Sidebar"
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
@@ -11,6 +11,13 @@ function TechnicianLandingPage() {
   const items = ["Jobs", "Maps", "Field Report", "Evaluation"]
  
   const [activeItem, setActiveItem] = useState(items[0])
+
+  useEffect(() => {
+    const openFieldReport = () => setActiveItem("Field Report")
+    window.addEventListener("technician-open-field-report", openFieldReport)
+    return () => window.removeEventListener("technician-open-field-report", openFieldReport)
+  }, [])
+
   const handleData = (data: string) => {
     setActiveItem(data)
   }

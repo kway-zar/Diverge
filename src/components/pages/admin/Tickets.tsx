@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useState, type ComponentProps } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -11,10 +11,13 @@ import {
 import type { Tickets as Ticket } from "../../types/tickets";
 import TicketStatus from "../../modals/ticketStatus";
 import SubmitTicket from "../../modals/SubmitTicket";
+import { publishDataChange, useDataRefresh } from "@/hooks/useDataRefresh";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
 
 const filterOptions = ["All", "Open", "In Progress", "Pending", "Resolved"];
 
-const intensityFilter = ["All", "Low", "Medium", "High"];
+const intensityFilter = ["All", "Low", "Medium", "High", "Critical"];
 
 function Tickets() {
   const [activeStatusFilter, setActiveStatusFilter] = useState<"All" | Ticket["status"]>("All");
@@ -22,44 +25,30 @@ function Tickets() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSubscriber, setSelectedSubscriber] = useState<Ticket | null>(null);
   const [showSubmitTicket, setShowSubmitTicket] = useState(false);
-  const tickets: Ticket[] = [
-    {
-      ticketID: "TICK-1001",
-      subscriber: "Jonathan Landoy",
-      issue: "No Internet",
-      category: "Technical",
-      priority: "High",
-      assignedTo: "Rizal Tech Team",
-      status: "In Progress",
-      SLA: "2h remaining",
-      created: "Sep 18, 08:03",
-      updated: "2026-09-26 08:30 AM",
-    },
-    {
-      ticketID: "TICK-1002",
-      subscriber: "Guiller Santos",
-      issue: "Connection Drops",
-      category: "Hardware",
-      priority: "Medium",
-      assignedTo: "Manila Support",
-      status: "Pending",
-      SLA: "5h remaining",
-      created: "Sep 20, 10:30",
-      updated: "2026-09-25 04:15 PM",
-    },
-    {
-      ticketID: "TICK-1003",
-      subscriber: "Vanna Mae",
-      issue: "Plan Change",
-      category: "Billing",
-      priority: "Low",
-      assignedTo: "Finance Team",
-      status: "Resolved",
-      SLA: "Breached",
-      created: "Noc, 1:45",
-      updated: "2026-09-24 11:00 AM",
-    },
-  ];
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  async function loadTickets() {
+    const token = localStorage.getItem("diverge_token");
+    if (!token) {
+      setErrorMessage("Administrator sign-in is required to view tickets.");
+      return;
+    }
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/admin/tickets`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.message ?? "Unable to load tickets.");
+      setTickets(Array.isArray(payload?.data) ? payload.data : []);
+      setErrorMessage("");
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Unable to load tickets.");
+    }
+  }
+
+  useDataRefresh(loadTickets);
+  useEffect(() => { void loadTickets(); }, []);
 
   const filteredTickets = tickets.filter((ticket) => {
     const matchesStatus = activeStatusFilter === "All" || ticket.status === activeStatusFilter;
@@ -96,8 +85,13 @@ function Tickets() {
         return "text-[#DE0961] font-semibold";
       case "Low":
         return "text-[#FFB800] font-semibold";
+      case "Critical":
+        return "text-red-500 font-semibold";
     }
   }
+  const openCount = tickets.filter((ticket) => ticket.status === "Open").length;
+  const inProgressCount = tickets.filter((ticket) => ticket.status === "In Progress").length;
+  const resolvedCount = tickets.filter((ticket) => ticket.status === "Resolved").length;
   return (
     <>
       <div className="bg-[#121212] w-full">
@@ -107,9 +101,7 @@ function Tickets() {
               <h1 className="text-white text-2xl font-bold tracking-wider text-left">
                 Support Ticketing
               </h1>
-              <p className="text-white opacity-30 italic text-xs sm:text-sm  font-mono">
-                Wednesday, September 16, 2026 12:31AM PHT
-              </p>
+              <p className="text-white opacity-30 italic text-xs sm:text-sm font-mono">{tickets.length} recorded tickets</p>
             </div>
             <div className="px-5">
               <Button
@@ -123,34 +115,36 @@ function Tickets() {
 
           <div className="mb-5 pr-10 flex flex-wrap justify-center items-center gap-2 w-full">
             <div className="w-45 h-25 shadow-glassy-jeri rounded-[15px] content-center bg-[#C4C4C4]/20">
-              <h1 className="font-bold text-[35px] mt-2">4</h1>
+              <h1 className="font-bold text-[35px] mt-2">{openCount}</h1>
               <h2 className="font-light text-[20px] text-[#FFFF] mt-5">Open</h2>
             </div>
             <div className="w-45 h-25 shadow-glassy-jeri rounded-[15px] content-center bg-[#C4C4C4]/20">
-              <h1 className="font-bold text-[35px] mt-2">5</h1>
+              <h1 className="font-bold text-[35px] mt-2">{inProgressCount}</h1>
               <h2 className="font-light text-[20px] text-[#FFFF] mt-5">
                 In Progress
               </h2>
             </div>
             <div className="w-45 h-25 shadow-glassy-jeri rounded-[15px] content-center bg-[#C4C4C4]/20">
-              <h1 className="font-bold text-[35px] mt-2">6</h1>
+              <h1 className="font-bold text-[35px] mt-2">{resolvedCount}</h1>
               <h2 className="font-light text-[20px] text-[#FFFF] mt-5">
                 Resolved Today
               </h2>
             </div>
             <div className="w-45 h-25 shadow-glassy-jeri rounded-[15px] content-center bg-[#C4C4C4]/20">
-              <h1 className="font-bold text-[35px] mt-2">1</h1>
+              <h1 className="font-bold text-[35px] mt-2">{tickets.filter((ticket) => ticket.priority === "Critical").length}</h1>
               <h2 className="font-light text-[20px] text-[#FFFF] mt-5">
                 Escalated
               </h2>
             </div>
             <div className="w-45 h-25 shadow-glassy-jeri rounded-[15px] content-center bg-[#C4C4C4]/20">
-              <h1 className="font-bold text-[35px] mt-2">6</h1>
+              <h1 className="font-bold text-[35px] mt-2">{tickets.filter((ticket) => ticket.SLA === "Breached").length}</h1>
               <h2 className="font-light text-[20px] text-[#FFFF] mt-5">
                 SLA Breached
               </h2>
             </div>
           </div>
+
+          {errorMessage && <p role="alert" className="mb-3 text-sm text-red-300">{errorMessage}</p>}
 
           <div className="mb-4 ml-10 flex w-full flex-wrap items-center gap-3">
             <input
@@ -386,13 +380,24 @@ function Tickets() {
       </div>
 
       {selectedSubscriber && (
-        <TicketStatus ticket={selectedSubscriber} onClose={() => setSelectedSubscriber(null)} />
+        <TicketStatus
+          ticket={selectedSubscriber}
+          onClose={() => setSelectedSubscriber(null)}
+          onAssigned={() => {
+            publishDataChange();
+            void loadTickets();
+          }}
+        />
       )}
 
       {showSubmitTicket && (
         <SubmitTicket
-          customer={{} as ComponentProps<typeof SubmitTicket>["customer"]}
           onClose={() => setShowSubmitTicket(false)}
+          mode="admin"
+          onSubmitted={() => {
+            publishDataChange();
+            void loadTickets();
+          }}
         />
       )}
     </>

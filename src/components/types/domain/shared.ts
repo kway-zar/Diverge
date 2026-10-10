@@ -10,13 +10,13 @@ export type EngineerStatus =
   | "Off-Duty"
   | "Unavailable";
 
-export type TicketPriority = "High" | "Medium" | "Low";
+export type TicketPriority = "High" | "Medium" | "Low" | "Critical";
 export type TicketStatus = "In Progress" | "Open" | "Pending" | "Resolved";
 
 export type JobPriority = "High" | "Critical";
 export type JobStatus = "Assigned" | "En Route" | "On-Site";
 
-export type PaymentMethod = "Gcash" | "GCash" | "Bank Transfer" | "Maya" | "Visa / Mastercard" | "-";
+export type PaymentMethod = "Gcash" | "GCash" | "Bank Transfer" | "Maya" | "Visa / Mastercard" | "Demo GCash" | "Demo Maya" | "Demo Card" | "-";
 export type InvoiceStatus = "Paid" | "Pending" | "Overdue";
 export type PaymentStatus = "Paid" | "Pending" | "Overdue";
 

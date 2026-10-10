@@ -12,6 +12,9 @@ import {
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import type { Customer } from "../types/customer";
+import { publishDataChange } from "@/hooks/useDataRefresh";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
 
 function ManageAccount({
   customer,
@@ -47,6 +50,7 @@ function ManageAccount({
     since: customer.since,
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSave = async () => {
     if (!customer.id) {
@@ -55,12 +59,16 @@ function ManageAccount({
     }
 
     setIsSaving(true);
+    setErrorMessage("");
 
     try {
-      const response = await fetch(`http://localhost:4001/api/customers/${customer.id}`, {
+      const token = localStorage.getItem("diverge_token");
+      if (!token) throw new Error("Administrator sign-in is required to update customers.");
+      const response = await fetch(`${API_BASE_URL}/api/customers/${customer.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           ...formData,
@@ -81,10 +89,10 @@ function ManageAccount({
         ...payload.data,
       } as Customer;
 
+      publishDataChange();
       onSave(updatedCustomer);
     } catch (error) {
-      console.error("Failed to save customer changes:", error);
-      alert(error instanceof Error ? error.message : "Unable to save customer changes.");
+      setErrorMessage(error instanceof Error ? error.message : "Unable to save customer changes.");
     } finally {
       setIsSaving(false);
     }
@@ -283,6 +291,7 @@ function ManageAccount({
               {isSaving ? "Saving..." : "Save Changes"}
             </Button>
           </div>
+          {errorMessage && <p role="alert" className="text-sm text-red-300">{errorMessage}</p>}
         </div>
       </DialogContent>
     </Dialog>

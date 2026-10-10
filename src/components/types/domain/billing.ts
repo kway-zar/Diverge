@@ -26,6 +26,7 @@ export interface CustomerPayment extends TimestampedEntity {
   invoice: string;
   invoiceId?: string;
   period: string;
+  plan?: string;
   amount: string;
   due: string;
   method: PaymentMethod;

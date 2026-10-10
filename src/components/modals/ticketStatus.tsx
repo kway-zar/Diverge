@@ -1,136 +1,96 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Tickets } from "../types/tickets";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
+type TechnicianOption = { id: string; name: string; location: string; queueCount: number };
 
-function TicketStatus({
-    ticket,
-    onClose,
-}: {
-    ticket: Tickets;
-    onClose: () => void;
-}) {
+function TicketStatus({ ticket, onClose, onAssigned }: { ticket: Tickets; onClose: () => void; onAssigned: () => void }) {
+  const [technicians, setTechnicians] = useState<TechnicianOption[]>([]);
+  const [technicianId, setTechnicianId] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-    const status = [
-    { value: "In Progress", label: "In Progress" },
-    { value: "Open", label: "Open" },
-    { value: "Pending", label: "Pending" },
-    { value: "Resolved", label: "Resolved" },
-  ];
+  useEffect(() => {
+    async function loadTechnicians() {
+      const token = localStorage.getItem("diverge_token");
+      if (!token) return;
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/v1/admin/tickets/technicians`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload?.message ?? "Unable to load technicians.");
+        setTechnicians(Array.isArray(payload?.data) ? payload.data : []);
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Unable to load technicians.");
+      }
+    }
+    void loadTechnicians();
+  }, []);
 
-    const [, setShowTicketStatus] = useState(false);
-    return(
-        <>
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#121212]/50">
-        <Card className="relative w-[550px] h-auto  ring-0 bg-white/5 shadow-glassy-jeri rounded-[2vw] opacity-80 gap-2 max-sm:w-[calc(100vw-2rem)] max-sm:max-h-[90vh] max-sm:overflow-y-auto">
-          <CardHeader className="flex flex-col ml-4 font-medium">
-            <CardTitle className="font-ubuntu font-light opacity-30 text-[20px]">TICKET STATUS</CardTitle>
-            <CardTitle className="font-ubuntu tracking-wider text-[25px]">{ticket.issue}</CardTitle>
-            <CardDescription className="font-ubuntu text-[#3ACF98]">
-              {ticket.ticketID}
-            </CardDescription>
-            <Button
-              className="absolute top-4 right-5 text-white rounded-full w-6 h-6 p-0 text-lg hover-glass-rim shrink-0"
-              onClick={onClose}
-            >
-              X
-            </Button>
-          </CardHeader>
-          <CardContent className="flex flex-col mt-2">
-            <div className="grid grid-cols-1 md:grid-cols-2">
-              <div>
-                <h2 className="flex ml-4 mb-0.5 text-[12px] font-bold text-[#C4C4C4] ">
-                  SUBSCRIBER
-                </h2>
-                <p className="flex ml-10 mb-0.5 font-ubuntu-mono text-[15px] text-[#FFFFFF]">
-                  {ticket.subscriber}
-                </p>
-                <h2 className="flex ml-4 mb-0.5 text-[12px] font-bold text-[#C4C4C4] ">
-                  CATEGORY
-                </h2>
-                <p className="flex ml-10 mb-0.5 font-ubuntu-mono text-[15px] text-[#FFFFFF]">
-                  {ticket.category}
-                </p>
-                <h2 className="flex ml-4 mb-0.5 text-[12px] font-bold text-[#C4C4C4] ">
-                  PRIORITY
-                </h2>
-                <p className="flex ml-10 mb-0.5 font-ubuntu-mono text-[15px] text-[#FFFFFF]">
-                  {ticket.priority}
-                </p>
-                <h2 className="flex ml-4 mb-0.5 text-[12px] font-bold text-[#C4C4C4]">
-                  ASSIGNED TO
-                </h2>
-                <p className="flex ml-10 mb-0.5 font-ubuntu-mono text-[15px] text-[#FFFFFF]">
-                  {ticket.assignedTo}
-                </p>
-              </div>
-              <div className="ml-5">
-                <h2 className="flex ml-4 mb-0.5 text-[12px] font-bold text-[#C4C4C4] ">
-                  STATUS
-                </h2>
-                 <Select items={status} defaultValue="Update Status" >
-                  <SelectTrigger id="form-plan" className="w-full max-w-45 bg-[#D9D9D9]/20  shadow-glassy-jeri rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 ml-4 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#1a1a1a] shadow-glassy rounded-[10px] border border-white/10 ring-0 text-white">
-                    <SelectGroup>
-                      {status.map((status) => (
-                        <SelectItem key={status.value} value={status.value} className="text-white focus:bg-white/10 focus:text-white">
-                          {status.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                <h2 className="flex ml-4 mb-0.5 text-[12px] font-bold text-[#C4C4C4] ">
-                  SLA
-                </h2>
-                <p className="flex ml-10 mb-0.5 font-ubuntu-mono text-[15px] text-[#FFFFFF]">
-                  {ticket.SLA}
-                </p>
-                <h2 className="flex ml-4 mb-0.5 text-[12px] font-bold text-[#C4C4C4] ">
-                  CREATED
-                </h2>
-                <p className="flex ml-10 mb-0.5 font-ubuntu-mono text-[15px] text-[#FFFFFF]">
-                  {ticket.created}
-                </p>
-                <h2 className="flex ml-4 mb-0.5 text-[12px] font-bold text-[#C4C4C4]">
-                    LAST UPDATED
-                </h2>
-                <p className="flex ml-10 mb-0.5 font-ubuntu-mono text-[15px] text-[#FFFFFF]">
-                  {ticket.updated}
-                </p>
-              </div>
-            </div>
+  async function assignTicket() {
+    const token = localStorage.getItem("diverge_token");
+    if (!token || !ticket.id || !technicianId) {
+      setErrorMessage("Select a technician before assigning this ticket.");
+      return;
+    }
+    setIsLoading(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/admin/tickets/${ticket.id}/assign`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ technicianId }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.message ?? "Unable to assign ticket.");
+      onAssigned();
+      onClose();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Unable to assign ticket.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
-            <div className="flex justify-center gap-10 mt-5">
-              <Button className="bg-[#B00049] font-light w-40 rounded-2xl shadow-glassy-jeri text-xs tracking-widest" onClick={() => setShowTicketStatus(true)}>
-                Escalate
-              </Button>
-              <Button className="bg-[#3ACF98] font-light w-40 rounded-2xl shadoe-glassy-jeri text-xs tracking-widest">
-                Update Status
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-        </>
-    )
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+      <Card className="relative w-full max-w-2xl gap-3 rounded-xl bg-[#171717] text-white shadow-glassy-jeri ring-1 ring-white/10">
+        <CardHeader>
+          <CardTitle>Ticket assignment</CardTitle>
+          <CardDescription>{ticket.ticketID} · {ticket.issue}</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <dl className="grid grid-cols-2 gap-3 text-sm">
+            <div><dt className="text-white/50">Customer</dt><dd>{ticket.subscriber}</dd></div>
+            <div><dt className="text-white/50">Status</dt><dd>{ticket.status}</dd></div>
+            <div><dt className="text-white/50">Category</dt><dd>{ticket.category}</dd></div>
+            <div><dt className="text-white/50">Priority</dt><dd>{ticket.priority}</dd></div>
+            <div><dt className="text-white/50">SLA</dt><dd>{ticket.SLA}</dd></div>
+            <div><dt className="text-white/50">Assigned to</dt><dd>{ticket.assignedTo}</dd></div>
+          </dl>
+          {ticket.status !== "Resolved" && (
+            <label className="flex flex-col gap-2 text-sm text-white/70">
+              Assign technician
+              <select value={technicianId} onChange={(event) => setTechnicianId(event.target.value)} className="h-10 rounded-md border border-white/15 bg-[#222] px-3 text-white">
+                <option value="">Select technician</option>
+                {technicians.map((technician) => (
+                  <option key={technician.id} value={technician.id}>{technician.name} · {technician.location} · queue {technician.queueCount}</option>
+                ))}
+              </select>
+            </label>
+          )}
+          {errorMessage && <p role="alert" className="text-sm text-red-300">{errorMessage}</p>}
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={onClose}>Close</Button>
+            {ticket.status !== "Resolved" && <Button disabled={isLoading || !technicianId} onClick={() => void assignTicket()}>{isLoading ? "Assigning..." : "Assign Job"}</Button>}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
 
 export default TicketStatus;

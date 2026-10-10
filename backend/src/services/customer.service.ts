@@ -28,57 +28,9 @@ export type BillingInvoiceRecord = {
   plan: string;
   amount: string;
   dueDate: string;
-  paymentMethod: 'Gcash' | 'Bank Transfer' | 'Maya' | '-';
+  paymentMethod: 'Gcash' | 'Bank Transfer' | 'Maya' | 'Demo GCash' | 'Demo Maya' | 'Demo Card' | '-';
   status: 'Paid' | 'Pending' | 'Overdue';
 };
-
-const seededCustomers: CustomerRecord[] = [
-  {
-    id: 'seed-jonathan-landoy',
-    accountID: 'ACC-SEED-001',
-    name: 'Jonathan Landoy',
-    email: 'jonathan@example.com',
-    type: 'Residential',
-    plan: 'Fiber 200',
-    usage: '5000 MB',
-    balance: '1000',
-    status: 'Active',
-    area: 'Rizal',
-    since: '2023-01-15T00:00:00.000Z',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 'seed-guiller-delacruz',
-    accountID: 'ACC-SEED-002',
-    name: 'Guiller DelaCruz',
-    email: 'guiller.delaCruz@example.com',
-    type: 'Commercial',
-    plan: 'Business Pro',
-    usage: '10000 MB',
-    balance: '2500',
-    status: 'Pending',
-    area: 'Manila',
-    since: '2023-03-20T00:00:00.000Z',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 'seed-vanna-banana',
-    accountID: 'ACC-SEED-003',
-    name: 'Vanna Banana',
-    email: 'vanna.banana@example.com',
-    type: 'Government',
-    plan: 'Government Plus',
-    usage: '5000 MB',
-    balance: '1000',
-    status: 'Suspended',
-    area: 'Cebu',
-    since: '2023-01-15T00:00:00.000Z',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
 
 function mapPrismaCustomerType(type: string): CustomerRecord['type'] {
   const normalized = type.toLowerCase();
@@ -189,6 +141,12 @@ function toUiPaymentMethod(method?: string | null, status?: string): BillingInvo
         return 'Bank Transfer';
       case 'MAYA':
         return 'Maya';
+      case 'DEMO_GCASH':
+        return 'Demo GCash';
+      case 'DEMO_MAYA':
+        return 'Demo Maya';
+      case 'DEMO_CARD':
+        return 'Demo Card';
       default:
         break;
     }
@@ -242,31 +200,22 @@ function serializeInvoiceRecord(data: {
 }
 
 export async function getAllCustomers(): Promise<CustomerRecord[]> {
-  try {
-    const result = await prisma.customer.findMany({
-      include: { plan: true },
-      orderBy: { createdAt: 'desc' },
-    });
+  const result = await prisma.customer.findMany({
+    include: { plan: true },
+    orderBy: { createdAt: 'desc' },
+  });
 
-    return result.map((customer) => serializeCustomerRecord(customer));
-  } catch (error) {
-    console.error('Customer DB lookup failed, using seeded fallback data.', error);
-    return seededCustomers;
-  }
+  return result.map((customer) => serializeCustomerRecord(customer));
 }
 
 export async function getCustomerById(id: string): Promise<CustomerRecord | undefined> {
-  try {
-    const result = await prisma.customer.findUnique({
-      where: { id },
-      include: { plan: true },
-    });
+  const result = await prisma.customer.findUnique({
+    where: { id },
+    include: { plan: true },
+  });
 
-    if (!result) return undefined;
-    return serializeCustomerRecord(result);
-  } catch {
-    return undefined;
-  }
+  if (!result) return undefined;
+  return serializeCustomerRecord(result);
 }
 
 export async function getAllBillingInvoices(): Promise<BillingInvoiceRecord[]> {
@@ -308,6 +257,35 @@ export async function getCustomerBillingByUserId(userId: string): Promise<Billin
   return getCustomerBillingByCustomerId(customer.id);
 }
 
+export async function getCustomerActivePlanByUserId(userId: string) {
+  const customer = await prisma.customer.findFirst({
+    where: { userId },
+    include: {
+      plan: true,
+      subscriptions: {
+        where: { status: 'ACTIVE' },
+        include: { plan: true },
+        orderBy: { updatedAt: 'desc' },
+        take: 1,
+      },
+    },
+  });
+  if (!customer) return null;
+
+  const activeSubscription = customer.subscriptions[0];
+  const plan = activeSubscription?.plan ?? customer.plan;
+  if (!plan) return null;
+
+  return {
+    id: plan.id,
+    name: plan.name,
+    speed: plan.speed,
+    cost: plan.cost,
+    status: activeSubscription?.status ?? customer.status,
+    effectiveAt: activeSubscription?.updatedAt ?? customer.updatedAt,
+  };
+}
+
 export async function getCustomerBillingByCustomerId(customerId: string): Promise<BillingInvoiceRecord[]> {
   const invoices = await prisma.invoice.findMany({
     where: { customerId },
@@ -339,121 +317,145 @@ export async function getCustomerBillingByCustomerId(customerId: string): Promis
 export async function payCustomerInvoice(
   userId: string,
   invoiceKey: string,
-  paymentMethod: string = '-',
-): Promise<{ currentInvoice: BillingInvoiceRecord; nextInvoice: BillingInvoiceRecord }> {
-  const customer = await prisma.customer.findFirst({
-    where: { userId },
-    include: { plan: true },
-  });
-
-  if (!customer) {
-    throw new Error('Customer not found');
+  paymentMethod: string = 'DEMO_GCASH',
+): Promise<{ currentInvoice: BillingInvoiceRecord; paymentReference: string; upcomingInvoiceID: string | null }> {
+  if (!['DEMO_GCASH', 'DEMO_MAYA', 'DEMO_CARD'].includes(paymentMethod)) {
+    throw new Error('Only demo-ledger payment methods are enabled');
   }
+
+  const customer = await prisma.customer.findFirst({ where: { userId }, include: { plan: true } });
+  if (!customer) throw new Error('Customer not found');
 
   const existingInvoice = await prisma.invoice.findFirst({
-    where: {
-      customerId: customer.id,
-      ...buildInvoiceLookup(invoiceKey),
-    },
-    include: {
-      customer: true,
-      plan: true,
-    },
+    where: { customerId: customer.id, ...buildInvoiceLookup(invoiceKey) },
   });
+  if (!existingInvoice) throw new Error('Invoice not found');
+  if (existingInvoice.status === 'PAID') throw new Error('Invoice is already paid');
 
-  if (!existingInvoice) {
-    throw new Error('Invoice not found');
-  }
+  const outstandingAmount = Math.max(0, existingInvoice.amount - existingInvoice.creditAmount);
+  if (outstandingAmount <= 0) throw new Error('Invoice has no outstanding balance');
 
-  const selectedMethod = paymentMethod && paymentMethod !== '-' ? paymentMethod : existingInvoice.paymentMethod || 'GCASH';
+  const settledAt = new Date();
+  const result = await prisma.$transaction(async (transaction) => {
+    const updatedInvoiceCount = await transaction.invoice.updateMany({
+      where: {
+        id: existingInvoice.id,
+        status: { not: 'PAID' },
+        creditAmount: existingInvoice.creditAmount,
+      },
+      data: { status: 'PAID', paymentMethod },
+    });
+    if (updatedInvoiceCount.count !== 1) throw new Error('Invoice has already changed; reload and try again');
 
-  const paidInvoice = await prisma.invoice.update({
-    where: { id: existingInvoice.id },
-    data: {
-      status: 'PAID',
-      paymentMethod: selectedMethod,
-    },
-    include: {
-      customer: true,
-      plan: true,
-    },
-  });
+    const updatedPayment = await transaction.payment.updateMany({
+      where: { invoiceId: existingInvoice.id, status: 'PENDING' },
+      data: {
+        amount: outstandingAmount,
+        method: paymentMethod,
+        status: 'PAID',
+        settledAt,
+      },
+    });
 
-  await prisma.payment.updateMany({
-    where: { invoiceId: existingInvoice.id },
-    data: {
-      status: 'PAID',
-      method: selectedMethod,
-    },
-  });
+    if (updatedPayment.count === 0) {
+      await transaction.payment.create({
+        data: {
+          customerId: customer.id,
+          invoiceId: existingInvoice.id,
+          period: existingInvoice.dueDate.toISOString().slice(0, 7),
+          amount: outstandingAmount,
+          due: existingInvoice.dueDate,
+          method: paymentMethod,
+          status: 'PAID',
+          settledAt,
+        },
+      });
+    }
 
-  const nextDueDate = new Date(existingInvoice.dueDate);
-  nextDueDate.setMonth(nextDueDate.getMonth() + 1);
-  const nextInvoiceNumber = `INV-${nextDueDate.getFullYear()}-${String(nextDueDate.getMonth() + 1).padStart(2, '0')}-${String(Date.now() % 10000).padStart(4, '0')}`;
+    const subscription = await transaction.subscription.findFirst({
+      where: { customerId: customer.id, status: 'ACTIVE' },
+      include: { plan: true },
+      orderBy: { updatedAt: 'desc' },
+    });
+    const nextPlan = subscription?.plan ?? customer.plan;
+    let upcomingInvoiceNumber: string | null = null;
+    if (nextPlan?.cost && nextPlan.cost > 0) {
+      const nextYear = existingInvoice.dueDate.getUTCFullYear();
+      const nextMonthIndex = existingInvoice.dueDate.getUTCMonth() + 1;
+      const lastDay = new Date(Date.UTC(nextYear, nextMonthIndex + 1, 0)).getUTCDate();
+      const billingDay = subscription?.billingDay ?? existingInvoice.dueDate.getUTCDate();
+      const nextDueDate = new Date(Date.UTC(nextYear, nextMonthIndex, Math.min(billingDay, lastDay)));
+      const nextPeriod = `${nextDueDate.getUTCFullYear()}-${String(nextDueDate.getUTCMonth() + 1).padStart(2, '0')}`;
+      upcomingInvoiceNumber = `INV-${nextPeriod.replace('-', '')}-${(subscription?.id ?? customer.id).toUpperCase()}`;
+      const alreadyGenerated = await transaction.invoice.findUnique({ where: { invoiceNumber: upcomingInvoiceNumber } });
 
-  const nextInvoice = await prisma.invoice.create({
-    data: {
-      customerId: customer.id,
-      planId: existingInvoice.planId ?? customer.planId ?? undefined,
-      invoiceNumber: nextInvoiceNumber,
-      email: customer.email,
-      contact: existingInvoice.contact,
-      amount: existingInvoice.amount,
-      dueDate: nextDueDate,
-      paymentMethod: '-',
-      status: 'PENDING',
-    },
-    include: {
-      customer: true,
-      plan: true,
-    },
-  });
+      if (!alreadyGenerated) {
+        const upcomingInvoice = await transaction.invoice.create({
+          data: {
+            customerId: customer.id,
+            planId: nextPlan.id,
+            invoiceNumber: upcomingInvoiceNumber,
+            email: customer.email,
+            contact: existingInvoice.contact,
+            amount: nextPlan.cost,
+            dueDate: nextDueDate,
+            paymentMethod: null,
+            status: 'PENDING',
+            lineItems: {
+              create: {
+                description: `${nextPlan.name} service for ${nextPeriod}`,
+                quantity: 1,
+                unitAmount: nextPlan.cost,
+                amount: nextPlan.cost,
+              },
+            },
+          },
+        });
+        await transaction.payment.create({
+          data: {
+            customerId: customer.id,
+            invoiceId: upcomingInvoice.id,
+            period: nextPeriod,
+            amount: nextPlan.cost,
+            due: nextDueDate,
+            method: null,
+            status: 'PENDING',
+          },
+        });
+      }
+    }
 
-  await prisma.payment.create({
-    data: {
-      customerId: customer.id,
-      invoiceId: nextInvoice.id,
-      period: nextDueDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-      amount: nextInvoice.amount,
-      due: nextDueDate,
-      method: '-',
-      status: 'PENDING',
-    },
+    const [paidInvoice, payment] = await Promise.all([
+      transaction.invoice.findUniqueOrThrow({
+        where: { id: existingInvoice.id },
+        include: { customer: true, plan: true },
+      }),
+      transaction.payment.findFirstOrThrow({
+        where: { invoiceId: existingInvoice.id, status: 'PAID', settledAt },
+      }),
+    ]);
+    return { paidInvoice, payment, upcomingInvoiceNumber };
   });
 
   return {
     currentInvoice: serializeInvoiceRecord({
-      id: paidInvoice.id,
-      customerId: paidInvoice.customerId,
-      invoiceNumber: paidInvoice.invoiceNumber,
+      id: result.paidInvoice.id,
+      customerId: result.paidInvoice.customerId,
+      invoiceNumber: result.paidInvoice.invoiceNumber,
       customer: {
-        name: paidInvoice.customer.name,
-        email: paidInvoice.customer.email,
-        accountId: paidInvoice.customer.accountId,
+        name: result.paidInvoice.customer.name,
+        email: result.paidInvoice.customer.email,
+        accountId: result.paidInvoice.customer.accountId,
       },
-      plan: paidInvoice.plan,
-      contact: paidInvoice.contact,
-      amount: paidInvoice.amount,
-      dueDate: paidInvoice.dueDate,
-      paymentMethod: paidInvoice.paymentMethod,
-      status: paidInvoice.status,
+      plan: result.paidInvoice.plan,
+      contact: result.paidInvoice.contact,
+      amount: result.paidInvoice.amount,
+      dueDate: result.paidInvoice.dueDate,
+      paymentMethod: result.paidInvoice.paymentMethod,
+      status: result.paidInvoice.status,
     }),
-    nextInvoice: serializeInvoiceRecord({
-      id: nextInvoice.id,
-      customerId: nextInvoice.customerId,
-      invoiceNumber: nextInvoice.invoiceNumber,
-      customer: {
-        name: nextInvoice.customer.name,
-        email: nextInvoice.customer.email,
-        accountId: nextInvoice.customer.accountId,
-      },
-      plan: nextInvoice.plan,
-      contact: nextInvoice.contact,
-      amount: nextInvoice.amount,
-      dueDate: nextInvoice.dueDate,
-      paymentMethod: nextInvoice.paymentMethod,
-      status: nextInvoice.status,
-    }),
+    paymentReference: result.payment.id,
+    upcomingInvoiceID: result.upcomingInvoiceNumber,
   };
 }
 
@@ -561,6 +563,19 @@ export async function createCustomer(input: CreateCustomerInput): Promise<Custom
       throw new Error('Customer was not created');
     }
 
+    if (customer.status === 'ACTIVE' && customer.planId) {
+      const startedAt = customer.since;
+      await prisma.subscription.create({
+        data: {
+          customerId: customer.id,
+          planId: customer.planId,
+          billingDay: startedAt.getUTCDate(),
+          startedAt,
+          status: 'ACTIVE',
+        },
+      });
+    }
+
     return serializeCustomerRecord(customer);
   } catch (error) {
     throw new Error(error instanceof Error ? error.message : 'Customer creation failed');
@@ -598,21 +613,55 @@ export async function updateCustomer(input: UpdateCustomerInput): Promise<Custom
         })
       : existing.plan;
 
-    const updated = await prisma.customer.update({
-      where: { id },
-      data: {
-        name: updates.name ?? existing.name,
-        email: updates.email ?? existing.email,
-        type: nextType as never,
-        planId: plan?.id ?? existing.planId ?? undefined,
-        usage: updates.usage ?? existing.usage ?? '0',
-        balance: updates.balance ?? existing.balance ?? '0',
-        status: nextStatus as never,
-        area: updates.area ?? existing.area ?? 'N/A',
-        since: updates.since ? new Date(updates.since) : existing.since,
-      },
-      include: { plan: true },
+    const [, updated] = await prisma.$transaction([
+      prisma.user.update({
+        where: { id: existing.userId },
+        data: { email: updates.email ?? existing.email },
+      }),
+      prisma.customer.update({
+        where: { id },
+        data: {
+          name: updates.name ?? existing.name,
+          email: updates.email ?? existing.email,
+          type: nextType as never,
+          planId: plan?.id ?? existing.planId ?? undefined,
+          usage: updates.usage ?? existing.usage ?? '0',
+          balance: updates.balance ?? existing.balance ?? '0',
+          status: nextStatus as never,
+          area: updates.area ?? existing.area ?? 'N/A',
+          since: updates.since ? new Date(updates.since) : existing.since,
+        },
+        include: { plan: true },
+      }),
+    ]);
+
+    const activeSubscription = await prisma.subscription.findFirst({
+      where: { customerId: updated.id, status: 'ACTIVE' },
     });
+
+    if (updated.status === 'ACTIVE' && updated.planId) {
+      if (activeSubscription) {
+        await prisma.subscription.update({
+          where: { id: activeSubscription.id },
+          data: { planId: updated.planId },
+        });
+      } else {
+        await prisma.subscription.create({
+          data: {
+            customerId: updated.id,
+            planId: updated.planId,
+            billingDay: updated.since.getUTCDate(),
+            startedAt: new Date(),
+            status: 'ACTIVE',
+          },
+        });
+      }
+    } else if (activeSubscription) {
+      await prisma.subscription.update({
+        where: { id: activeSubscription.id },
+        data: { status: 'PAUSED' },
+      });
+    }
 
     return serializeCustomerRecord(updated);
   } catch (error) {

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ArrowLeft, Check, CreditCard, Download } from "lucide-react"
+import { ArrowLeft, Check, CreditCard } from "lucide-react"
 import { Button } from "../ui/button"
 import {
   Dialog,
@@ -11,8 +11,8 @@ import {
 } from "../ui/dialog"
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group"
 
-type PaymentMethod = "Gcash" | "Maya" | "Visa / Mastercard"
-type PaymentStep = "method" | "confirmation" | "success"
+type PaymentMethod = "GCASH" | "MAYA" | "CARD"
+type PaymentStep = "method" | "confirmation" | "success" | "error"
 
 type PayNowModalProps = {
   accountNumber: string
@@ -21,20 +21,21 @@ type PayNowModalProps = {
   amount: string
   planName: string
   invoiceId?: string
-  onPaymentSuccess?: (details: { invoiceId?: string; amount: string; method: PaymentMethod }) => void | Promise<void>
+  onPaymentSuccess?: (details: { invoiceId?: string; amount: string; method: PaymentMethod }) => Promise<{ paymentReference: string }>
 }
 
 const paymentMethods: { value: PaymentMethod; label: string; className: string }[] = [
-  { value: "Gcash", label: "GCash", className: "bg-[#0754d8] text-white" },
-  { value: "Maya", label: "maya", className: "bg-black text-[#42e6ad]" },
-  { value: "Visa / Mastercard", label: "VISA  ● Mastercard", className: "bg-[#f3f3ef] text-[#25234f]" },
+  { value: "GCASH", label: "GCash", className: "bg-[#0754d8] text-white" },
+  { value: "MAYA", label: "Maya", className: "bg-black text-[#42e6ad]" },
+  { value: "CARD", label: "Visa / Mastercard", className: "bg-[#f3f3ef] text-[#25234f]" },
 ]
 
 function PayNowModal({ accountNumber, billingPeriod, dueDate, amount, planName, invoiceId, onPaymentSuccess }: PayNowModalProps) {
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<PaymentStep>("method")
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("Gcash")
-  const [transactionId, setTransactionId] = useState("")
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("GCASH")
+  const [errorMessage, setErrorMessage] = useState("")
+  const [paymentReference, setPaymentReference] = useState("")
 
   const closeModal = () => {
     setOpen(false)
@@ -42,41 +43,30 @@ function PayNowModal({ accountNumber, billingPeriod, dueDate, amount, planName, 
 
   const openModal = () => {
     setStep("method")
-    setTransactionId("")
+    setErrorMessage("")
+    setPaymentReference("")
     setOpen(true)
   }
 
   const confirmPayment = async () => {
-    setTransactionId(`TXN-${Date.now().toString().slice(-9)}`)
+    if (!onPaymentSuccess) {
+      setErrorMessage("The demo settlement action is unavailable.")
+      setStep("error")
+      return
+    }
 
-    if (onPaymentSuccess) {
-      await onPaymentSuccess({
+    try {
+      const result = await onPaymentSuccess({
         invoiceId,
         amount,
         method: paymentMethod,
       })
+      setPaymentReference(result.paymentReference)
+      setStep("success")
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Unable to start payment.")
+      setStep("error")
     }
-
-    setStep("success")
-  }
-
-  const downloadReceipt = () => {
-    const receipt = [
-      "Diverge payment receipt",
-      `Account number: ${accountNumber}`,
-      `Billing period: ${billingPeriod}`,
-      `Plan: ${planName}`,
-      `Amount: ${amount}`,
-      `Payment method: ${paymentMethod}`,
-      `Transaction ID: ${transactionId}`,
-      `Date: ${new Date().toLocaleDateString()}`,
-    ].join("\n")
-    const url = URL.createObjectURL(new Blob([receipt], { type: "text/plain" }))
-    const link = document.createElement("a")
-    link.href = url
-    link.download = `${transactionId}-receipt.txt`
-    link.click()
-    URL.revokeObjectURL(url)
   }
 
   return (
@@ -104,13 +94,15 @@ function PayNowModal({ accountNumber, billingPeriod, dueDate, amount, planName, 
                 <dl className="space-y-1 pl-2 font-ubuntu-mono text-xs text-white/85">
                   <div className="flex gap-2"><dt className="text-white/55">Account Number:</dt><dd>{accountNumber}</dd></div>
                   <div className="flex gap-2"><dt className="text-white/55">Billing Period:</dt><dd>{billingPeriod}</dd></div>
+                  <div className="flex gap-2"><dt className="text-white/55">Plan:</dt><dd>{planName}</dd></div>
                   <div className="flex gap-2"><dt className="text-white/55">Due Date:</dt><dd>{dueDate}</dd></div>
                   <div className="flex gap-2"><dt className="text-white/55">Amount Due:</dt><dd className="font-semibold">{amount}</dd></div>
                 </dl>
               </section>
 
               <section aria-labelledby="payment-method-title">
-                <h2 id="payment-method-title" className="mb-3 font-ubuntu-mono text-[10px] font-medium uppercase tracking-wider text-[#3ACF98]/70">Payment Methods</h2>
+                <h2 id="payment-method-title" className="mb-3 font-ubuntu-mono text-[10px] font-medium uppercase tracking-wider text-[#3ACF98]/70">Payment method</h2>
+                <p className="mb-3 text-xs text-amber-200/80">Demo only. This records the invoice as settled locally; no external payment or money transfer occurs.</p>
                 <RadioGroup
                   aria-labelledby="payment-method-title"
                   value={paymentMethod}
@@ -132,7 +124,7 @@ function PayNowModal({ accountNumber, billingPeriod, dueDate, amount, planName, 
             </div>
             <DialogFooter className="grid grid-cols-2 gap-3 border-0 bg-transparent px-5 pb-5 sm:flex-row sm:justify-between sm:px-6 sm:pb-6">
               <Button variant="outline" className="h-9 rounded-[2vw] border-[#DE0961]/40 bg-[#DE0961]/15 font-ubuntu-mono text-[#DE0961] shadow-glassy-jeri hover-glass-rim hover:bg-[#DE0961]/35" onClick={closeModal}>Cancel</Button>
-              <Button className="h-9 rounded-[2vw] border border-white/10 bg-[#3ACF98]/15 font-ubuntu-mono text-[#3ACF98] shadow-glassy-jeri hover-glass-rim hover:bg-[#3ACF98]/35" onClick={() => setStep("confirmation")}>Proceed to Payment</Button>
+              <Button className="h-9 rounded-md border border-white/10 bg-[#3ACF98]/15 font-ubuntu-mono text-[#3ACF98] shadow-glassy-jeri hover-glass-rim hover:bg-[#3ACF98]/35" onClick={() => setStep("confirmation")}>Review Demo Settlement</Button>
             </DialogFooter>
           </>
         )}
@@ -151,11 +143,12 @@ function PayNowModal({ accountNumber, billingPeriod, dueDate, amount, planName, 
               <p className="leading-relaxed text-white/90">
                 You are about to pay <strong className="text-white">{amount}</strong> for your <strong className="text-white">{billingPeriod}</strong> Diverge bill.
               </p>
-              <p className="text-white/80">Payment Method: <strong className="text-white">{paymentMethod}</strong></p>
+              <p className="text-white/80">Selected method: <strong className="text-white">{paymentMethods.find((method) => method.value === paymentMethod)?.label}</strong></p>
+              <p className="text-amber-200/80">No third-party provider is contacted and no funds are moved.</p>
             </div>
             <DialogFooter className="grid grid-cols-2 gap-3 border-0 bg-transparent px-5 pb-5 sm:flex-row sm:justify-between sm:px-6 sm:pb-6">
               <Button variant="outline" className="h-9 rounded-[2vw] border-[#DE0961]/40 bg-[#DE0961]/15 font-ubuntu-mono text-[#DE0961] shadow-glassy-jeri hover-glass-rim hover:bg-[#DE0961]/35" onClick={closeModal}>Cancel</Button>
-              <Button className="h-9 rounded-[2vw] border border-white/10 bg-[#3ACF98]/15 font-ubuntu-mono text-[#3ACF98] shadow-glassy-jeri hover-glass-rim hover:bg-[#3ACF98]/35" onClick={confirmPayment}>Confirm Payment</Button>
+              <Button className="h-9 rounded-md border border-white/10 bg-[#3ACF98]/15 font-ubuntu-mono text-[#3ACF98] shadow-glassy-jeri hover-glass-rim hover:bg-[#3ACF98]/35" onClick={confirmPayment}>Record Demo Settlement</Button>
             </DialogFooter>
           </>
         )}
@@ -164,24 +157,32 @@ function PayNowModal({ accountNumber, billingPeriod, dueDate, amount, planName, 
           <>
             <DialogHeader className="px-5 pt-5 sm:px-6 sm:pt-6">
               <DialogTitle className="flex items-center gap-2 font-ubuntu-mono text-sm font-medium text-[#3ACF98]">
-                Payment Successful <Check aria-hidden="true" className="size-4" />
+                Demo settlement recorded <Check aria-hidden="true" className="size-4" />
               </DialogTitle>
               <DialogDescription className="sr-only">payment has been completed.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 px-5 py-2 font-ubuntu-mono text-xs sm:px-6">
-              <p className="text-[#3ACF98]">Your payment of {amount} has been successfully processed.</p>
+              <p className="text-[#3ACF98]">Invoice {invoiceId} was marked settled in the internal demo ledger.</p>
               <dl className="space-y-1 text-white/85">
-                <div className="flex flex-wrap gap-2"><dt className="text-white/55">Transaction ID:</dt><dd>{transactionId}</dd></div>
+                <div className="flex flex-wrap gap-2"><dt className="text-white/55">Reference:</dt><dd>{paymentReference}</dd></div>
                 <div className="flex flex-wrap gap-2"><dt className="text-white/55">Date:</dt><dd>{new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</dd></div>
               </dl>
-              <p className="text-[#3ACF98]">Your account balance has been updated.</p>
+              <p className="text-xs text-amber-200/80">No funds were moved. This is not a receipt for an external payment.</p>
             </div>
-            <DialogFooter className="grid grid-cols-2 gap-3 border-0 bg-transparent px-5 pb-5 sm:flex-row sm:justify-between sm:px-6 sm:pb-6">
-              <Button variant="outline" className="h-9 rounded-[2vw] border-white/15 bg-white/5 font-ubuntu-mono text-white shadow-glassy-jeri hover-glass-rim" onClick={downloadReceipt}>
-                <Download aria-hidden="true" />
-                Download Receipt
-              </Button>
+            <DialogFooter className="border-0 bg-transparent px-5 pb-5 sm:px-6 sm:pb-6">
               <Button className="h-9 rounded-[2vw] border border-white/10 bg-[#3ACF98]/15 font-ubuntu-mono text-[#3ACF98] shadow-glassy-jeri hover-glass-rim" onClick={closeModal}>Done</Button>
+            </DialogFooter>
+          </>
+        )}
+
+        {step === "error" && (
+          <>
+            <DialogHeader className="px-5 pt-5 sm:px-6 sm:pt-6">
+              <DialogTitle className="text-sm font-medium text-[#DE0961]">Payment unavailable</DialogTitle>
+              <DialogDescription>{errorMessage}</DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="border-0 bg-transparent px-5 pb-5 sm:px-6 sm:pb-6">
+              <Button variant="outline" className="h-9 border-white/15 bg-white/5 text-white" onClick={closeModal}>Close</Button>
             </DialogFooter>
           </>
         )}

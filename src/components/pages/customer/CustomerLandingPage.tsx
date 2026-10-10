@@ -1,5 +1,5 @@
 import SidebarApp from '../../Sidebar'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Navbar from '../../Navbar.tsx'
 import Footer from '../../Footer.tsx'
 import MyAccount from './MyAccount.tsx'
@@ -13,6 +13,13 @@ function CustomerLandingPage() {
   const items = ["My Account", "Billing", "Tickets", "Plan Changes", "Support"]
 
   const [activeItem, setActiveItem] = useState(items[0])
+
+  useEffect(() => {
+    const openBilling = () => setActiveItem('Billing')
+    window.addEventListener('customer-open-billing', openBilling)
+    return () => window.removeEventListener('customer-open-billing', openBilling)
+  }, [])
+
   const handleData = (data: string) => {
     setActiveItem(data);
 
