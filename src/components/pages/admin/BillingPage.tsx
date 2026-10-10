@@ -17,6 +17,7 @@ type BillingSummary = {
   overdueAmount: number;
   creditNotesIssuedThisMonth: number;
   overdue31DayAccountCount: number;
+  suspendedAccountCount: number;
 };
 
 const emptySummary: BillingSummary = {
@@ -25,6 +26,7 @@ const emptySummary: BillingSummary = {
   overdueAmount: 0,
   creditNotesIssuedThisMonth: 0,
   overdue31DayAccountCount: 0,
+  suspendedAccountCount: 0,
 };
 
 function getCurrentPeriod() {
@@ -45,10 +47,14 @@ function BillingPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [summary, setSummary] = useState<BillingSummary>(emptySummary);
   const [period, setPeriod] = useState(getCurrentPeriod);
+  const [dueFrom, setDueFrom] = useState("");
+  const [dueTo, setDueTo] = useState("");
   const [page, setPage] = useState(1);
   const [totalInvoices, setTotalInvoices] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [notice, setNotice] = useState("");
+  const [isRunningSuspension, setIsRunningSuspension] = useState(false);
 
   const loadBillingData = async () => {
     const token = localStorage.getItem("diverge_token");
@@ -63,13 +69,18 @@ function BillingPage() {
     setIsLoading(true);
     try {
       const headers = { Authorization: `Bearer ${token}` };
+      const invoiceParams = new URLSearchParams({ page: String(page), limit: String(PAGE_SIZE) });
+      if (dueFrom) invoiceParams.set("dueFrom", dueFrom);
+      if (dueTo) invoiceParams.set("dueTo", dueTo);
       const [invoiceResponse, summaryResponse] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/v1/admin/billing/invoices?page=${page}&limit=${PAGE_SIZE}`, { headers }),
+        fetch(`${API_BASE_URL}/api/v1/admin/billing/invoices?${invoiceParams.toString()}`, { headers }),
         fetch(`${API_BASE_URL}/api/v1/admin/billing/summary?period=${period}`, { headers }),
       ]);
-      if (!invoiceResponse.ok || !summaryResponse.ok) {
-        throw new Error("Unable to load billing data. Check your administrator access and try again.");
+      const failedResponse = [invoiceResponse, summaryResponse].find((response) => !response.ok);
+      if (failedResponse?.status === 401 || failedResponse?.status === 403) {
+        throw new Error("Your administrator session is invalid or no longer has billing access. Sign out and sign in again.");
       }
+      if (failedResponse) throw new Error(`Unable to load billing data (HTTP ${failedResponse.status}).`);
 
       const [invoicePayload, summaryPayload] = await Promise.all([
         invoiceResponse.json(),
@@ -88,7 +99,7 @@ function BillingPage() {
 
   useEffect(() => {
     void loadBillingData();
-  }, [page, period]);
+  }, [page, period, dueFrom, dueTo]);
   useDataRefresh(loadBillingData);
 
   const handleRefreshCycle = async () => {
@@ -138,6 +149,30 @@ function BillingPage() {
     setIsModalOpen(false);
   };
 
+  const handleRunSuspension = async () => {
+    const token = localStorage.getItem("diverge_token");
+    if (!token) return;
+
+    setIsRunningSuspension(true);
+    setErrorMessage("");
+    setNotice("");
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/admin/billing/br-01/run-suspensions`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.message ?? "BR-01 suspension scan failed.");
+      setNotice(payload?.message ?? "BR-01 suspension scan completed.");
+      publishDataChange();
+      await loadBillingData();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "BR-01 suspension scan failed.");
+    } finally {
+      setIsRunningSuspension(false);
+    }
+  };
+
   const warningMessage = summary.overdue31DayAccountCount > 0
     ? `${summary.overdue31DayAccountCount} account${summary.overdue31DayAccountCount === 1 ? " is" : "s are"} 31+ days overdue. Review suspension eligibility and provisioning status.`
     : "No accounts are beyond the 31-day overdue threshold.";
@@ -170,17 +205,48 @@ function BillingPage() {
             {new Date().toLocaleString("en-PH", { dateStyle: "full", timeStyle: "short", timeZone: "Asia/Manila" })} PHT
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-3">
-          <input
-            aria-label="Billing period"
-            type="month"
-            value={period}
-            onChange={(event) => {
-              setPage(1);
-              setPeriod(event.target.value);
-            }}
-            className="h-11 rounded-lg border border-white/15 bg-[#121212] px-3 text-white"
-          />
+        <div className="flex shrink-0 flex-wrap items-end justify-end gap-3">
+          <label className="flex flex-col gap-1 text-[11px] font-light tracking-wide text-white/50">
+            Due from
+            <input
+              aria-label="Filter invoices due from"
+              type="date"
+              value={dueFrom}
+              max={dueTo || undefined}
+              onChange={(event) => {
+                setPage(1);
+                setDueFrom(event.target.value);
+              }}
+              className="h-11 rounded-lg border border-white/15 bg-[#121212] px-3 text-white"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-[11px] font-light tracking-wide text-white/50">
+            Due to
+            <input
+              aria-label="Filter invoices due until"
+              type="date"
+              value={dueTo}
+              min={dueFrom || undefined}
+              onChange={(event) => {
+                setPage(1);
+                setDueTo(event.target.value);
+              }}
+              className="h-11 rounded-lg border border-white/15 bg-[#121212] px-3 text-white"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-[11px] font-light tracking-wide text-white/50">
+            Billing period
+            <input
+              aria-label="Billing period"
+              type="month"
+              value={period}
+              onChange={(event) => {
+                setPage(1);
+                setPeriod(event.target.value);
+              }}
+              className="h-11 rounded-lg border border-white/15 bg-[#121212] px-3 text-white"
+            />
+          </label>
           <Button
             onClick={handleRefreshCycle}
             disabled={isLoading}
@@ -192,6 +258,7 @@ function BillingPage() {
       </div>
 
       {errorMessage && <p role="alert" className="mb-5 text-left text-sm text-red-300">{errorMessage}</p>}
+      {notice && <p role="status" className="mb-5 text-left text-sm text-emerald-300">{notice}</p>}
 
       <div className="mb-8 grid w-full grid-cols-4 gap-6">
         {stats.map((stat) => (
@@ -216,12 +283,22 @@ function BillingPage() {
 
       <div className="mb-8 flex min-h-[83px] w-full items-center gap-4 rounded-xl border border-red-900/40 bg-[#2C0A0E] px-5 py-3.5 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black">
         <AlertTriangle className="h-12 w-12 shrink-0 text-amber-500" />
-        <div className="text-left">
+        <div className="flex-1 text-left">
           <h2 className="text-[21px] font-bold leading-tight tracking-[0.05em] text-[#E18E08] opacity-75">
             BR-01 Past Due Suspension
           </h2>
           <p className="mt-2 text-sm leading-snug tracking-[0.05em] text-[#E18E08] opacity-75">{warningMessage}</p>
+          <p className="mt-1 text-xs leading-snug tracking-[0.05em] text-[#E18E08]/70">
+            {summary.suspendedAccountCount} account{summary.suspendedAccountCount === 1 ? "" : "s"} currently suspended.
+          </p>
         </div>
+        <Button
+          onClick={handleRunSuspension}
+          disabled={isRunningSuspension}
+          className="h-11 shrink-0 rounded-xl border border-amber-500/40 bg-amber-500/20 px-4 text-sm font-normal tracking-wide text-amber-200 shadow-glassy-jeri hover:bg-amber-500/30"
+        >
+          {isRunningSuspension ? "Running..." : "Run suspension check"}
+        </Button>
       </div>
 
       <div className="w-full">

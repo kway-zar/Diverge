@@ -51,7 +51,7 @@ customerRouter.post('/me/billing/pay', requireAuth, requireRole(['CUSTOMER']), a
   };
   const method = typeof req.body?.method === 'string' ? methodMap[req.body.method] : undefined;
   if (req.body?.paymentMode !== 'INTERNAL_DEMO' || !method) {
-    res.status(400).json({ message: 'Choose GCash, Maya, or card for the internal demo settlement. No external provider is contacted.' });
+    res.status(400).json({ message: 'Choose GCash, Maya, or card as the payment method.' });
     return;
   }
   try {
@@ -59,7 +59,7 @@ customerRouter.post('/me/billing/pay', requireAuth, requireRole(['CUSTOMER']), a
     res.status(200).json({
       data: result.currentInvoice,
       paymentReference: result.paymentReference,
-      message: 'Demo settlement recorded. No funds were moved.',
+      message: 'Payment recorded. The invoice has been settled.',
     });
   } catch (error) {
     if (error instanceof Error && error.message === 'Invoice not found') {

@@ -13,7 +13,7 @@ export type EngineerStatus =
 export type TicketPriority = "High" | "Medium" | "Low" | "Critical";
 export type TicketStatus = "In Progress" | "Open" | "Pending" | "Resolved";
 
-export type JobPriority = "High" | "Critical";
+export type JobPriority = "Low" | "Medium" | "High" | "Critical";
 export type JobStatus = "Assigned" | "En Route" | "On-Site";
 
 export type PaymentMethod = "Gcash" | "GCash" | "Bank Transfer" | "Maya" | "Visa / Mastercard" | "Demo GCash" | "Demo Maya" | "Demo Card" | "-";

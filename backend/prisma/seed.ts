@@ -107,6 +107,24 @@ async function main() {
     status: 'AVAILABLE',
     rating: 4.8,
   };
+  const additionalTechnicians = [
+    {
+      name: 'Mika Santos',
+      email: 'mika.unavailable@diverge.com',
+      location: 'Rizal',
+      phone: '+639171234568',
+      status: 'UNAVAILABLE' as const,
+      rating: 4.4,
+    },
+    {
+      name: 'Paolo Reyes',
+      email: 'paolo.offduty@diverge.com',
+      location: 'Manila',
+      phone: '+639171234569',
+      status: 'OFF_DUTY' as const,
+      rating: 4.2,
+    },
+  ];
 
   for (const customer of customerData) {
     const existingUser = await prisma.user.findUnique({ where: { email: customer.email } });
@@ -166,6 +184,27 @@ async function main() {
             phone: technicianData.phone,
             status: technicianData.status,
             rating: technicianData.rating,
+          },
+        },
+      },
+    });
+  }
+
+  for (const technician of additionalTechnicians) {
+    const existingUser = await prisma.user.findUnique({ where: { email: technician.email } });
+    if (existingUser) continue;
+    await prisma.user.create({
+      data: {
+        email: technician.email,
+        password: 'seed-password',
+        role: 'TECHNICIAN',
+        technician: {
+          create: {
+            name: technician.name,
+            location: technician.location,
+            phone: technician.phone,
+            status: technician.status,
+            rating: technician.rating,
           },
         },
       },

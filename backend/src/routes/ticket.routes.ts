@@ -16,6 +16,7 @@ function toTicketResponse(ticket: {
   priority: string;
   status: string;
   sla: string | null;
+  escalatedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
   customer: { id: string; name: string };
@@ -24,7 +25,6 @@ function toTicketResponse(ticket: {
 }) {
   return {
     id: ticket.id,
-    ticketID: ticket.ticketNumber,
     customerId: ticket.customer.id,
     subscriber: ticket.customer.name,
     issue: ticket.issue,
@@ -33,7 +33,8 @@ function toTicketResponse(ticket: {
     assignedTo: ticket.assignedTo?.name ?? 'Unassigned',
     assignedTechnicianId: ticket.assignedTo?.id,
     status: ticket.status === 'IN_PROGRESS' ? 'In Progress' : ticket.status[0] + ticket.status.slice(1).toLowerCase(),
-    SLA: ticket.sla ?? '2 business hours',
+    SLA: ticket.escalatedAt ? 'Escalated' : ticket.status !== 'RESOLVED' && Date.now() - ticket.createdAt.getTime() > 60 * 60 * 1000 ? 'Breached' : ticket.sla ?? '2 business hours',
+    isEscalated: Boolean(ticket.escalatedAt),
     created: ticket.createdAt.toISOString(),
     updated: ticket.updatedAt.toISOString(),
     hasEvaluation: Boolean(ticket.technicianReview),
@@ -175,7 +176,7 @@ adminTicketRouter.get('/', async (_req, res, next) => {
 adminTicketRouter.get('/technicians', async (_req, res, next) => {
   try {
     const technicians = await prisma.technician.findMany({
-      where: { status: { not: 'OFF_DUTY' } },
+      where: { status: 'AVAILABLE' },
       select: { id: true, name: true, location: true, status: true, queueCount: true },
       orderBy: { name: 'asc' },
     });
@@ -219,6 +220,151 @@ adminTicketRouter.post('/', async (req, res, next) => {
   }
 });
 
+adminTicketRouter.post('/auto-assign', async (_req, res, next) => {
+  try {
+    const [openTickets, technicians] = await Promise.all([
+      prisma.ticket.findMany({
+        where: { status: 'OPEN', assignedToId: null },
+        include: { customer: true },
+        orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }],
+      }),
+      prisma.technician.findMany({
+        where: { status: 'AVAILABLE' },
+        orderBy: [{ queueCount: 'asc' }, { rating: 'desc' }],
+      }),
+    ]);
+    const workload = new Map(technicians.map((technician) => [technician.id, technician.queueCount]));
+    const assigned: Array<{ ticketNumber: string; technician: string }> = [];
+
+    for (const ticket of openTickets) {
+      const area = ticket.customer.area?.toLowerCase();
+      const orderedTechnicians = [...technicians].sort((left, right) => {
+        const leftArea = area && left.location.toLowerCase().includes(area) ? 0 : 1;
+        const rightArea = area && right.location.toLowerCase().includes(area) ? 0 : 1;
+        return leftArea - rightArea || (workload.get(left.id) ?? 0) - (workload.get(right.id) ?? 0) || right.rating - left.rating;
+      });
+      const technician = orderedTechnicians[0];
+      if (!technician) break;
+
+      await prisma.$transaction(async (transaction) => {
+        await transaction.ticket.update({
+          where: { id: ticket.id },
+          data: { assignedToId: technician.id, status: 'IN_PROGRESS' },
+        });
+        await transaction.job.upsert({
+          where: { ticketId: ticket.id },
+          create: {
+            ticketId: ticket.id,
+            technicianId: technician.id,
+            subscriber: ticket.customer.name,
+            address: ticket.customer.area ?? 'Address not provided',
+            phone: '',
+            priority: ticket.priority,
+            status: 'ASSIGNED',
+            issue: ticket.issue,
+          },
+          update: { technicianId: technician.id, status: 'ASSIGNED' },
+        });
+        await transaction.technician.update({
+          where: { id: technician.id },
+          data: { queueCount: { increment: 1 } },
+        });
+      });
+      workload.set(technician.id, (workload.get(technician.id) ?? 0) + 1);
+      assigned.push({ ticketNumber: ticket.ticketNumber, technician: technician.name });
+    }
+
+    res.json({
+      data: { assigned, assignedCount: assigned.length, unassignedCount: openTickets.length - assigned.length },
+      message: `Assigned ${assigned.length} ticket${assigned.length === 1 ? '' : 's'}`,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+adminTicketRouter.post('/escalate-overdue', async (_req, res, next) => {
+  try {
+    const breachThreshold = new Date(Date.now() - 60 * 60 * 1000);
+    const tickets = await prisma.ticket.findMany({
+      where: {
+        status: { in: ['OPEN', 'IN_PROGRESS', 'PENDING'] },
+        createdAt: { lt: breachThreshold },
+        escalatedAt: null,
+      },
+      select: { id: true, priority: true },
+    });
+    for (const ticket of tickets) {
+      await prisma.$transaction(async (transaction) => {
+        await transaction.ticket.update({
+          where: { id: ticket.id },
+          data: { priority: 'CRITICAL', escalatedAt: new Date(), sla: 'Escalated' },
+        });
+        await transaction.job.updateMany({
+          where: { ticketId: ticket.id },
+          data: { priority: 'CRITICAL' },
+        });
+      });
+    }
+    res.json({ data: { escalatedCount: tickets.length }, message: `Escalated ${tickets.length} overdue ticket${tickets.length === 1 ? '' : 's'}` });
+  } catch (error) {
+    next(error);
+  }
+});
+
+adminTicketRouter.patch('/:ticketId/priority', async (req, res, next) => {
+  try {
+    const ticketId = Array.isArray(req.params.ticketId) ? req.params.ticketId[0] : req.params.ticketId;
+    const priority = req.body?.priority;
+    if (!['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'].includes(priority)) {
+      res.status(400).json({ message: 'Priority must be LOW, MEDIUM, HIGH, or CRITICAL' });
+      return;
+    }
+    const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
+    if (!ticket) {
+      res.status(404).json({ message: 'Ticket not found' });
+      return;
+    }
+    const updated = await prisma.$transaction(async (transaction) => {
+      const nextTicket = await transaction.ticket.update({ where: { id: ticket.id }, data: { priority } });
+      await transaction.job.updateMany({
+        where: { ticketId: ticket.id },
+        data: { priority },
+      });
+      return nextTicket;
+    });
+    res.json({ data: updated, message: 'Ticket priority updated' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+adminTicketRouter.post('/:ticketId/escalate', async (req, res, next) => {
+  try {
+    const ticketId = Array.isArray(req.params.ticketId) ? req.params.ticketId[0] : req.params.ticketId;
+    const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
+    if (!ticket) {
+      res.status(404).json({ message: 'Ticket not found' });
+      return;
+    }
+    if (ticket.status === 'RESOLVED') {
+      res.status(409).json({ message: 'Resolved tickets cannot be escalated' });
+      return;
+    }
+    const updated = await prisma.$transaction(async (transaction) => {
+      const nextTicket = await transaction.ticket.update({
+        where: { id: ticket.id },
+        data: { priority: 'CRITICAL', escalatedAt: new Date(), sla: 'Escalated' },
+      });
+      await transaction.job.updateMany({ where: { ticketId: ticket.id }, data: { priority: 'CRITICAL' } });
+      return nextTicket;
+    });
+    res.json({ data: updated, message: 'Ticket escalated to critical priority' });
+  } catch (error) {
+    next(error);
+  }
+});
+
 adminTicketRouter.post('/:ticketId/assign', async (req, res, next) => {
   try {
     const ticketId = Array.isArray(req.params.ticketId) ? req.params.ticketId[0] : req.params.ticketId;
@@ -236,12 +382,16 @@ adminTicketRouter.post('/:ticketId/assign', async (req, res, next) => {
       res.status(404).json({ message: 'Ticket or technician not found' });
       return;
     }
+    if (technician.status !== 'AVAILABLE') {
+      res.status(409).json({ message: 'Only available technicians can be assigned' });
+      return;
+    }
     if (ticket.status === 'RESOLVED') {
       res.status(409).json({ message: 'Resolved tickets cannot be assigned' });
       return;
     }
 
-    const jobPriority = ticket.priority === 'CRITICAL' ? 'CRITICAL' : 'HIGH';
+    const jobPriority = ticket.priority;
     const data = await prisma.$transaction(async (transaction) => {
       await transaction.ticket.update({
         where: { id: ticket.id },
@@ -280,6 +430,25 @@ adminTicketRouter.post('/:ticketId/assign', async (req, res, next) => {
 });
 
 technicianRouter.use(requireAuth, requireRole(['TECHNICIAN']));
+technicianRouter.patch('/status', async (req, res, next) => {
+  try {
+    const status = req.body?.status;
+    if (status !== 'AVAILABLE' && status !== 'UNAVAILABLE' && status !== 'OFF_DUTY') {
+      res.status(400).json({ message: 'Choose AVAILABLE, UNAVAILABLE, or OFF_DUTY' });
+      return;
+    }
+    const technician = await prisma.technician.findUnique({ where: { userId: req.user!.userId } });
+    if (!technician) {
+      res.status(404).json({ message: 'Technician profile not found' });
+      return;
+    }
+    const updated = await prisma.technician.update({ where: { id: technician.id }, data: { status } });
+    res.json({ data: updated, message: `Availability set to ${status}` });
+  } catch (error) {
+    next(error);
+  }
+});
+
 technicianRouter.get('/evaluation', async (req, res, next) => {
   try {
     const technician = await prisma.technician.findUnique({ where: { userId: req.user!.userId } });
@@ -339,7 +508,7 @@ technicianRouter.get('/jobs', async (req, res, next) => {
         subscriber: job.subscriber,
         address: job.address,
         phone: job.phone,
-        priority: job.priority === 'CRITICAL' ? 'Critical' : 'High',
+        priority: job.priority[0] + job.priority.slice(1).toLowerCase(),
         status: job.status === 'EN_ROUTE' ? 'En Route' : job.status === 'ON_SITE' ? 'On-Site' : 'Assigned',
         timeLeft: job.timeLeft ?? 'On schedule',
         issue: job.issue,
@@ -360,8 +529,8 @@ technicianRouter.patch('/jobs/:jobId/status', async (req, res, next) => {
   try {
     const jobId = Array.isArray(req.params.jobId) ? req.params.jobId[0] : req.params.jobId;
     const nextStatus = req.body?.status;
-    if (nextStatus !== 'EN_ROUTE' && nextStatus !== 'ON_SITE') {
-      res.status(400).json({ message: 'Status must be EN_ROUTE or ON_SITE' });
+    if (nextStatus !== 'ASSIGNED' && nextStatus !== 'EN_ROUTE' && nextStatus !== 'ON_SITE') {
+      res.status(400).json({ message: 'Status must be ASSIGNED, EN_ROUTE, or ON_SITE' });
       return;
     }
     const technician = await prisma.technician.findUnique({ where: { userId: req.user!.userId } });
@@ -370,16 +539,15 @@ technicianRouter.patch('/jobs/:jobId/status', async (req, res, next) => {
       res.status(404).json({ message: 'Assigned job not found' });
       return;
     }
-    const expectedCurrent = nextStatus === 'EN_ROUTE' ? 'ASSIGNED' : 'EN_ROUTE';
     const result = await prisma.$transaction(async (transaction) => {
       const updated = await transaction.job.updateMany({
-        where: { id: job.id, technicianId: technician!.id, status: expectedCurrent },
+        where: { id: job.id, technicianId: technician!.id, status: job.status },
         data: { status: nextStatus },
       });
       if (updated.count !== 1) return false;
       await transaction.technician.update({
         where: { id: technician!.id },
-        data: { status: nextStatus === 'EN_ROUTE' ? 'TRAVELING' : 'ON_SITE' },
+        data: { status: nextStatus === 'EN_ROUTE' ? 'TRAVELING' : nextStatus === 'ON_SITE' ? 'ON_SITE' : 'AVAILABLE' },
       });
       return true;
     });

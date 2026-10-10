@@ -28,7 +28,7 @@ export type BillingInvoiceRecord = {
   plan: string;
   amount: string;
   dueDate: string;
-  paymentMethod: 'Gcash' | 'Bank Transfer' | 'Maya' | 'Demo GCash' | 'Demo Maya' | 'Demo Card' | '-';
+  paymentMethod: 'Gcash' | 'Bank Transfer' | 'Maya' | 'Visa / Mastercard' | 'Demo GCash' | 'Demo Maya' | 'Demo Card' | '-';
   status: 'Paid' | 'Pending' | 'Overdue';
 };
 
@@ -131,22 +131,24 @@ function toUiInvoiceStatus(status: string, dueDate: Date): BillingInvoiceRecord[
 }
 
 function toUiPaymentMethod(method?: string | null, status?: string): BillingInvoiceRecord['paymentMethod'] {
-  const normalized = method?.trim();
+  const normalized = method?.trim().toUpperCase().replace(/\s+/g, '_');
 
   if (normalized) {
-    switch (normalized.toUpperCase()) {
+    switch (normalized) {
       case 'GCASH':
+      case 'DEMO_GCASH':
         return 'Gcash';
       case 'BANK_TRANSFER':
         return 'Bank Transfer';
       case 'MAYA':
-        return 'Maya';
-      case 'DEMO_GCASH':
-        return 'Demo GCash';
       case 'DEMO_MAYA':
-        return 'Demo Maya';
+        return 'Maya';
+      case 'CARD':
+      case 'VISA':
+      case 'MASTERCARD':
+      case 'VISA_/_MASTERCARD':
       case 'DEMO_CARD':
-        return 'Demo Card';
+        return 'Visa / Mastercard';
       default:
         break;
     }
@@ -319,8 +321,8 @@ export async function payCustomerInvoice(
   invoiceKey: string,
   paymentMethod: string = 'DEMO_GCASH',
 ): Promise<{ currentInvoice: BillingInvoiceRecord; paymentReference: string; upcomingInvoiceID: string | null }> {
-  if (!['DEMO_GCASH', 'DEMO_MAYA', 'DEMO_CARD'].includes(paymentMethod)) {
-    throw new Error('Only demo-ledger payment methods are enabled');
+  if (!['DEMO_GCASH', 'DEMO_MAYA', 'DEMO_CARD', 'GCASH', 'MAYA', 'CARD'].includes(paymentMethod)) {
+    throw new Error('Unsupported payment method');
   }
 
   const customer = await prisma.customer.findFirst({ where: { userId }, include: { plan: true } });
@@ -341,7 +343,6 @@ export async function payCustomerInvoice(
       where: {
         id: existingInvoice.id,
         status: { not: 'PAID' },
-        creditAmount: existingInvoice.creditAmount,
       },
       data: { status: 'PAID', paymentMethod },
     });
@@ -370,6 +371,40 @@ export async function payCustomerInvoice(
           settledAt,
         },
       });
+    }
+
+    const customerState = await transaction.customer.findUnique({ where: { id: customer.id } });
+    if (customerState?.status === 'SUSPENDED') {
+      const overdueBefore = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000);
+      const overdueInvoices = await transaction.invoice.findMany({
+        where: { customerId: customer.id, status: { not: 'PAID' }, dueDate: { lt: overdueBefore } },
+        select: { amount: true, creditAmount: true },
+      });
+      const hasSuspendingBalance = overdueInvoices.some((invoice) => invoice.amount > invoice.creditAmount);
+      const priorSuspension = await transaction.provisioningAction.findFirst({
+        where: { customerId: customer.id, action: 'SUSPEND', status: 'COMPLETED' },
+      });
+      if (!hasSuspendingBalance && priorSuspension) {
+        await transaction.customer.update({ where: { id: customer.id }, data: { status: 'ACTIVE' } });
+        await transaction.subscription.updateMany({
+          where: { customerId: customer.id, status: 'PAUSED' },
+          data: { status: 'ACTIVE' },
+        });
+        await transaction.provisioningAction.upsert({
+          where: { actionKey: `${customer.id}:RESTORE:${existingInvoice.id}` },
+          create: {
+            actionKey: `${customer.id}:RESTORE:${existingInvoice.id}`,
+            customerId: customer.id,
+            invoiceId: existingInvoice.id,
+            action: 'RESTORE',
+            status: 'COMPLETED',
+            reason: `BR-01: overdue balance cleared by invoice ${existingInvoice.invoiceNumber}`,
+            processedAt: new Date(),
+            result: 'Internal account restored. External network provisioning is not configured.',
+          },
+          update: {},
+        });
+      }
     }
 
     const subscription = await transaction.subscription.findFirst({
