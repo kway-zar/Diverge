@@ -1,206 +1,152 @@
-import { useState } from "react"
-import { Upload } from "lucide-react"
-import { initialJobs } from "@/components/data/ticketData"
- 
- 
-type Outcome = "Fully Resolved" | "Partially Solved" | "Needs Follow-Up"
- 
-const inputBox =
-  "w-full rounded-[8px] border border-white/10 bg-white/10 px-3 font-ubuntu-mono text-sm tracking-[0.5px] text-white/85 shadow-[inset_0_3px_3px_rgba(0,0,0,0.25)] placeholder:text-white/60 focus:outline-none"
- 
+import { useEffect, useState } from "react";
+import type { Job } from "@/components/types/job";
+import { Button } from "@/components/ui/button";
+import { publishDataChange, useDataRefresh } from "@/hooks/useDataRefresh";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
+type ReportOutcome = "FULLY_RESOLVED" | "PARTIALLY_SOLVED" | "NEEDS_FOLLOW_UP";
+
 function FieldReport() {
-  const [ticketID, setTicketID] = useState(initialJobs[0].ticketID)
-  const [summary, setSummary] = useState("")
-  const [parts, setParts] = useState("")
-  const [timeOnSite, setTimeOnSite] = useState("")
-  const [outcome, setOutcome] = useState<Outcome>("Fully Resolved")
-  const [photos, setPhotos] = useState<File[]>([])
-  const [submitted, setSubmitted] = useState(false)
- 
-  const today =
-    new Date().toLocaleString("en-US", {
-      timeZone: "Asia/Manila",
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    }) + " PHT"
- 
-  function handlePhotoPick(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? [])
-    setPhotos((prev) => [...prev, ...files].slice(0, 5))
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [ticketID, setTicketID] = useState("");
+  const [summary, setSummary] = useState("");
+  const [parts, setParts] = useState("");
+  const [timeOnSite, setTimeOnSite] = useState("");
+  const [outcome, setOutcome] = useState<ReportOutcome>("FULLY_RESOLVED");
+  const [submitted, setSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function loadJobs() {
+    const token = localStorage.getItem("diverge_token");
+    if (!token) {
+      setErrorMessage("Technician sign-in is required to access field reports.");
+      setIsLoading(false);
+      return;
+    }
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/technician/jobs`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.message ?? "Unable to load assigned jobs.");
+      const activeJobs = Array.isArray(payload?.data) ? payload.data : [];
+      setJobs(activeJobs);
+      setTicketID((selected) => activeJobs.some((job: Job) => job.ticketID === selected) ? selected : activeJobs[0]?.ticketID ?? "");
+      setErrorMessage("");
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Unable to load assigned jobs.");
+    } finally {
+      setIsLoading(false);
+    }
   }
- 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setSubmitted(true)
+
+  useDataRefresh(loadJobs);
+  useEffect(() => { void loadJobs(); }, []);
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const job = jobs.find((item) => item.ticketID === ticketID);
+    const token = localStorage.getItem("diverge_token");
+    if (!job?.id || !token) {
+      setErrorMessage("Select an assigned job before submitting a report.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/technician/jobs/${job.id}/field-reports`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          description: summary,
+          parts,
+          timeOnSite,
+          outcome,
+        }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.message ?? "Field report could not be submitted.");
+      setSubmitted(true);
+      publishDataChange();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Field report could not be submitted.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
- 
+
   function reset() {
-    setSummary("")
-    setParts("")
-    setTimeOnSite("")
-    setOutcome("Fully Resolved")
-    setPhotos([])
-    setSubmitted(false)
+    setSummary("");
+    setParts("");
+    setTimeOnSite("");
+    setOutcome("FULLY_RESOLVED");
+    setSubmitted(false);
+    void loadJobs();
   }
- 
-  const selectedTicket = initialJobs.find((t) => t.ticketID === ticketID) ?? initialJobs[0]
- 
+
+  const selectedJob = jobs.find((job) => job.ticketID === ticketID);
+
   if (submitted) {
     return (
-      <div className="w-full px-4 pb-10 pt-2 text-left text-white lg:px-10">
-        <div className="mb-4">
-          <h1 className="text-xl font-bold tracking-wider text-white">Field Report</h1>
-          <p className="font-mono text-xs italic text-white opacity-30">{today}</p>
+      <section className="w-full px-4 pb-10 pt-2 text-left text-white lg:px-10">
+        <h1 className="mb-4 text-xl font-bold tracking-wider">Field Report</h1>
+        <div className="flex flex-col items-center gap-3 rounded-xl border border-[#3acf98] bg-[#3acf98]/10 px-6 py-10 text-center">
+          <h2 className="text-lg font-medium text-[#3acf98]">Report saved</h2>
+          <p className="text-sm text-white/70">{ticketID} has been updated with the submitted outcome.</p>
+          <Button type="button" onClick={reset}>Submit Another</Button>
         </div>
- 
-        <div className="flex flex-col items-center gap-3 rounded-[14px] border-2 border-[#3acf98] bg-[rgba(58,207,152,0.15)] px-6 py-10 text-center">
-          <span className="text-[40px] leading-none text-white">✓</span>
-          <h2 className="text-lg font-medium tracking-[1px] text-[#fffefe] lg:text-xl">
-            Report Submitted
-          </h2>
-          <p className="max-w-xl text-sm text-white/70 lg:text-base">
-            Job <span className="text-[#3acf98]">{selectedTicket.ticketID}</span> has been marked as
-            resolved. Your field report has been logged.
-          </p>
-          <button
-            type="button"
-            onClick={reset}
-            className="mt-1 rounded-[14px] border border-[#197af9] bg-[rgba(25,122,249,0.5)] px-6 py-3 text-sm tracking-[0.5px] text-white"
-          >
-            Submit Another
-          </button>
-        </div>
-      </div>
-    )
+      </section>
+    );
   }
- 
+
   return (
     <form onSubmit={handleSubmit} className="w-full px-4 pb-10 pt-2 text-left text-white lg:px-10">
-      <div className="mb-4">
-        <h1 className="text-xl font-bold tracking-wider text-white">Field Report</h1>
-        <p className="font-mono text-xs italic text-white opacity-30">{today}</p>
-      </div>
- 
-      <div className="rounded-[14px] border border-[#7e7e7e] bg-white/20 p-5 lg:p-8">
-        <h2 className="mb-4 text-lg font-medium tracking-[1px] text-[#fffefe] lg:text-xl">
-          Job Details
-        </h2>
- 
-        <label className="mb-1 block font-ubuntu-mono text-xs tracking-[0.5px] text-white/80 lg:text-sm">
-          TICKET ID
-        </label>
-        <select
-          value={ticketID}
-          onChange={(e) => setTicketID(e.target.value)}
-          className={`${inputBox} mb-5 h-[44px]`}
-        >
-          {initialJobs.map((t) => (
-            <option key={t.ticketID} value={t.ticketID} className="bg-[#1a1a1a]">
-              {t.ticketID} - {t.subscriber}
-            </option>
-          ))}
-        </select>
- 
-        <label className="mb-1 block font-ubuntu-mono text-xs tracking-[0.5px] text-white/80 lg:text-sm">
-          RESOLUTION SUMMARY
-        </label>
-        <textarea
-          value={summary}
-          onChange={(e) => setSummary(e.target.value)}
-          placeholder="Describe what was found and how it was resolved"
-          rows={3}
-          required
-          className={`${inputBox} mb-5 h-auto resize-none py-3`}
-        />
- 
-        <div className="mb-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <div>
-            <label className="mb-1 block font-ubuntu-mono text-xs tracking-[0.5px] text-white/80 lg:text-sm">
-              PARTS/MATERIAL USED
+      <h1 className="mb-4 text-xl font-bold tracking-wider">Field Report</h1>
+      {errorMessage && <p role="alert" className="mb-3 text-sm text-red-300">{errorMessage}</p>}
+      {isLoading ? <p className="text-white/60">Loading assigned jobs...</p> : jobs.length === 0 ? (
+        <p className="rounded-lg border border-white/10 bg-white/5 p-5 text-white/60">There are no assigned jobs to report.</p>
+      ) : (
+        <div className="flex max-w-3xl flex-col gap-4 rounded-xl border border-white/10 bg-white/5 p-5 lg:p-8">
+          <label className="flex flex-col gap-2 text-sm text-white/70">
+            Assigned job
+            <select value={ticketID} onChange={(event) => setTicketID(event.target.value)} className="h-10 rounded-md border border-white/15 bg-[#202020] px-3 text-white">
+              {jobs.map((job) => <option key={job.id} value={job.ticketID}>{job.ticketID} · {job.subscriber} · {job.status}</option>)}
+            </select>
+          </label>
+          {selectedJob && <p className="text-sm text-white/60">{selectedJob.issue} · {selectedJob.address}</p>}
+          <label className="flex flex-col gap-2 text-sm text-white/70">
+            Resolution summary
+            <textarea value={summary} onChange={(event) => setSummary(event.target.value)} minLength={10} maxLength={2000} required rows={4} className="rounded-md border border-white/15 bg-white/5 p-3 text-white" placeholder="Describe findings and work performed" />
+          </label>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <label className="flex flex-col gap-2 text-sm text-white/70">
+              Time on site
+              <input value={timeOnSite} onChange={(event) => setTimeOnSite(event.target.value)} required minLength={2} maxLength={80} className="h-10 rounded-md border border-white/15 bg-white/5 px-3 text-white" placeholder="e.g. 1h 30m" />
             </label>
-            <input
-              value={parts}
-              onChange={(e) => setParts(e.target.value)}
-              placeholder="e.g. RJ45 connector, 10mm cable, LAN, etc."
-              className={`${inputBox} h-[42px]`}
-            />
+            <label className="flex flex-col gap-2 text-sm text-white/70">
+              Parts/material used
+              <input value={parts} onChange={(event) => setParts(event.target.value)} maxLength={500} className="h-10 rounded-md border border-white/15 bg-white/5 px-3 text-white" placeholder="Optional" />
+            </label>
           </div>
-          <div>
-            <label className="mb-1 block font-ubuntu-mono text-xs tracking-[0.5px] text-white/80 lg:text-sm">
-              TIME ON SITE
-            </label>
-            <input
-              value={timeOnSite}
-              onChange={(e) => setTimeOnSite(e.target.value)}
-              placeholder="e.g. 1h 30min"
-              required
-              className={`${inputBox} h-[42px]`}
-            />
+          <label className="flex flex-col gap-2 text-sm text-white/70">
+            Outcome
+            <select value={outcome} onChange={(event) => setOutcome(event.target.value as ReportOutcome)} className="h-10 rounded-md border border-white/15 bg-[#202020] px-3 text-white">
+              <option value="FULLY_RESOLVED">Fully resolved</option>
+              <option value="PARTIALLY_SOLVED">Partially solved</option>
+              <option value="NEEDS_FOLLOW_UP">Needs follow-up</option>
+            </select>
+          </label>
+          <p className="text-xs text-white/45">Photo evidence upload requires a configured storage service.</p>
+          <div className="flex justify-end">
+            <Button type="submit" disabled={isSubmitting || isLoading}>{isSubmitting ? "Submitting..." : "Submit Field Report"}</Button>
           </div>
         </div>
- 
-        <label className="mb-1 block font-ubuntu-mono text-xs tracking-[0.5px] text-white/80 lg:text-sm">
-          OUTCOME
-        </label>
-        <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {(["Fully Resolved", "Partially Solved", "Needs Follow-Up"] as Outcome[]).map((opt) => (
-            <label
-              key={opt}
-              className={`flex h-[42px] cursor-pointer items-center gap-2 rounded-[8px] border px-3 font-ubuntu-mono text-xs tracking-[0.5px] ${
-                outcome === opt ? "border-white bg-white/10" : "border-white/30 bg-white/5"
-              }`}
-            >
-              <span
-                className={`flex size-[16px] shrink-0 items-center justify-center rounded-full border ${
-                  outcome === opt ? "border-[#ff006a]" : "border-white/60"
-                }`}
-              >
-                {outcome === opt && <span className="size-[9px] rounded-full bg-[#ff006a]" />}
-              </span>
-              <input
-                type="radio"
-                name="outcome"
-                className="sr-only"
-                checked={outcome === opt}
-                onChange={() => setOutcome(opt)}
-              />
-              {opt}
-            </label>
-          ))}
-        </div>
- 
-        <label className="mb-1 block font-ubuntu-mono text-xs tracking-[0.5px] text-white/80 lg:text-sm">
-          PHOTOS
-        </label>
-        <label className="flex h-[42px] w-fit cursor-pointer items-center gap-2 rounded-[8px] border border-white/60 bg-white/5 px-4 font-ubuntu-mono text-xs tracking-[0.5px] text-white">
-          <Upload size={16} />
-          Upload Photos Here
-          <input type="file" accept="image/png,image/jpeg" multiple className="sr-only" onChange={handlePhotoPick} />
-        </label>
-        {photos.length > 0 && (
-          <ul className="mt-2 flex flex-wrap gap-2 font-ubuntu-mono text-xs text-white/70">
-            {photos.map((f, i) => (
-              <li key={i}>{f.name}</li>
-            ))}
-          </ul>
-        )}
-        <p className="mt-2 text-xs text-white/70">
-          Upload 3 to 5 clear Before/After photos. Supported formats: JPG, PNG. Maximum file size: 5 MB per photo.
-        </p>
-      </div>
- 
-      <button
-        type="submit"
-        className="mt-5 w-full rounded-[14px] border border-[#3acf98] bg-[rgba(58,207,152,0.5)] py-4 text-base font-bold tracking-[1px] text-white/85 lg:text-xl"
-      >
-        SUBMIT FIELD REPORT
-      </button>
+      )}
     </form>
-  )
+  );
 }
- 
-export default FieldReport
+
+export default FieldReport;

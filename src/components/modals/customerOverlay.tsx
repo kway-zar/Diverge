@@ -8,9 +8,11 @@ import ManageAccount from "./manageAccount";
 function CustomerOverlay({
   customer,
   onClose,
+  onUpdated,
 }: {
   customer: Customer;
   onClose: () => void;
+  onUpdated?: (customer: Customer) => void;
 }) {
   const [showManage, setShowManage] = useState(false);
   const [customerData, setCustomerData] = useState<Customer>(customer);
@@ -26,6 +28,7 @@ function CustomerOverlay({
         onClose={() => setShowManage(false)}
         onSave={(updatedCustomer) => {
           setCustomerData(updatedCustomer);
+          onUpdated?.(updatedCustomer);
           setShowManage(false);
         }}
       />
@@ -145,6 +148,7 @@ function CustomerOverlay({
               Manage Account
             </Button>
             <Button
+              onClick={onClose}
               type="button"
               className="w-[399px] h-[71px] bg-[#3ACF98]/20 rounded-[30px] text-[32px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#3ACF98]/35"
             >

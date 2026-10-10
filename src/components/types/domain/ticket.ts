@@ -16,6 +16,7 @@ export interface Ticket extends TimestampedEntity {
   priority: TicketPriority;
   assignedTo: string;
   assignedTechnicianId?: string;
+  hasEvaluation?: boolean;
   status: TicketStatus;
   SLA: string;
   created: string;

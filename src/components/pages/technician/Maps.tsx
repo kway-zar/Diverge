@@ -1,123 +1,80 @@
-import { useState } from "react"
-import { MapContainer, TileLayer, Marker } from "react-leaflet"
-import { divIcon } from "leaflet"
-import "leaflet/dist/leaflet.css"
+import { useEffect, useState } from "react";
+import { MapPin, Navigation } from "lucide-react";
+import type { Job } from "@/components/types/job";
 
-interface MapJob {
-  ticketID: string
-  customer: string
-  address: string
-  priority: "High" | "Critical"
-  lat: number
-  lng: number
-}
- 
-const jobs: MapJob[] = [
-  { ticketID: "TK - 231231", customer: "Vanna Hernandez", address: "Blk 0 Lot 00 St, Brngy, Rizal", priority: "High", lat: 14.6091, lng: 121.0223 },
-  { ticketID: "TK - 231232", customer: "Jojo Landoy", address: "Blk 0 Lot 00 St, Brngy, Rizal", priority: "High", lat: 14.6255, lng: 121.0445 },
-  { ticketID: "TK - 231233", customer: "Jojo Corp.", address: "Blk 0 Lot 00 St, Brngy, Rizal", priority: "Critical", lat: 14.6142, lng: 121.0350 },
-]
- 
-const technicianPosition: [number, number] = [14.6180, 121.0300]
- 
-function pinIcon(color: string) {
-  return divIcon({
-    className: "",
-    html: `<div style="width:22px;height:22px;background:${color};border:2px solid white;border-radius:9999px;box-shadow:0 2px 6px rgba(0,0,0,0.5)"></div>`,
-    iconSize: [22, 22],
-    iconAnchor: [11, 11],
-  })
-}
- 
-const priorityStyles: Record<MapJob["priority"], string> = {
-  High: "border-[#ff006a] bg-[rgba(255,0,106,0.2)] text-[#ff006a]",
-  Critical: "border-[#dd0002] bg-[rgba(221,0,2,0.2)] text-[#dd0002]",
-}
- 
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
+
 function Maps() {
-  const [selected, setSelected] = useState<MapJob>(jobs[0])
- 
-  const today =
-    new Date().toLocaleString("en-US", {
-      timeZone: "Asia/Manila",
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    }) + " PHT"
- 
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [selected, setSelected] = useState<Job | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadJobs() {
+      const token = localStorage.getItem("diverge_token");
+      if (!token) {
+        setErrorMessage("Technician sign-in is required to view assigned job locations.");
+        setIsLoading(false);
+        return;
+      }
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/v1/technician/jobs`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload?.message ?? "Unable to load job locations.");
+        const nextJobs: Job[] = Array.isArray(payload?.data) ? payload.data : [];
+        setJobs(nextJobs);
+        setSelected((current) => nextJobs.find((job) => job.id === current?.id) ?? nextJobs[0] ?? null);
+        setErrorMessage("");
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Unable to load job locations.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    void loadJobs();
+  }, []);
+
   return (
     <div className="w-full px-4 pb-10 pt-2 text-left text-white lg:px-10">
       <div className="mb-5">
-        <h1 className="text-2xl font-bold tracking-wider text-white">Map & Navigation</h1>
-        <p className="font-mono text-xs italic text-white opacity-30 sm:text-sm">{today}</p>
+        <h1 className="text-2xl font-bold tracking-wider">Job Locations</h1>
+        <p className="mt-1 text-sm text-white/55">Live GPS markers are unavailable until technician location sharing is configured.</p>
       </div>
- 
-      <div className="overflow-hidden rounded-[15px] border border-[#7e7e7e] bg-white/20">
-        <div className="relative h-[500px] w-full">
-          <span className="absolute left-4 top-4 z-[1000] rounded-[41px] border border-[#7e7e7e] bg-[#393939] px-4 py-1 font-ubuntu-mono text-sm tracking-[1px] text-white">
-            NCR - Manila/Quezon City
-          </span>
- 
-          <MapContainer
-            center={technicianPosition}
-            zoom={13}
-            className="size-full"
-            scrollWheelZoom={false}
-          >
-            <TileLayer
-              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-              attribution="&copy; OpenStreetMap contributors &copy; CARTO"
-            />
- 
-            <Marker position={technicianPosition} icon={pinIcon("#3acf98")} />
- 
+      {errorMessage && <p role="alert" className="mb-4 text-sm text-red-300">{errorMessage}</p>}
+      {isLoading ? <p className="text-white/60">Loading assigned jobs...</p> : jobs.length === 0 ? (
+        <p className="rounded-lg border border-white/10 bg-white/5 p-5 text-white/60">No assigned jobs have an address to navigate to.</p>
+      ) : (
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.8fr)]">
+          <div className="flex flex-col gap-3">
             {jobs.map((job) => (
-              <Marker
-                key={job.ticketID}
-                position={[job.lat, job.lng]}
-                icon={pinIcon(job.priority === "Critical" ? "#dd0002" : "#ff006a")}
-                eventHandlers={{ click: () => setSelected(job) }}
-              />
+              <button key={job.id} type="button" onClick={() => setSelected(job)} className={`rounded-lg border p-4 text-left transition ${selected?.id === job.id ? "border-[#3acf98]/60 bg-[#3acf98]/10" : "border-white/10 bg-white/5 hover:bg-white/10"}`}>
+                <span className="font-mono text-sm text-[#3acf98]">{job.ticketID}</span>
+                <span className="ml-3 text-xs text-white/50">{job.status}</span>
+                <h2 className="mt-1 font-medium">{job.subscriber}</h2>
+                <p className="mt-1 flex items-center gap-2 text-sm text-white/65"><MapPin size={14} />{job.address}</p>
+              </button>
             ))}
-          </MapContainer>
-        </div>
- 
-        {/* Selected job detail bar */}
-        <div className="flex flex-col gap-4 border-t border-white/10 bg-[#3a3a3a] p-6 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="mb-1 flex items-center gap-3">
-              <span className="font-ubuntu-mono text-sm tracking-[1px] text-[#3acf98]">{selected.ticketID}</span>
-              <span className={`rounded-[41px] border px-3 py-0.5 text-xs tracking-[0.5px] ${priorityStyles[selected.priority]}`}>
-                {selected.priority}
-              </span>
-            </div>
-            <h3 className="text-xl font-medium tracking-[1px] text-[#fffefe]">{selected.customer}</h3>
-            <p className="font-ubuntu-mono text-sm tracking-[0.5px] text-white/70">{selected.address}</p>
           </div>
- 
-          <div className="flex gap-4">
-            <a
-              href={`https://www.google.com/maps/search/?api=1&query=${selected.lat},${selected.lng}`}
-              target="_blank"
-              rel="noreferrer"
-              className="flex h-[52px] items-center justify-center rounded-[10px] border border-[#197af9] bg-[rgba(25,122,249,0.4)] px-6 font-ubuntu-mono text-sm tracking-[1px] text-white"
-            >
-              OPEN IN MAPS
-            </a>
-            <button
-              type="button"
-              className="flex h-[52px] items-center justify-center rounded-[10px] border border-[#7e7e7e] bg-white/20 px-6 font-ubuntu-mono text-sm tracking-[1px] text-white/85"
-            >
-              VIEW DETAILS
-            </button>
-          </div>
+          {selected && (
+            <section className="flex flex-col justify-between gap-5 rounded-lg border border-white/10 bg-white/5 p-5">
+              <div>
+                <p className="font-mono text-sm text-[#3acf98]">{selected.ticketID} · {selected.priority}</p>
+                <h2 className="mt-2 text-xl font-medium">{selected.subscriber}</h2>
+                <p className="mt-2 flex items-start gap-2 text-white/65"><MapPin size={17} className="mt-0.5 shrink-0" />{selected.address}</p>
+                <p className="mt-4 text-sm text-white/55">{selected.issue}</p>
+              </div>
+              <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selected.address)}`} target="_blank" rel="noreferrer" className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#3acf98] px-4 text-sm font-medium text-black hover:bg-[#3acf98]/80">
+                <Navigation size={16} /> Open Directions
+              </a>
+            </section>
+          )}
         </div>
-      </div>
+      )}
     </div>
-  )
+  );
 }
- 
-export default Maps
+
+export default Maps;

@@ -1,137 +1,125 @@
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardFooter
-} from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { publishDataChange, useDataRefresh } from "@/hooks/useDataRefresh";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
+type Plan = { id: string; name: string; type: string; speed: string | null; cost: number | null };
+type PlanRequest = { id: string; status: string; finalPlan?: Plan | null; requestedAt: string };
 
 function PlanChanges() {
-  return (
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [currentPlanId, setCurrentPlanId] = useState("");
+  const [requests, setRequests] = useState<PlanRequest[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [submittingPlanId, setSubmittingPlanId] = useState("");
+  const [notice, setNotice] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-
-    <div className="flex flex-col text-left w-full font-light tracking-wide">
-      {
-        //TODO: make optimize the cards rendering once the types are determined
+  async function loadPlanData() {
+    const token = localStorage.getItem("diverge_token");
+    if (!token) {
+      setErrorMessage("Sign in to review available plans.");
+      setIsLoading(false);
+      return;
+    }
+    const headers = { Authorization: `Bearer ${token}` };
+    try {
+      const [plansResponse, requestResponse, accountResponse] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/v1/customer/plans/offerings`, { headers }),
+        fetch(`${API_BASE_URL}/api/v1/customer/plans/requests`, { headers }),
+        fetch(`${API_BASE_URL}/api/customers/me`, { headers }),
+      ]);
+      const [plansPayload, requestPayload, accountPayload] = await Promise.all([
+        plansResponse.json(), requestResponse.json(), accountResponse.json(),
+      ]);
+      if (!plansResponse.ok || !requestResponse.ok || !accountResponse.ok) {
+        throw new Error("Unable to load plan information.");
       }
-      <h1 className="text-2xl">Upgrade or Downgrade</h1>
+      setPlans(Array.isArray(plansPayload?.data) ? plansPayload.data : []);
+      setRequests(Array.isArray(requestPayload?.data) ? requestPayload.data : []);
+      setCurrentPlanId(accountPayload?.data?.planId ?? "");
+      setErrorMessage("");
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Unable to load plan information.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
-      <div className="w-full mr-5 mt-5 flex flex-col gap-10">
-        <div className="flex flex-1 flex-row shadow-glassy-jeri text-amber-400 rounded-2xl p-2 bg-amber-400/20">
-          <i className="fa-solid fa-bolt-lightning fa-xl"></i>
-          <p>Upgrades to 200 Mbps or below take effect within 30 minutes — no technician needed. Downgrades have a 30-day lock-in</p>
+  useDataRefresh(loadPlanData);
+  useEffect(() => { void loadPlanData(); }, []);
+
+  async function requestPlan(planId: string) {
+    const token = localStorage.getItem("diverge_token");
+    if (!token) return;
+    setSubmittingPlanId(planId);
+    setErrorMessage("");
+    setNotice("");
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/customer/plans/requests`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ planId }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.message ?? "Plan change request failed.");
+      setNotice("Your plan change request was submitted for review.");
+      publishDataChange();
+      await loadPlanData();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Plan change request failed.");
+    } finally {
+      setSubmittingPlanId("");
+    }
+  }
+
+  const pendingRequest = requests.find((request) => request.status === "PENDING");
+
+  return (
+    <div className="w-full px-4 py-6 text-left text-white lg:px-10">
+      <h1 className="mb-2 text-2xl font-medium">Plans &amp; subscriptions</h1>
+      <p className="mb-6 max-w-3xl text-sm text-white/60">Choose an available service plan. Your current service remains active until an administrator reviews the request.</p>
+      {notice && <p role="status" className="mb-4 text-sm text-emerald-300">{notice}</p>}
+      {errorMessage && <p role="alert" className="mb-4 text-sm text-red-300">{errorMessage}</p>}
+      {pendingRequest && <p className="mb-5 rounded-md border border-amber-300/20 bg-amber-300/10 p-3 text-sm text-amber-200">A request for {pendingRequest.finalPlan?.name ?? "a plan change"} is awaiting review.</p>}
+      {isLoading ? <p className="text-white/60">Loading plans...</p> : plans.length === 0 ? (
+        <p className="text-white/60">No active plans are available.</p>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {plans.map((plan) => {
+            const isCurrent = plan.id === currentPlanId;
+            return (
+              <Card key={plan.id} className="gap-3 rounded-lg border-white/10 bg-white/5 text-white shadow-glassy-jeri ring-0">
+                <CardHeader className="flex-row items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-medium">{plan.name}</h2>
+                    <p className="text-sm text-white/55">{plan.type}</p>
+                  </div>
+                  {isCurrent && <span className="rounded-md border border-blue-400/30 bg-blue-400/10 px-2 py-1 text-xs text-blue-200">Current</span>}
+                </CardHeader>
+                <CardContent className="flex flex-col gap-4">
+                  <p className="text-3xl font-semibold tabular-nums">₱{((plan.cost ?? 0) / 100).toLocaleString("en-PH", { minimumFractionDigits: 2 })}<span className="ml-1 text-sm font-normal text-white/45">/month</span></p>
+                  <p className="text-sm text-white/65">{plan.speed ?? "Speed details unavailable"}</p>
+                  <Button disabled={isCurrent || Boolean(pendingRequest) || Boolean(submittingPlanId)} onClick={() => void requestPlan(plan.id)}>
+                    {isCurrent ? "Current Plan" : submittingPlanId === plan.id ? "Submitting..." : pendingRequest ? "Request Pending" : "Request Plan Change"}
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
-        <div className="flex flex-1 flex-row gap-x-5 max-sm:flex-col max-sm:gap-4">
-          {
-            //Request style
-          }
-          <Card className="ml-2 flex-1 shadow-glassy-jeri bg-white/5 ring-0 max-sm:ml-0 max-sm:w-full">
-            <CardHeader className="flex flex-row place-content-between">
-            </CardHeader>
-            <CardContent className="flex flex-col gap-y-10">
-              <span className="flex flex-col gap-y-4">
-                <p className="text-2xl">Fiber 50 Mbps</p>
-                <span className="flex flex-row">
-                  <p className="text-5xl ">₱999</p>
-                  <p className="text-xl self-end opacity-40">{"/mo"}</p>
-                </span>
-              </span>
-
-              <div className="flex flex-row shadow-glassy-jeri h-40 rounded-2xl bg-black/30">
-                <span className="flex flex-col items-center justify-center w-[50%]">
-                  <p className="text-4xl bg-linear-to-r from-teal-400 from-50% to-blue-600 bg-clip-text text-transparent font-normal">50 Mbps</p>
-                  <p className="opacity-40 font-normal">Download</p>
-                </span>
-                <Separator orientation="vertical" className="w-[1.5px] bg-white/10 my-4" />
-                <span className="flex flex-col items-center justify-center w-[50%]">
-                  <p className="text-4xl bg-linear-to-r from-teal-400 from-50% to-blue-600 bg-clip-text text-transparent font-normal">25 Mbps</p>
-                  <p className="opacity-40 font-normal">Upload</p>
-                </span>
-
-              </div>
-            </CardContent>
-            <CardFooter className="border-none mt-auto mb-4 mx-4 ring-1 ring-emerald-500 rounded-2xl bg-emerald-500/20 flex justify-center p-5" >
-              <p className="text-emerald-500 text-2xl tracking-widest font-normal">Request Submitted</p>
-
-            </CardFooter>
-          </Card>
-
-
-          {
-            //Current Plan style
-          }
-          <Card className="ml-2 flex-1 shadow-glassy-jeri bg-white/5 ring-blue-500 ring-1 max-sm:ml-0 max-sm:w-full">
-            <CardHeader className="flex flex-row place-content-between">
-              <h1 className="p-1 px-4 bg-blue-500/20 text-blue-500 ring-1 ring-blue-500/80 rounded-md">Current Plan</h1>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-y-10">
-              <span className="flex flex-col gap-y-4">
-                <p className="text-2xl">Diverge Netflix</p>
-                <span className="flex flex-row">
-                  <p className="text-5xl ">₱1,499</p>
-                  <p className="text-xl self-end opacity-40">{"/mo"}</p>
-                </span>
-              </span>
-
-              <div className="flex flex-row shadow-glassy-jeri h-40 rounded-2xl bg-black/30">
-                <span className="flex flex-col items-center justify-center w-[50%]">
-                  <p className="text-4xl bg-linear-to-r from-teal-400 from-50% to-blue-600 bg-clip-text text-transparent font-normal">100 Mbps</p>
-                  <p className="opacity-40 font-normal">Download</p>
-                </span>
-                <Separator orientation="vertical" className="w-[1.5px] bg-white/10 my-4" />
-                <span className="flex flex-col items-center justify-center w-[50%]">
-                  <p className="text-4xl bg-linear-to-r from-teal-400 from-50% to-blue-600 bg-clip-text text-transparent font-normal">50 Mbps</p>
-                  <p className="opacity-40 font-normal">Upload</p>
-                </span>
-
-              </div>
-              <div className="shadow-glassy-jeri rounded-2xl bg-black/30 flex justify-center p-5">
-                <p className="opacity-40 text-2xl tracking-widest">Current Plan</p>
-              </div>
-            </CardContent>
-          </Card>
-          {
-            //Upgrade Plan Style
-          }
-          <Card className="ml-2 flex-1 shadow-glassy-jeri bg-white/5 ring-0 max-sm:ml-0 max-sm:w-full">
-            <CardHeader className="flex flex-row place-content-between">
-            </CardHeader>
-            <CardContent className="flex flex-col gap-y-10">
-              <span className="flex flex-col gap-y-4">
-                <p className="text-2xl">Fiber 50 Mbps</p>
-                <span className="flex flex-row">
-                  <p className="text-5xl ">₱999</p>
-                  <p className="text-xl self-end opacity-40">{"/mo"}</p>
-                </span>
-              </span>
-
-              <div className="flex flex-row shadow-glassy-jeri h-40 rounded-2xl bg-black/30">
-                <span className="flex flex-col items-center justify-center w-[50%]">
-                  <p className="text-4xl bg-linear-to-r from-teal-400 from-50% to-blue-600 bg-clip-text text-transparent font-normal">50 Mbps</p>
-                  <p className="opacity-40 font-normal">Download</p>
-                </span>
-                <Separator orientation="vertical" className="w-[1.5px] bg-white/10 my-4" />
-                <span className="flex flex-col items-center justify-center w-[50%]">
-                  <p className="text-4xl bg-linear-to-r from-teal-400 from-50% to-blue-600 bg-clip-text text-transparent font-normal">25 Mbps</p>
-                  <p className="opacity-40 font-normal">Upload</p>
-                </span>
-
-              </div>
-            </CardContent>
-            <CardFooter className="border-none mt-auto mb-4 mx-4 shadow-glassy-jeri rounded-2xl bg-blue-500/70 flex justify-center p-5" >
-              <p className=" text-2xl tracking-widest font-normal">Upgrade to This Plan</p>
-
-            </CardFooter>
-          </Card>
-
-
-        </div>
-
-      </div>
+      )}
+      {requests.length > 0 && (
+        <section className="mt-8 border-t border-white/10 pt-5">
+          <h2 className="mb-3 text-lg font-medium">Request history</h2>
+          <ul className="space-y-2 text-sm text-white/65">
+            {requests.map((request) => <li key={request.id}>{request.finalPlan?.name ?? "Plan change"} · {request.status.replaceAll("_", " ")} · {new Date(request.requestedAt).toLocaleDateString()}</li>)}
+          </ul>
+        </section>
+      )}
     </div>
-
-  )
-
+  );
 }
-export default PlanChanges
+
+export default PlanChanges;

@@ -46,7 +46,7 @@ const DEMO_ACCOUNTS: Array<{
   },
 ]
 
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000"
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001"
 
 function LoginPage() {
   const navigate = useNavigate()

@@ -1,65 +1,97 @@
-
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import type { Customer } from "../types/customer";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
 
-function ManageAccount({
-  customer,
-  onClose,
-}: {
-  customer: Customer;
+type SubmitTicketProps = {
   onClose: () => void;
-}) {
-  void customer;
-  return (
-    <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#121212]/50">
-        <Card className="relative w-[600px] h-auto  ring-0 bg-white/5 shadow-glassy-jeri rounded-[2vw] opacity-80 gap-2 max-sm:w-[calc(100vw-2rem)] max-sm:max-h-[90vh] max-sm:overflow-y-auto">
-          <CardHeader className="flex flex-col ml-4 font-medium">
-            <CardTitle className="font-ubuntu text-[20px] font-light font-white opacity-30">SUBMIT A TICKET</CardTitle>
-            <Button
-              className="absolute top-4 right-5 text-white rounded-full w-6 h-6 p-0 text-lg hover-glass-rim shrink-0"
-              onClick={onClose}
-            >
-              X
-            </Button>
-          </CardHeader>
-          <CardContent className="flex flex-col mt-0 mr-8">
-            <div className="grid grid-cols-1">
-              <div>
-                <h2 className="flex ml-4 mb-1 font-bold text-xs text-[#C4C4C4]">
-                 CATEGORY
-                </h2>
-                <Input type="text" placeholder="Input category" className="bg-[#D9D9D9]/20 shadow-glassy-jeri rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-6 ml-4 mb-2 text-xs"/>
-                <h2 className="flex ml-4 mb-1 font-bold text-xs text-[#C4C4C4] ">
-                  SUBJECT
-                </h2>
-                <Input type="text" placeholder="Type here" className="bg-[#D9D9D9]/20 shadow-glassy-jeri rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-6 ml-4 mb-2 text-xs"/>
-                <h2 className="flex ml-4 mb-1 font-bold text-xs text-[#C4C4C4] ">
-                  DESCRIPTION
-                </h2>
-                <Textarea placeholder="Describe the issue" className="bg-[#D9D9D9]/20 shadow-glassy-jeri rounded-[10px] border-0 italic focus-visible:ring-0 flex-1 min-w-0 h-20 ml-4 mb-2 text-xs py-1.5 field-sizing-fixed resize-none"/>
-              </div>
-            </div>
-          </CardContent>
+  mode?: "customer" | "admin";
+  onSubmitted?: () => void;
+};
 
-            <div className="flex justify-center">
-              <Button className="bg-[#3ACF98] font-light w-40 rounded-2xl items-center justify-center shadow-glassy-jeri text-xs tracking-widest">
-                  Submit Ticket
+function SubmitTicket({ onClose, mode = "customer", onSubmitted }: SubmitTicketProps) {
+  const [category, setCategory] = useState("");
+  const [issue, setIssue] = useState("");
+  const [description, setDescription] = useState("");
+  const [accountId, setAccountId] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setErrorMessage("");
+
+    try {
+      const token = localStorage.getItem("diverge_token");
+      if (!token) throw new Error("Sign in to submit a support ticket.");
+
+      const response = await fetch(
+        mode === "admin"
+          ? `${API_BASE_URL}/api/v1/admin/tickets`
+          : `${API_BASE_URL}/api/customers/me/tickets`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ category, issue, description, ...(mode === "admin" ? { accountId } : {}) }),
+        },
+      );
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.message ?? "Ticket could not be submitted.");
+      onSubmitted?.();
+      onClose();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Ticket could not be submitted.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#121212]/70 p-4">
+      <Card className="relative w-full max-w-xl gap-2 rounded-xl bg-[#171717] text-white shadow-glassy-jeri ring-1 ring-white/10">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-lg font-medium">Submit a support ticket</CardTitle>
+          <Button variant="ghost" type="button" onClick={onClose} aria-label="Close ticket form">×</Button>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {mode === "admin" && (
+              <label className="flex flex-col gap-1 text-sm text-white/70">
+                Account ID
+                <Input value={accountId} onChange={(event) => setAccountId(event.target.value)} required placeholder="ACC-..." />
+              </label>
+            )}
+            <label className="flex flex-col gap-1 text-sm text-white/70">
+              Category
+              <Input value={category} onChange={(event) => setCategory(event.target.value)} minLength={2} maxLength={80} required placeholder="Technical, billing, account..." />
+            </label>
+            <label className="flex flex-col gap-1 text-sm text-white/70">
+              Subject
+              <Input value={issue} onChange={(event) => setIssue(event.target.value)} minLength={4} maxLength={120} required placeholder="Briefly describe the issue" />
+            </label>
+            <label className="flex flex-col gap-1 text-sm text-white/70">
+              Description
+              <Textarea value={description} onChange={(event) => setDescription(event.target.value)} minLength={10} maxLength={2000} required rows={5} placeholder="Include when it started and what you have tried" />
+            </label>
+            {errorMessage && <p role="alert" className="text-sm text-red-300">{errorMessage}</p>}
+            <div className="flex justify-end gap-3">
+              <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+              <Button type="submit" disabled={isSubmitting} className="bg-[#3ACF98] text-black hover:bg-[#3ACF98]/80">
+                {isSubmitting ? "Submitting..." : "Submit Ticket"}
               </Button>
             </div>
-        </Card>
-      </div>
-    </>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
-export default ManageAccount;
+export default SubmitTicket;

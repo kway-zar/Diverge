@@ -11,21 +11,58 @@ import {
   Dialog,
   DialogContent,
 } from "@/components/ui/dialog"
-import { engineers } from "../../data/engineerData";
 import type { Engineer, EngineerStatus } from "../../types/engineer";
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import { Button } from "@/components/ui/button"
+import { publishDataChange } from "@/hooks/useDataRefresh";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
 
 function RosterModal({
   engineer,
   isOpen,
   onClose,
+  onUpdated,
 } : {
   engineer : Engineer | null;
   isOpen: boolean;
-  onClose: () => void
+  onClose: () => void;
+  onUpdated: () => void;
 }) {
+  const [status, setStatus] = useState<EngineerStatus>(engineer?.status ?? "Available");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    setStatus(engineer?.status ?? "Available");
+    setErrorMessage("");
+  }, [engineer]);
+
   if (!engineer) return null;
+  const engineerId = engineer.id;
+
+  async function saveStatus() {
+    const token = localStorage.getItem("diverge_token");
+    if (!token) return setErrorMessage("Administrator sign-in is required.");
+    setIsSaving(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/admin/technicians/${engineerId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.message ?? "Unable to update technician status.");
+      publishDataChange();
+      onUpdated();
+      onClose();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Unable to update technician status.");
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   return(
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -90,10 +127,6 @@ function RosterModal({
                 </div>
               </div>
             <div className="flex flex-col gap-3">
-              <span className="text-[20px] font-bold text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em]"> 
-                Hello
-              </span>
-              
               <div className="flex flex-col gap-2">
                   <span className="text-[20px] font-light text-[#C4C4C4]/92 leading-[100%] tracking-[0.05em] opacity-80"> 
                     JOBS COMPLETED
@@ -115,18 +148,21 @@ function RosterModal({
                     CURRENT JOB
                   </span>
                   <p className="text-[24px] font-ubuntu-mono font-regular text-[#FFFFFF] leading-[100%] tracking-[0.05em] opacity-75 ml-6">
-                    {engineer.overview.joined}
+                    {new Date(engineer.overview.joined).toLocaleDateString()}
                   </p>
               </div>
+              <label className="mt-2 flex flex-col gap-2 text-sm text-white/70">
+                Availability
+                <select value={status} onChange={(event) => setStatus(event.target.value as EngineerStatus)} className="h-10 rounded-md border border-white/15 bg-[#202020] px-3 text-white">
+                  {(["Available", "On-Site", "Traveling", "Off-Duty", "Unavailable"] as EngineerStatus[]).map((option) => <option key={option} value={option}>{option}</option>)}
+                </select>
+              </label>
             </div>
           </div>
-          <div className="flex justify-between">
-            <Button  className="w-[399px] h-[71px] bg-[#4BE0A9]/40 rounded-[30px] text-[32px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#4BE0A9]/35">
-              Assign Job
-            </Button>
-            <Button  className="w-[399px] h-[71px] bg-[#FFFFFF]/29 rounded-[30px] text-[32px] font-regular font-ubuntu-mono text-[#FFFFFF]/75 cursor-pointer border-none shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black hover:bg-[#FFFFFF]/35">
-              Cancel
-            </Button>
+          {errorMessage && <p role="alert" className="text-sm text-red-300">{errorMessage}</p>}
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={onClose}>Cancel</Button>
+            <Button disabled={isSaving} onClick={() => void saveStatus()}>{isSaving ? "Saving..." : "Save Status"}</Button>
           </div>
         </div>
       </DialogContent>
@@ -165,7 +201,7 @@ const statusStyles: Record<
   },
 };
 
-function Roster() {
+function Roster({ engineers, onUpdated }: { engineers: Engineer[]; onUpdated: () => void }) {
   const [selectedEngineer, setSelectedEngineer] =
     useState<Engineer | null>(null);
 
@@ -263,6 +299,7 @@ function Roster() {
               </TableCell>
             </TableRow>
           ))}
+          {engineers.length === 0 && <TableRow><TableCell colSpan={7} className="py-8 text-center text-white/50">No technician profiles found.</TableCell></TableRow>}
         </TableBody>
       </Table>
       <RosterModal
@@ -270,6 +307,7 @@ function Roster() {
         engineer={selectedEngineer}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        onUpdated={onUpdated}
       />    
     </div>
   );

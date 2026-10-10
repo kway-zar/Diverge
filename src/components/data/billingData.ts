@@ -262,6 +262,7 @@ export function buildPaymentHistory(invoices: Invoice[]): CustomerPayment[] {
     return {
       invoice: invoice.invoiceID,
       period,
+      plan: invoice.plan,
       amount: invoice.amount,
       due: invoice.dueDate,
       method: invoice.paymentMethod,

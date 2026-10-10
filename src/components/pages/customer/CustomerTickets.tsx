@@ -1,50 +1,98 @@
-import { useState, type ComponentProps } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { Tickets } from "@/components/types/tickets"
 import SubmitTicket from "@/components/modals/SubmitTicket";
+import { publishDataChange, useDataRefresh } from "@/hooks/useDataRefresh";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
+
+function TechnicianEvaluation({ ticket, onSubmitted }: { ticket: Tickets; onSubmitted: () => void }) {
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function submitEvaluation(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const token = localStorage.getItem("diverge_token");
+    if (!token || !ticket.id) {
+      setErrorMessage("Sign in again to submit an evaluation.");
+      return;
+    }
+    setIsSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/customers/me/tickets/${ticket.id}/review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ rating, comment }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.message ?? "Unable to submit evaluation.");
+      onSubmitted();
+      publishDataChange();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Unable to submit evaluation.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  if (ticket.hasEvaluation) {
+    return <p className="mt-4 border-t border-white/10 pt-3 text-sm text-emerald-300">Technician evaluation submitted. Thank you.</p>;
+  }
+
+  return (
+    <form onSubmit={submitEvaluation} className="mt-4 flex flex-col gap-3 border-t border-white/10 pt-4">
+      <h3 className="text-sm font-medium">Evaluate {ticket.assignedTo}</h3>
+      <label className="flex items-center gap-2 text-sm text-white/70">
+        Rating
+        <select value={rating} onChange={(event) => setRating(Number(event.target.value))} className="h-9 rounded-md border border-white/15 bg-[#202020] px-2 text-white">
+          {[5, 4, 3, 2, 1].map((value) => <option key={value} value={value}>{value} star{value === 1 ? "" : "s"}</option>)}
+        </select>
+      </label>
+      <label className="flex flex-col gap-1 text-sm text-white/70">
+        Comment
+        <textarea value={comment} onChange={(event) => setComment(event.target.value)} required minLength={5} maxLength={1000} rows={2} className="rounded-md border border-white/15 bg-white/5 p-2 text-white" placeholder="Describe your service experience" />
+      </label>
+      {errorMessage && <p role="alert" className="text-sm text-red-300">{errorMessage}</p>}
+      <button type="submit" disabled={isSubmitting} className="h-9 self-start rounded-md bg-[#3ACF98]/20 px-4 text-sm text-[#3ACF98] disabled:opacity-50">
+        {isSubmitting ? "Submitting..." : "Submit evaluation"}
+      </button>
+    </form>
+  );
+}
 
 function CustomerTickets() {
    const [showSubmitTicket, setShowSubmitTicket] = useState(false);
+   const [tickets, setTickets] = useState<Tickets[]>([]);
+   const [errorMessage, setErrorMessage] = useState("");
+   const [isLoading, setIsLoading] = useState(true);
 
-   const tickets: Tickets[] = [
-     {
-         ticketID: "TICK-1001",
-         issue: "No Internet",
-         status: "Open",
-         created: "Sep 18, 08:03",
-         subscriber: "",
-         category: "",
-         priority: "Low",
-         assignedTo: "",
-         SLA: "",
-         updated: "Ticket received. Our team will be in touch shortly."
-     },
-    {
-        ticketID: "TICK-1002",
-        issue: "Connection Drops",
-        status: "Pending",
-        created: "Sep 20, 10:30",
-        subscriber: "",
-        category: "",
-        priority: "Low",
-        assignedTo: "",
-        SLA: "",
-        updated: "Waiting for technician action/visit"
-    },
-    {
-        ticketID: "TICK-1003",
-        issue: "Plan Change",
-        status: "Resolved",
-        created: "Nov, 1:45",
-        subscriber: "",
-        category: "",
-        priority: "Low",
-        assignedTo: "",
-        SLA: "",
-        updated: "Resolved by billing team. Refund processed."
-    },
-  ];
+   async function loadTickets() {
+     const token = localStorage.getItem("diverge_token");
+     if (!token) {
+       setErrorMessage("Sign in to view your tickets.");
+       setIsLoading(false);
+       return;
+     }
+     try {
+       const response = await fetch(`${API_BASE_URL}/api/customers/me/tickets`, {
+         headers: { Authorization: `Bearer ${token}` },
+       });
+       const payload = await response.json();
+       if (!response.ok) throw new Error(payload?.message ?? "Unable to load tickets.");
+       setTickets(Array.isArray(payload?.data) ? payload.data : []);
+       setErrorMessage("");
+     } catch (error) {
+       setErrorMessage(error instanceof Error ? error.message : "Unable to load tickets.");
+     } finally {
+       setIsLoading(false);
+     }
+   }
+
+   useDataRefresh(loadTickets);
+   useEffect(() => { void loadTickets(); }, []);
 
    function getStatusBadge(status: Tickets["status"]) {
       switch (status) {
@@ -79,13 +127,10 @@ function CustomerTickets() {
             </div>
           </div>
           <div>
-            <div className="w-full bg-emerald-500/25 text-emerald-400 border-emerald-500/60 border-2 rounded-[12px] text-start">
-              <p className="m-1 tracking-widest text-sm">
-                ✓ Your ticket has been submitted. A support agent will respond
-                within 2 business hours.
-              </p>
-            </div>
+            {errorMessage && <p role="alert" className="text-left text-sm text-red-300">{errorMessage}</p>}
 
+            {isLoading && <p className="py-6 text-white/60">Loading tickets...</p>}
+            {!isLoading && !errorMessage && tickets.length === 0 && <p className="py-6 text-white/60">You have no support tickets yet.</p>}
             {tickets.map((ticket) => (
               <div
                 key={ticket.ticketID}
@@ -103,8 +148,11 @@ function CustomerTickets() {
                   {ticket.updated}
                 </p>
                 <p className="text-start font-light opacity-60 text-[15px]">
-                  {ticket.created}
+                  {new Date(ticket.created).toLocaleString()}
                 </p>
+                {ticket.status === "Resolved" && ticket.assignedTechnicianId && (
+                  <TechnicianEvaluation ticket={ticket} onSubmitted={() => void loadTickets()} />
+                )}
               </div>
             ))}
           </div>
@@ -113,8 +161,11 @@ function CustomerTickets() {
 
       {showSubmitTicket && (
         <SubmitTicket
-          customer={{} as ComponentProps<typeof SubmitTicket>["customer"]}
           onClose={() => setShowSubmitTicket(false)}
+          onSubmitted={() => {
+            publishDataChange();
+            void loadTickets();
+          }}
         />
       )}
     </>

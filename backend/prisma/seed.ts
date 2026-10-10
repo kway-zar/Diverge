@@ -178,6 +178,25 @@ async function main() {
     },
   });
 
+  for (const customer of seededCustomers) {
+    if (customer.status !== 'ACTIVE' || !customer.planId) continue;
+
+    const subscription = await prisma.subscription.findFirst({
+      where: { customerId: customer.id, status: 'ACTIVE' },
+    });
+    if (!subscription) {
+      await prisma.subscription.create({
+        data: {
+          customerId: customer.id,
+          planId: customer.planId,
+          billingDay: customer.since.getUTCDate(),
+          startedAt: customer.since,
+          status: 'ACTIVE',
+        },
+      });
+    }
+  }
+
   const invoiceTemplates = [
     {
       customerEmail: 'jonathan@example.com',
@@ -322,6 +341,7 @@ async function main() {
             due: invoiceTemplate.dueDate,
             method: invoiceTemplate.paymentMethodLabel,
             status: invoiceTemplate.paymentStatus,
+            settledAt: invoiceTemplate.paymentStatus === 'PAID' ? invoiceTemplate.dueDate : undefined,
           },
         });
       }

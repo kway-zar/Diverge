@@ -1,14 +1,47 @@
 import { Card, CardContent} from '@/components/ui/card'
 import type {EngineerStatus} from "../../types/engineer.ts"
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent} from '@/components/ui/tabs'
 import TechnicianOverview from "./TechnicianOverview.tsx";
 import TechnicianFieldReports from "./TechnicianFieldReports.tsx";
 import TechnicianReviews from "./TechnicianReviews.tsx";
-import {engineers} from "../../data/engineerData";
+import type { Engineer } from "../../types/engineer";
+import { useDataRefresh } from "@/hooks/useDataRefresh";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
 
 function Technicians() {
-    const avgTeamRating = engineers.reduce((sum, engineer) => sum + engineer.rating, 0) / engineers.length;
+    const [engineers, setEngineers] = useState<Engineer[]>([]);
+    const [selectedEngineerId, setSelectedEngineerId] = useState<string | null>(null);
+    const [errorMessage, setErrorMessage] = useState("");
+
+    async function loadEngineers() {
+        const token = localStorage.getItem("diverge_token");
+        if (!token) {
+            setErrorMessage("Administrator sign-in is required to view technician records.");
+            return;
+        }
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/v1/admin/technicians`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const payload = await response.json();
+            if (!response.ok) throw new Error(payload?.message ?? "Unable to load technician records.");
+            const nextEngineers: Engineer[] = Array.isArray(payload?.data) ? payload.data : [];
+            setEngineers(nextEngineers);
+            setSelectedEngineerId((current) => nextEngineers.some((engineer) => engineer.id === current) ? current : nextEngineers[0]?.id ?? null);
+            setErrorMessage("");
+        } catch (error) {
+            setErrorMessage(error instanceof Error ? error.message : "Unable to load technician records.");
+        }
+    }
+
+    useDataRefresh(loadEngineers);
+    useEffect(() => { void loadEngineers(); }, []);
+
+    const avgTeamRating = engineers.length
+        ? engineers.reduce((sum, engineer) => sum + engineer.rating, 0) / engineers.length
+        : 0;
 
     const reportsThisMonth = engineers.reduce(
         (total, engineer) => total + engineer.fieldReports.length,
@@ -24,15 +57,16 @@ function Technicians() {
         0
     );
 
-    const topPerformer = engineers.reduce((top, engineer) =>
-        engineer.rating > top.rating ? engineer : top
+    const topPerformer = engineers.reduce<Engineer | null>(
+        (top, engineer) => !top || engineer.rating > top.rating ? engineer : top,
+        null,
     );
 
     const stats = [
         {
             title: "AVG TEAM RATING",
             value: avgTeamRating.toFixed(1),
-            description: "Across S Engineers",
+            description: `Across ${engineers.length} technicians`,
             valueColor: "#E1AE08"
         },
         {
@@ -49,8 +83,8 @@ function Technicians() {
         },
         {
             title: "TOP PERFORMER",
-            value: topPerformer.name,
-            description: "5 star ratings in 20 jobs",
+            value: topPerformer?.name ?? "-",
+            description: "Highest current rating",
             valueColor: "#3ACF98"
         }
     ]
@@ -88,8 +122,6 @@ function Technicians() {
     }
     
 
-    const [selectedEngineerId, setSelectedEngineerId] = useState<string | null>(null);
-
     const handleEngineerClick = (engineerId: string) => {
         setSelectedEngineerId(engineerId);
     }
@@ -102,6 +134,7 @@ function Technicians() {
 
     return(
         <div className="flex flex-col items-start text-left mt-5 gap-7 w-[97%]">
+            {errorMessage && <p role="alert" className="text-sm text-red-300">{errorMessage}</p>}
             <div className="flex flex-col gap-1">
                 <span className="font-ubuntu-mono text-[32px] font-regular text-[#FFFFFF] tracking-[0.05em] leading-[100%]">
                     Technician Monitoring

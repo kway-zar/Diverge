@@ -1,108 +1,72 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { publishDataChange } from "@/hooks/useDataRefresh";
 
-import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Field, FieldGroup } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { Textarea } from "@/components/ui/textarea"
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
 
+function CreatePlan({ onCreated }: { onCreated?: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [type, setType] = useState("");
+  const [speed, setSpeed] = useState("");
+  const [price, setPrice] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
-function CreatePlan() {
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const token = localStorage.getItem("diverge_token");
+    const costCents = Math.round(Number(price) * 100);
+    if (!token || !Number.isSafeInteger(costCents) || costCents <= 0) {
+      setErrorMessage("Sign in and enter a valid monthly price.");
+      return;
+    }
+    setIsSaving(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/admin/plans`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ name, type, speed, costCents }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.message ?? "Unable to create plan.");
+      publishDataChange();
+      onCreated?.();
+      setOpen(false);
+      setName(""); setType(""); setSpeed(""); setPrice("");
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Unable to create plan.");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   return (
-    <Dialog >
-      <form>
-        <DialogTrigger className='px-2 py-0 rounded-md bg-emerald-900 mr-5 h-10 shadow-glassy-jeri cursor-pointer'>Create Plan</DialogTrigger>
-        <DialogContent className="sm:max-w-xl bg-[#121212] ring-0 text-white shadow-glassy-jeri">
-          <DialogHeader>
-            <DialogTitle>Create Plan</DialogTitle>
-            <DialogDescription className="opacity-20">
-              Create your profile plan. Click save when you&apos;re
-              done.
-            </DialogDescription>
-            <Separator className="bg-white/20 mb-0" />
-            <h1 className="opacity-20">{"SPEED & TECHINICAL"}</h1>
-          </DialogHeader>
-          <FieldGroup>
-
-            <div className="grid grid-cols-2 grid-rows-2 gap-4 gap-x-20">
-              <Field>
-                <Label htmlFor="plan_name" className="font-ubuntu-mono font-thin">PLAN NAME</Label>
-                <Input id="plan_name" name="name"  className="focus-visible:ring-pink-900 border-none bg-neutral-700" />
-              </Field>
-              <Field>
-                <Label htmlFor="plan_name" className="font-ubuntu-mono font-thin">TYPE</Label>
-                <Input id="plan_type" name="type"  className="focus-visible:ring-pink-900 border-none bg-neutral-700" />
-              </Field>
-              <Field>
-                <Label htmlFor="plan_price" className="font-ubuntu-mono font-thin">{"MONTLY PRICE (₱)"}</Label>
-                <Input id="plan_price" name="price"  className="focus-visible:ring-pink-900 border-none bg-neutral-700" />
-              </Field>
-              <Field>
-                <Label htmlFor="plan_status" className="font-ubuntu-mono font-thin">STATUS</Label>
-                <Input id="plan_status" name="name"  className="focus-visible:ring-pink-900 border-none bg-neutral-700" />
-              </Field>
-
-            </div>
-            <Field>
-              <Label htmlFor="plan_desc" className="font-ubuntu-mono font-thin">DESCRIPTION</Label>
-              <Input id="plan_desc" name="desc"  className="focus-visible:ring-pink-900 border-none bg-neutral-700" />
-            </Field>
-          </FieldGroup>
-          <Separator className="bg-white/20 mb-0" />
-          <h1 className="opacity-20">{"SPEED & TECHINICAL"}</h1>
-          <FieldGroup>
-            <div className="grid grid-cols-2 grid-rows-2 gap-4 gap-x-20">
-              <Field>
-                <Label htmlFor="plan_ds" className="font-ubuntu-mono font-thin">{"DOWNLOAD SPEED (MBPS)"}</Label>
-                <Input id="plan_ds" name="ds"  className="focus-visible:ring-pink-900 border-none bg-neutral-700" />
-              </Field>
-              <Field>
-                <Label htmlFor="plan_us" className="font-ubuntu-mono font-thin">{"UPLOAD SPEED (MBPS)"}</Label>
-                <Input id="plan_us" name="us"  className="focus-visible:ring-pink-900 border-none bg-neutral-700" />
-              </Field>
-              <Field>
-                <Label htmlFor="plan_sla" className="font-ubuntu-mono font-thin">SLA UPTIME</Label>
-                <Input id="plan_sla" name="sla"  className="focus-visible:ring-pink-900 border-none bg-neutral-700" />
-              </Field>
-              <Field>
-                <Label htmlFor="plan_name" className="font-ubuntu-mono font-thin">{"CONTRACT (MONTHS)"}</Label>
-                <Input id="plan_months" name="months"  className="focus-visible:ring-pink-900 border-none bg-neutral-700" />
-              </Field>
-
-            </div>
-          </FieldGroup>
-          <Separator className="bg-white/20 mb-0" />
-          <h1 className="opacity-20">FEATURES</h1>
-
-          <FieldGroup>
-            <Field>
-              <Label htmlFor="plan_features" className="font-ubuntu-mono font-thin">ONE FEATURE PER LINE</Label>
-              <Textarea id="plan_features" name="features"  className="focus-visible:ring-pink-900 border-none bg-neutral-700" />
-            </Field>
-
-          </FieldGroup>
-
-          <DialogFooter className="border-none grid grid-cols-2 gap-x-20 ">
-            <DialogClose render={<Button className="cursor-pointer bg-rose-400/30 rounded-4xl shadow-glassy-jeri">Cancel</Button>} />
-            <Button type="submit"className="cursor-pointer bg-emerald-500/20 rounded-4xl shadow-glassy-jeri">Save changes</Button>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger className="mr-5 h-10 rounded-md bg-emerald-900 px-3 shadow-glassy-jeri">Create Plan</DialogTrigger>
+      <DialogContent className="bg-[#121212] text-white ring-0 shadow-glassy-jeri sm:max-w-xl">
+        <DialogHeader>
+          <DialogTitle>Create Plan Offering</DialogTitle>
+          <DialogDescription>New offerings are immediately available for customer plan requests.</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={submit} className="flex flex-col gap-4">
+          <label className="flex flex-col gap-2 text-sm text-white/70"><Label htmlFor="new-plan-name">Plan name</Label><Input id="new-plan-name" value={name} onChange={(event) => setName(event.target.value)} required minLength={2} maxLength={80} /></label>
+          <label className="flex flex-col gap-2 text-sm text-white/70"><Label htmlFor="new-plan-type">Customer type</Label><Input id="new-plan-type" value={type} onChange={(event) => setType(event.target.value)} required minLength={2} maxLength={40} placeholder="Residential or Business" /></label>
+          <label className="flex flex-col gap-2 text-sm text-white/70"><Label htmlFor="new-plan-speed">Speed</Label><Input id="new-plan-speed" value={speed} onChange={(event) => setSpeed(event.target.value)} required minLength={2} maxLength={80} placeholder="200 Mbps" /></label>
+          <label className="flex flex-col gap-2 text-sm text-white/70"><Label htmlFor="new-plan-price">Monthly price (PHP)</Label><Input id="new-plan-price" type="number" min="0.01" step="0.01" value={price} onChange={(event) => setPrice(event.target.value)} required /></label>
+          {errorMessage && <p role="alert" className="text-sm text-red-300">{errorMessage}</p>}
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button type="submit" disabled={isSaving}>{isSaving ? "Creating..." : "Create Plan"}</Button>
           </DialogFooter>
-        </DialogContent>
-      </form>
+        </form>
+      </DialogContent>
     </Dialog>
-
-
-
-  )
-
+  );
 }
-export default CreatePlan
+
+export default CreatePlan;

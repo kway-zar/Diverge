@@ -1,9 +1,11 @@
 import CreatePlan from '../../modals/CreatePlan.tsx'
 import OfferTab from '../../tabs/admin/OfferTab.tsx'
 import UpgradeReqTab from '../../tabs/admin/UpgradeReqTab.tsx'
+import { useState } from 'react'
 
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 function PlanManagement() {
+  const [refreshKey, setRefreshKey] = useState(0)
   return (
     <div className="flex flex-col text-left w-full font-ubuntu mx-auto gap-2">
       <div className="flex flex-row place-content-between">
@@ -11,14 +13,14 @@ function PlanManagement() {
           <h1 className="text-2xl">Plan Management</h1>
           <h2 className="text-md  font-thin opacity-20"><i>Wednesday, September 16, 2026 12:31AM PHT</i></h2>
         </span>
-        <CreatePlan />
+        <CreatePlan onCreated={() => setRefreshKey((current) => current + 1)} />
       </div>
       <Tabs defaultValue="offer" className="flex-1 mt-10">
         <TabsList className="shadow-glassy-jeri p-1 rounded-4xl">
           <TabsTrigger value="offer" className="cursor-pointer hover:bg-neutral-500/20 data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">PLAN OFFERINGS</TabsTrigger>
           <TabsTrigger value="upgrade" className="cursor-pointer hover:bg-neutral-500/20 data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">UPGRADE REQUESTS</TabsTrigger>
         </TabsList>
-        <OfferTab />
+        <OfferTab refreshKey={refreshKey} />
         <UpgradeReqTab />
       </Tabs>
     </div>

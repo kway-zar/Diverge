@@ -1,135 +1,113 @@
-import type { RatingBreakdown, Metric, Feedback } from "../../types/evaluation";
- 
-const ratingBreakdown: RatingBreakdown[] = [
-  { stars: 5, count: 14 },
-  { stars: 4, count: 3 },
-  { stars: 3, count: 1 },
-  { stars: 2, count: 0 },
-  { stars: 1, count: 0 },
-]
-const maxRatingCount = Math.max(...ratingBreakdown.map((r) => r.count))
- 
-const metrics: Metric[] = [
-  { label: "Average Resolution Time", value: "1h 23min", benchmark: "Benchmark: 2h 00min", percent: 88 },
-  { label: "Customer Satisfaction", value: "4.5 / 5.0", benchmark: "Benchmark: 4.5 / 5.0", percent: 90 },
-  { label: "First-Call Resolution", value: "85%", benchmark: "Benchmark: 80%", percent: 85 },
-  { label: "Punctuality Rate", value: "90%", benchmark: "Benchmark: 80%", percent: 90 },
-  { label: "Jobs Completed", value: "18", benchmark: "Benchmark: --", percent: 100 },
-]
- 
-const feedback: Feedback[] = [
-  { name: "Vanna Hernandez", date: "Sep 23", stars: 5, quote: "Very professional and fast! Fixed the issue within 30 minutes." },
-  { name: "Jojo Landoy", date: "Sep 19", stars: 5, quote: "Was polite and knowledgeable. Great experience." },
-  { name: "Jepoy", date: "Sep 12", stars: 4, quote: "Resolved the issue but took longer than expected." },
-]
- 
+import { useEffect, useState } from "react";
+import { useDataRefresh } from "@/hooks/useDataRefresh";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
+type Review = { id: string; reviewer: string; rating: number; date: string; comment: string };
+type EvaluationData = {
+  averageRating: number;
+  reviewCount: number;
+  breakdown: { stars: number; count: number }[];
+  completedJobsCount: number;
+  reviews: Review[];
+};
+
 function Stars({ count, size = 14 }: { count: number; size?: number }) {
-  return (
-    <div className="flex gap-1">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <span
-          key={i}
-          style={{ fontSize: size }}
-          className={i < count ? "text-[#e1ae08]" : "text-white/20"}
-        >
-          ★
-        </span>
-      ))}
-    </div>
-  )
+  return <div className="flex gap-1" aria-label={`${count} out of 5 stars`}>
+    {Array.from({ length: 5 }).map((_, index) => <span key={index} style={{ fontSize: size }} className={index < count ? "text-[#e1ae08]" : "text-white/20"}>★</span>)}
+  </div>;
 }
- 
+
 function Evaluation() {
-  const today =
-    new Date().toLocaleString("en-US", {
-      timeZone: "Asia/Manila",
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    }) + " PHT"
- 
+  const [evaluation, setEvaluation] = useState<EvaluationData | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  async function loadEvaluation() {
+    const token = localStorage.getItem("diverge_token");
+    if (!token) {
+      setErrorMessage("Technician sign-in is required to view evaluations.");
+      setIsLoading(false);
+      return;
+    }
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/technician/evaluation`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.message ?? "Unable to load evaluations.");
+      setEvaluation(payload?.data ?? null);
+      setErrorMessage("");
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Unable to load evaluations.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useDataRefresh(loadEvaluation);
+  useEffect(() => { void loadEvaluation(); }, []);
+
+  const maxCount = Math.max(1, ...(evaluation?.breakdown.map((row) => row.count) ?? [0]));
+
   return (
     <div className="w-full px-4 pb-10 pt-2 text-left text-white lg:px-10">
       <div className="mb-4">
-        <h1 className="text-xl font-bold tracking-wider text-white">My Evaluation</h1>
-        <p className="font-mono text-xs italic text-white opacity-30">{today}</p>
+        <h1 className="text-xl font-bold tracking-wider">My Evaluation</h1>
+        <p className="font-mono text-xs text-white/40">Customer feedback for your resolved work</p>
       </div>
- 
-      {/* Overall rating */}
-      <div className="flex flex-col gap-5 rounded-[14px] border border-[#7e7e7e] bg-white/20 p-5 lg:flex-row lg:items-center lg:p-8">
-        <div className="flex shrink-0 flex-col items-center gap-1 lg:items-start">
-          <span className="text-4xl font-medium text-[#fffefe] lg:text-5xl">4.5</span>
-          <Stars count={5} size={18} />
-          <span className="text-xs uppercase tracking-[1px] text-white/60">overall rating</span>
-        </div>
-        <div className="flex-1 space-y-2">
-          {ratingBreakdown.map((row) => (
-            <div key={row.stars} className="flex items-center gap-2">
-              <span className="w-8 shrink-0 font-ubuntu-mono text-xs text-white/85">{row.stars} ★</span>
-              <div className="h-[10px] flex-1 overflow-hidden rounded-full bg-[#757575]">
-                <div
-                  className="h-full rounded-full bg-[#e1ae08]"
-                  style={{ width: `${maxRatingCount ? (row.count / maxRatingCount) * 100 : 0}%` }}
-                />
-              </div>
-              <span className="w-5 shrink-0 text-right text-xs text-white/60">{row.count}</span>
+      {errorMessage && <p role="alert" className="mb-4 text-sm text-red-300">{errorMessage}</p>}
+      {isLoading ? <p className="text-white/60">Loading evaluations...</p> : evaluation && (
+        <>
+          <section className="flex flex-col gap-5 rounded-lg border border-white/10 bg-white/5 p-5 lg:flex-row lg:items-center lg:p-8">
+            <div className="flex shrink-0 flex-col items-center gap-1 lg:items-start">
+              <span className="text-4xl font-medium">{evaluation.reviewCount ? evaluation.averageRating.toFixed(1) : "—"}</span>
+              <Stars count={Math.round(evaluation.averageRating)} size={18} />
+              <span className="text-xs uppercase text-white/55">{evaluation.reviewCount} customer reviews</span>
             </div>
-          ))}
-        </div>
-      </div>
- 
-      {/* Performance metrics */}
-      <h2 className="mb-3 mt-4 text-lg font-medium tracking-[1px] text-[#fffefe] lg:text-xl">
-        Performance Metrics
-      </h2>
-      <div className="rounded-[14px] border border-[#7e7e7e] bg-white/20">
-        {metrics.map((m, i) => (
-          <div
-            key={m.label}
-            className={`flex flex-col gap-2 px-5 py-4 lg:flex-row lg:items-center lg:justify-between ${
-              i !== metrics.length - 1 ? "border-b border-white/10" : ""
-            }`}
-          >
-            <div>
-              <p className="text-sm font-medium tracking-[0.5px] text-white lg:text-base">{m.label}</p>
-              <p className="text-xs text-white/60">{m.benchmark}</p>
+            <div className="flex-1 space-y-2">
+              {evaluation.breakdown.map((row) => (
+                <div key={row.stars} className="flex items-center gap-2">
+                  <span className="w-8 shrink-0 font-mono text-xs">{row.stars} ★</span>
+                  <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-white/15">
+                    <div className="h-full rounded-full bg-[#e1ae08]" style={{ width: `${(row.count / maxCount) * 100}%` }} />
+                  </div>
+                  <span className="w-6 text-right text-xs text-white/60">{row.count}</span>
+                </div>
+              ))}
             </div>
-            <div className="flex items-center gap-3">
-              <span className="font-ubuntu-mono text-sm text-white lg:text-base">{m.value}</span>
-              <div className="h-[10px] w-[100px] overflow-hidden rounded-full bg-[#7e7e7e]">
-                <div className="h-full rounded-full bg-[#3acf98]" style={{ width: `${m.percent}%` }} />
-              </div>
-              <span className="rounded-[8px] border border-[#3acf98] bg-[rgba(75,224,169,0.2)] px-2 py-0.5 text-[10px] text-[#3acf98]">
-                ✓ Passed
-              </span>
+          </section>
+
+          <section className="mt-5 rounded-lg border border-white/10 bg-white/5 p-5">
+            <h2 className="mb-4 text-lg font-medium">Performance</h2>
+            <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+              <div><dt className="text-xs text-white/50">Resolved jobs</dt><dd className="mt-1 text-2xl font-semibold">{evaluation.completedJobsCount}</dd></div>
+              <div><dt className="text-xs text-white/50">Customer reviews</dt><dd className="mt-1 text-2xl font-semibold">{evaluation.reviewCount}</dd></div>
+              <div><dt className="text-xs text-white/50">Average rating</dt><dd className="mt-1 text-2xl font-semibold">{evaluation.reviewCount ? `${evaluation.averageRating.toFixed(1)} / 5` : "No ratings yet"}</dd></div>
+            </dl>
+          </section>
+
+          <section className="mt-6">
+            <h2 className="mb-3 text-lg font-medium">Customer Feedback</h2>
+            <div className="flex flex-col gap-3">
+              {evaluation.reviews.map((review) => (
+                <article key={review.id} className="rounded-lg border border-white/10 bg-white/5 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-sm font-medium">{review.reviewer}</span>
+                    <time className="text-xs text-white/50">{new Date(review.date).toLocaleDateString()}</time>
+                  </div>
+                  <div className="mt-2 flex items-start justify-between gap-3">
+                    <p className="text-sm text-white/80">{review.comment}</p>
+                    <Stars count={review.rating} />
+                  </div>
+                </article>
+              ))}
+              {!evaluation.reviews.length && <p className="py-6 text-sm text-white/55">No customer evaluations yet. Reviews are available after resolved tickets are evaluated.</p>}
             </div>
-          </div>
-        ))}
-      </div>
- 
-      {/* Customer feedback */}
-      <h2 className="mb-3 mt-6 text-lg font-medium tracking-[1px] text-[#fffefe] lg:text-xl">
-        Customer Feedback
-      </h2>
-      <div className="flex flex-col gap-3">
-        {feedback.map((f) => (
-          <div key={f.name + f.date} className="rounded-[14px] border border-[#7e7e7e] bg-white/20 p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium tracking-[0.5px] text-white">{f.name}</span>
-              <span className="text-xs text-white/60">{f.date}</span>
-            </div>
-            <div className="mt-1 flex items-center justify-between gap-3">
-              <p className="text-sm italic text-white/80">"{f.quote}"</p>
-              <Stars count={f.stars} />
-            </div>
-          </div>
-        ))}
-      </div>
+          </section>
+        </>
+      )}
     </div>
-  )
+  );
 }
- 
-export default Evaluation
+
+export default Evaluation;
