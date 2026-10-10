@@ -34,7 +34,7 @@ const DEMO_ACCOUNTS: Array<{
   },
   {
     label: "Technician",
-    email: "tech@diverge.com",
+    email: "deveratech@diverge.com",
     password: "seed-password",
     role: "TECHNICIAN",
   },
@@ -46,7 +46,7 @@ const DEMO_ACCOUNTS: Array<{
   },
 ]
 
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001"
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000"
 
 function LoginPage() {
   const navigate = useNavigate()
