@@ -39,6 +39,18 @@ const DEMO_ACCOUNTS: Array<{
     role: "TECHNICIAN",
   },
   {
+    label: "Technician - Unavailable",
+    email: "mika.unavailable@diverge.com",
+    password: "seed-password",
+    role: "TECHNICIAN",
+  },
+  {
+    label: "Technician - Off Duty",
+    email: "paolo.offduty@diverge.com",
+    password: "seed-password",
+    role: "TECHNICIAN",
+  },
+  {
     label: "Admin",
     email: "admin@diverge.com",
     password: "seed-password",

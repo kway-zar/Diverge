@@ -66,7 +66,7 @@ function Billing() {
     ? "Not available"
     : `₱${(activePlan.cost / 100).toLocaleString("en-PH", { minimumFractionDigits: 2 })}`;
 
-  async function recordDemoSettlement({ invoiceId, method }: { invoiceId?: string; amount: string; method: "GCASH" | "MAYA" | "CARD" }) {
+  async function recordPayment({ invoiceId, method }: { invoiceId?: string; amount: string; method: "GCASH" | "MAYA" | "CARD" }) {
     const token = localStorage.getItem("diverge_token");
     if (!token || !invoiceId) throw new Error("Sign in to settle an invoice.");
     setNotice("");
@@ -76,9 +76,9 @@ function Billing() {
       body: JSON.stringify({ invoiceId, paymentMode: "INTERNAL_DEMO", method }),
     });
     const payload = await response.json();
-    if (!response.ok) throw new Error(payload?.message ?? "Unable to record demo settlement.");
+    if (!response.ok) throw new Error(payload?.message ?? "Unable to process payment.");
     await loadCustomerBilling();
-    setNotice(payload?.message ?? "Demo settlement recorded. No funds were moved.");
+    setNotice(payload?.message ?? "Payment recorded. The invoice has been settled.");
     publishDataChange();
     return { paymentReference: String(payload?.paymentReference ?? "Recorded") };
   }
@@ -119,7 +119,7 @@ function Billing() {
                   dueDate={currentBill.dueDate}
                   amount={currentBill.amount}
                   planName={currentBill.plan}
-                  onPaymentSuccess={recordDemoSettlement}
+                  onPaymentSuccess={recordPayment}
                 />
               </div>
             ) : !isLoading && (

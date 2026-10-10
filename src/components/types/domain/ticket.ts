@@ -17,6 +17,7 @@ export interface Ticket extends TimestampedEntity {
   assignedTo: string;
   assignedTechnicianId?: string;
   hasEvaluation?: boolean;
+  isEscalated?: boolean;
   status: TicketStatus;
   SLA: string;
   created: string;

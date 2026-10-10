@@ -9,7 +9,10 @@ export const adminPlanRouter = Router();
 customerPlanRouter.use(requireAuth, requireRole(['CUSTOMER']));
 customerPlanRouter.get('/offerings', async (_req, res, next) => {
   try {
-    const plans = await prisma.plan.findMany({ where: { status: 'ACTIVE' }, orderBy: { cost: 'asc' } });
+    const plans = await prisma.plan.findMany({
+      where: { status: 'ACTIVE', cost: { gt: 0 } },
+      orderBy: { cost: 'asc' },
+    });
     res.json({ data: plans });
   } catch (error) {
     next(error);
@@ -46,7 +49,7 @@ customerPlanRouter.post('/requests', async (req, res, next) => {
       res.status(404).json({ message: 'Customer account not found' });
       return;
     }
-    const plan = await prisma.plan.findFirst({ where: { id: finalPlanId, status: 'ACTIVE' } });
+    const plan = await prisma.plan.findFirst({ where: { id: finalPlanId, status: 'ACTIVE', cost: { gt: 0 } } });
     if (!plan) {
       res.status(404).json({ message: 'Active plan not found' });
       return;
@@ -164,27 +167,61 @@ adminPlanRouter.patch('/requests/:requestId', async (req, res, next) => {
       res.json({ data: updatedRequest, message: 'Plan change request put on hold' });
       return;
     }
-    if (!request.finalPlan || request.finalPlan.status !== 'ACTIVE') {
-      res.status(409).json({ message: 'Requested plan is no longer active' });
+    if (!request.finalPlan || request.finalPlan.status !== 'ACTIVE' || !request.finalPlan.cost || request.finalPlan.cost <= 0) {
+      res.status(409).json({ message: 'Requested plan is no longer active or has no billable monthly price' });
       return;
     }
+    const finalPlan = request.finalPlan;
+    const finalPlanId = finalPlan.id;
 
     const result = await prisma.$transaction(async (transaction) => {
       await transaction.upgradeRequest.update({ where: { id: request.id }, data: { status: 'APPROVED' } });
-      await transaction.customer.update({ where: { id: request.customerId }, data: { planId: request.finalPlanId } });
+      await transaction.customer.update({ where: { id: request.customerId }, data: { planId: finalPlanId } });
       const subscription = await transaction.subscription.findFirst({
         where: { customerId: request.customerId, status: 'ACTIVE' },
       });
-      if (subscription && request.finalPlanId) {
-        await transaction.subscription.update({ where: { id: subscription.id }, data: { planId: request.finalPlanId } });
-      } else if (request.finalPlanId) {
+      if (subscription) {
+        await transaction.subscription.update({ where: { id: subscription.id }, data: { planId: finalPlanId } });
+      } else {
         await transaction.subscription.create({
           data: {
             customerId: request.customerId,
-            planId: request.finalPlanId,
+            planId: finalPlanId,
             billingDay: new Date().getUTCDate(),
             status: 'ACTIVE',
           },
+        });
+      }
+
+      const pendingFutureInvoices = await transaction.invoice.findMany({
+        where: {
+          customerId: request.customerId,
+          status: 'PENDING',
+          dueDate: { gte: new Date() },
+        },
+        select: { id: true, creditAmount: true },
+      });
+      for (const invoice of pendingFutureInvoices) {
+        const adjustedAmount = Math.max(finalPlan.cost!, invoice.creditAmount);
+        await transaction.invoice.update({
+          where: { id: invoice.id },
+          data: {
+            planId: finalPlanId,
+            amount: adjustedAmount,
+            lineItems: {
+              deleteMany: {},
+              create: {
+                description: `${finalPlan.name} service after approved plan change`,
+                quantity: 1,
+                unitAmount: finalPlan.cost!,
+                amount: finalPlan.cost!,
+              },
+            },
+          },
+        });
+        await transaction.payment.updateMany({
+          where: { invoiceId: invoice.id, status: 'PENDING' },
+          data: { amount: adjustedAmount },
         });
       }
       return transaction.upgradeRequest.findUniqueOrThrow({

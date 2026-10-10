@@ -18,6 +18,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
 const filterOptions = ["All", "Open", "In Progress", "Pending", "Resolved"];
 
 const intensityFilter = ["All", "Low", "Medium", "High", "Critical"];
+type TechnicianOption = { id: string; name: string; location: string; status: string; queueCount: number };
 
 function Tickets() {
   const [activeStatusFilter, setActiveStatusFilter] = useState<"All" | Ticket["status"]>("All");
@@ -26,7 +27,12 @@ function Tickets() {
   const [selectedSubscriber, setSelectedSubscriber] = useState<Ticket | null>(null);
   const [showSubmitTicket, setShowSubmitTicket] = useState(false);
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [technicians, setTechnicians] = useState<TechnicianOption[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [notice, setNotice] = useState("");
+  const [isAutoAssigning, setIsAutoAssigning] = useState(false);
+  const [isEscalating, setIsEscalating] = useState(false);
+  const [slaOnly, setSlaOnly] = useState(false);
 
   async function loadTickets() {
     const token = localStorage.getItem("diverge_token");
@@ -35,15 +41,91 @@ function Tickets() {
       return;
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/admin/tickets`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const [response, technicianResponse] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/v1/admin/tickets`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch(`${API_BASE_URL}/api/v1/admin/tickets/technicians`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
       const payload = await response.json();
-      if (!response.ok) throw new Error(payload?.message ?? "Unable to load tickets.");
+      const technicianPayload = await technicianResponse.json();
+      if (!response.ok || !technicianResponse.ok) throw new Error(payload?.message ?? technicianPayload?.message ?? "Unable to load ticket support data.");
       setTickets(Array.isArray(payload?.data) ? payload.data : []);
+      setTechnicians(Array.isArray(technicianPayload?.data) ? technicianPayload.data : []);
       setErrorMessage("");
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Unable to load tickets.");
+    }
+  }
+
+  async function updatePriority(ticket: Ticket, priority: Ticket["priority"]) {
+    const token = localStorage.getItem("diverge_token");
+    if (!token || !ticket.id) return;
+    setErrorMessage("");
+    setNotice("");
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/admin/tickets/${ticket.id}/priority`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ priority: priority.toUpperCase() }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.message ?? "Unable to update ticket priority.");
+      publishDataChange();
+      await loadTickets();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Unable to update ticket priority.");
+    }
+  }
+
+  async function autoAssignTickets() {
+    const token = localStorage.getItem("diverge_token");
+    if (!token) return;
+    setIsAutoAssigning(true);
+    setErrorMessage("");
+    setNotice("");
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/admin/tickets/auto-assign`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.message ?? "Auto-assignment failed.");
+      setNotice(`${payload?.data?.assignedCount ?? 0} ticket(s) assigned; ${payload?.data?.unassignedCount ?? 0} left unassigned.`);
+      publishDataChange();
+      await loadTickets();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Auto-assignment failed.");
+    } finally {
+      setIsAutoAssigning(false);
+    }
+  }
+
+  async function escalateTickets(ticketId?: string) {
+    const token = localStorage.getItem("diverge_token");
+    if (!token) return;
+    setIsEscalating(true);
+    setErrorMessage("");
+    setNotice("");
+    try {
+      const url = ticketId
+        ? `${API_BASE_URL}/api/v1/admin/tickets/${ticketId}/escalate`
+        : `${API_BASE_URL}/api/v1/admin/tickets/escalate-overdue`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.message ?? "Escalation failed.");
+      setNotice(payload?.message ?? "Ticket escalated.");
+      publishDataChange();
+      await loadTickets();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Escalation failed.");
+    } finally {
+      setIsEscalating(false);
     }
   }
 
@@ -53,13 +135,14 @@ function Tickets() {
   const filteredTickets = tickets.filter((ticket) => {
     const matchesStatus = activeStatusFilter === "All" || ticket.status === activeStatusFilter;
     const matchesPriority = activePriorityFilter === "All" || ticket.priority === activePriorityFilter;
+    const matchesSla = !slaOnly || ticket.SLA === "Breached";
     const normalizedSearch = searchTerm.trim().toLowerCase();
     const matchesSearch =
       normalizedSearch.length === 0 ||
       [ticket.ticketID, ticket.subscriber, ticket.issue, ticket.category]
         .some((value) => value.toLowerCase().includes(normalizedSearch));
 
-    return matchesStatus && matchesPriority && matchesSearch;
+    return matchesStatus && matchesPriority && matchesSla && matchesSearch;
   });
 
   function getStatusBadge(status: Ticket["status"]) {
@@ -91,7 +174,10 @@ function Tickets() {
   }
   const openCount = tickets.filter((ticket) => ticket.status === "Open").length;
   const inProgressCount = tickets.filter((ticket) => ticket.status === "In Progress").length;
-  const resolvedCount = tickets.filter((ticket) => ticket.status === "Resolved").length;
+  const resolvedCount = tickets.filter((ticket) => ticket.status === "Resolved" && new Date(ticket.updated).toDateString() === new Date().toDateString()).length;
+  const escalatedCount = tickets.filter((ticket) => ticket.isEscalated || ticket.priority === "Critical").length;
+  const breachedTickets = tickets.filter((ticket) => ticket.SLA === "Breached" && ticket.status !== "Resolved");
+  const unassignedCount = tickets.filter((ticket) => ticket.status === "Open" && ticket.assignedTo === "Unassigned").length;
   return (
     <>
       <div className="bg-[#121212] w-full">
@@ -114,34 +200,34 @@ function Tickets() {
           </div>
 
           <div className="mb-5 pr-10 flex flex-wrap justify-center items-center gap-2 w-full">
-            <div className="w-45 h-25 shadow-glassy-jeri rounded-[15px] content-center bg-[#C4C4C4]/20">
+            <button type="button" onClick={() => { setActiveStatusFilter(activeStatusFilter === "Open" ? "All" : "Open"); setActivePriorityFilter("All"); setSlaOnly(false); }} aria-pressed={activeStatusFilter === "Open"} className="w-45 h-25 shadow-glassy-jeri rounded-[15px] content-center bg-[#C4C4C4]/20">
               <h1 className="font-bold text-[35px] mt-2">{openCount}</h1>
               <h2 className="font-light text-[20px] text-[#FFFF] mt-5">Open</h2>
-            </div>
-            <div className="w-45 h-25 shadow-glassy-jeri rounded-[15px] content-center bg-[#C4C4C4]/20">
+            </button>
+            <button type="button" onClick={() => { setActiveStatusFilter(activeStatusFilter === "In Progress" ? "All" : "In Progress"); setActivePriorityFilter("All"); setSlaOnly(false); }} aria-pressed={activeStatusFilter === "In Progress"} className="w-45 h-25 shadow-glassy-jeri rounded-[15px] content-center bg-[#C4C4C4]/20">
               <h1 className="font-bold text-[35px] mt-2">{inProgressCount}</h1>
               <h2 className="font-light text-[20px] text-[#FFFF] mt-5">
                 In Progress
               </h2>
-            </div>
-            <div className="w-45 h-25 shadow-glassy-jeri rounded-[15px] content-center bg-[#C4C4C4]/20">
+            </button>
+            <button type="button" onClick={() => { setActiveStatusFilter(activeStatusFilter === "Resolved" ? "All" : "Resolved"); setActivePriorityFilter("All"); setSlaOnly(false); }} aria-pressed={activeStatusFilter === "Resolved"} className="w-45 h-25 shadow-glassy-jeri rounded-[15px] content-center bg-[#C4C4C4]/20">
               <h1 className="font-bold text-[35px] mt-2">{resolvedCount}</h1>
               <h2 className="font-light text-[20px] text-[#FFFF] mt-5">
                 Resolved Today
               </h2>
-            </div>
-            <div className="w-45 h-25 shadow-glassy-jeri rounded-[15px] content-center bg-[#C4C4C4]/20">
-              <h1 className="font-bold text-[35px] mt-2">{tickets.filter((ticket) => ticket.priority === "Critical").length}</h1>
+            </button>
+            <button type="button" onClick={() => { setActiveStatusFilter("All"); setActivePriorityFilter(activePriorityFilter === "Critical" ? "All" : "Critical"); setSlaOnly(false); }} aria-pressed={activePriorityFilter === "Critical"} className="w-45 h-25 shadow-glassy-jeri rounded-[15px] content-center bg-[#C4C4C4]/20">
+              <h1 className="font-bold text-[35px] mt-2">{escalatedCount}</h1>
               <h2 className="font-light text-[20px] text-[#FFFF] mt-5">
                 Escalated
               </h2>
-            </div>
-            <div className="w-45 h-25 shadow-glassy-jeri rounded-[15px] content-center bg-[#C4C4C4]/20">
+            </button>
+            <button type="button" onClick={() => { setActiveStatusFilter("All"); setActivePriorityFilter("All"); setSlaOnly(!slaOnly); }} aria-pressed={slaOnly} className="w-45 h-25 shadow-glassy-jeri rounded-[15px] content-center bg-[#C4C4C4]/20">
               <h1 className="font-bold text-[35px] mt-2">{tickets.filter((ticket) => ticket.SLA === "Breached").length}</h1>
               <h2 className="font-light text-[20px] text-[#FFFF] mt-5">
                 SLA Breached
               </h2>
-            </div>
+            </button>
           </div>
 
           {errorMessage && <p role="alert" className="mb-3 text-sm text-red-300">{errorMessage}</p>}
@@ -225,12 +311,13 @@ function Tickets() {
                   <TableHead className="text-center whitespace-nowrap font-light text-[#FFFFFF] opacity-30">
                     UPDATED
                   </TableHead>
+                  <TableHead className="text-center whitespace-nowrap font-light text-[#FFFFFF] opacity-30">ESCALATION</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredTickets.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="py-8 text-center text-slate-300">
+                    <TableCell colSpan={10} className="py-8 text-center text-slate-300">
                       No tickets match the current search and filters.
                     </TableCell>
                   </TableRow>
@@ -253,10 +340,16 @@ function Tickets() {
                       <TableCell className="text-center max-w-[160px] truncate text-[#C4C4C4] font-light">
                         {ticket.category}
                       </TableCell>
-                      <TableCell
-                        className={`text-center whitespace-nowrap ${getPriority(ticket.priority)}`}
-                      >
-                        {ticket.priority}
+                      <TableCell className="text-center whitespace-nowrap">
+                        <select
+                          aria-label={`Priority for ${ticket.ticketID}`}
+                          value={ticket.priority}
+                          onClick={(event) => event.stopPropagation()}
+                          onChange={(event) => void updatePriority(ticket, event.target.value as Ticket["priority"])}
+                          className={`h-8 rounded-md border border-white/15 bg-[#202020] px-2 text-xs ${getPriority(ticket.priority)}`}
+                        >
+                          {["Low", "Medium", "High", "Critical"].map((priority) => <option key={priority} value={priority}>{priority}</option>)}
+                        </select>
                       </TableCell>
                       <TableCell className="max-w-[180px] truncate text-center whitespace-nowrap text-[#C4C4C4] font-light">
                         {ticket.assignedTo}
@@ -274,6 +367,14 @@ function Tickets() {
                       <TableCell className="text-center font-mono whitespace-nowrap text-[#C4C4C4] font-light">
                         {ticket.updated}
                       </TableCell>
+                      <TableCell className="text-center">
+                        {ticket.status !== "Resolved" && !ticket.isEscalated && ticket.id && (
+                          <Button size="sm" variant="outline" disabled={isEscalating} onClick={() => void escalateTickets(ticket.id)}>
+                            Escalate
+                          </Button>
+                        )}
+                        {ticket.isEscalated && <span className="text-xs text-red-300">Escalated</span>}
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
@@ -284,98 +385,34 @@ function Tickets() {
           <div className="flex flex-row w-full mt-5 gap-3">
             <div className="w-full h-auto overflow-hidden shadow-glassy-jeri rounded-[15px] content-center  bg-white/5 shadow-glassy-jeri p-4">
               <h1 className="text-white text-xl font-bold tracking-wider text-left">
-                Auto - Assignment
+                Auto-assignment
               </h1>
-              <Table className="w-full mt-1 text-start">
-                <TableBody>
-                  <TableRow className="border-b border-white/10">
-                    <TableCell className="pr-40">
-                      <h1 className="text-[12px]">Antipolo / Rodriguez</h1>
-                      <p className="text-[11px] font-bold text-[#235ED4]">
-                        Technician 2
-                      </p>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <h1 className="text-[12px]">Queue</h1>
-                      <p className="text-[11px] font-bold text-[#235ED4]">
-                        5
-                      </p>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow className="border-b border-white/10">
-                    <TableCell className="pr-40">
-                      <h1 className="text-[12px]">Antipolo / Rodriguez</h1>
-                      <p className="text-[11px] font-bold text-[#235ED4]">
-                        Technician 2
-                      </p>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <h1 className="text-[12px]">Queue</h1>
-                      <p className="text-[11px] font-bold text-[#235ED4]">
-                        5
-                      </p>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow className="border-b border-white/10">
-                    <TableCell className="pr-40">
-                      <h1 className="text-[12px]">Antipolo / Rodriguez</h1>
-                      <p className="text-[11px] font-bold text-[#235ED4]">
-                        Technician 2
-                      </p>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <h1 className="text-[12px]">Queue</h1>
-                      <p className="text-[11px] font-bold text-[#235ED4]">
-                        5
-                      </p>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+              <div className="mt-3 space-y-2">
+                {technicians.map((technician) => (
+                  <div key={technician.id} className="flex items-center justify-between gap-3 border-b border-white/10 py-2 text-sm">
+                    <div><p>{technician.name}</p><p className="text-xs text-white/45">{technician.location} · {technician.status}</p></div>
+                    <span className="text-xs text-blue-300">Queue {technician.queueCount}</span>
+                  </div>
+                ))}
+                {!technicians.length && <p className="py-3 text-sm text-white/50">No dispatchable technicians found.</p>}
+              </div>
+              <Button className="mt-4" disabled={isAutoAssigning || unassignedCount === 0 || !technicians.length} onClick={() => void autoAssignTickets()}>
+                {isAutoAssigning ? "Assigning..." : `Auto-assign ${unassignedCount} open ticket(s)`}
+              </Button>
             </div>
             <div className="w-full ah-auto overflow-hidden shadow-glassy-jeri rounded-[15px] content-center  bg-white/5 shadow-glassy-jeri p-4">
               <h1 className="text-white text-xl font-bold tracking-wider text-left">
                 Escalation Matrix
               </h1>
-              <Table className="w-full mt-1 text-start">
-                <TableBody>
-                  <TableRow className="border-b border-white/10">
-                    <TableCell className="pr-30">
-                      <h1 className="text-[13px]">Unresolved &gt; 1h</h1>
-                      <p className="text-[16px] font-bold text-[#FFFF]">
-                        Helpdesk → Technical
-                      </p>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <h1 className="text-[13px]">Stand By</h1>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow className="border-b border-white/10">
-                    <TableCell className="pr-30">
-                      <h1 className="text-[13px]">Unresolved &gt; 1h</h1>
-                      <p className="text-[16px] font-bold text-[#FFFF]">
-                        Helpdesk → Technical
-                      </p>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <h1 className="text-[13px]">Triggered</h1>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow className="border-b border-white/10">
-                    <TableCell className="pr-30">
-                      <h1 className="text-[13px]">Unresolved &gt; 1h</h1>
-                      <p className="text-[16px] font-bold text-[#FFFF]">
-                        Helpdesk → Technical
-                      </p>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <h1 className="text-[13px]">Stand By</h1>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+              <p className="mt-2 text-sm text-white/60">Unresolved for more than one hour</p>
+              <p className="mt-3 text-3xl font-semibold text-amber-300">{breachedTickets.length}</p>
+              <p className="text-xs text-white/45">{tickets.filter((ticket) => ticket.isEscalated).length} already escalated</p>
+              <Button className="mt-4" variant="outline" disabled={isEscalating || breachedTickets.length === 0} onClick={() => void escalateTickets()}>
+                {isEscalating ? "Escalating..." : "Escalate all breaches"}
+              </Button>
             </div>
           </div>
+          {(notice || errorMessage) && <p role={errorMessage ? "alert" : "status"} className={`mt-3 text-sm ${errorMessage ? "text-red-300" : "text-emerald-300"}`}>{errorMessage || notice}</p>}
         </div>
       </div>
 

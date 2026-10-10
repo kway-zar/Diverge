@@ -6,6 +6,8 @@ const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
  
  
 const priorityStyles: Record<JobPriority, string> = {
+  Low: "border-[#197af9] bg-[rgba(34,100,231,0.2)] text-[#197af9]",
+  Medium: "border-[#e18e08] bg-[rgba(225,142,8,0.2)] text-[#e18e08]",
   High: "border-[#ff006a] bg-[rgba(255,0,106,0.2)] text-[#ff006a]",
   Critical: "border-[#dd0002] bg-[rgba(221,0,2,0.2)] text-[#dd0002]",
 }
@@ -16,17 +18,6 @@ const statusStyles: Record<JobStatus, string> = {
   "On-Site": "border-[#3acf98] bg-[rgba(58,207,152,0.2)] text-[#3acf98]",
 }
  
-const nextLabel: Record<JobStatus, string> = {
-  Assigned: "Mark as En Route",
-  "En Route": "Mark as On-Site",
-  "On-Site": "Open Field Report",
-}
- 
-const nextStatus: Partial<Record<JobStatus, JobStatus>> = {
-  Assigned: "En Route",
-  "En Route": "On-Site",
-}
- 
 const actionBtn =
   "flex h-[36px] items-center justify-center gap-2 rounded-[8px] border px-3 font-ubuntu-mono text-xs tracking-[0.5px] lg:text-sm"
  
@@ -34,6 +25,8 @@ function Jobs() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [completed, setCompleted] = useState<CompletedJob[]>([])
   const [technician, setTechnician] = useState<{ name: string; location: string; status: string } | null>(null)
+  const [availability, setAvailability] = useState<"AVAILABLE" | "UNAVAILABLE" | "OFF_DUTY">("AVAILABLE")
+  const [isSavingAvailability, setIsSavingAvailability] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
   const [isLoading, setIsLoading] = useState(true)
  
@@ -64,6 +57,11 @@ function Jobs() {
       setJobs(Array.isArray(payload?.data) ? payload.data : [])
       setCompleted(Array.isArray(payload?.completed) ? payload.completed.map((job: Job) => ({ ...job, outcome: "Completed" as const })) : [])
       setTechnician(payload?.technician ?? null)
+      if (payload?.technician?.status === "UNAVAILABLE" || payload?.technician?.status === "OFF_DUTY") {
+        setAvailability(payload.technician.status)
+      } else {
+        setAvailability("AVAILABLE")
+      }
       setErrorMessage("")
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Unable to load jobs.")
@@ -75,19 +73,36 @@ function Jobs() {
   useDataRefresh(loadJobs)
   useEffect(() => { void loadJobs() }, [])
 
-  async function advance(job: Job) {
-    const next = nextStatus[job.status]
-    if (!next) {
-      window.dispatchEvent(new Event("technician-open-field-report"))
-      return
+  async function updateAvailability() {
+    const token = localStorage.getItem("diverge_token")
+    if (!token) return
+    setIsSavingAvailability(true)
+    setErrorMessage("")
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/technician/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status: availability }),
+      })
+      const payload = await response.json()
+      if (!response.ok) throw new Error(payload?.message ?? "Unable to update availability.")
+      setTechnician((current) => current ? { ...current, status: payload.data.status } : current)
+      publishDataChange()
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Unable to update availability.")
+    } finally {
+      setIsSavingAvailability(false)
     }
+  }
+
+  async function updateJobStatus(job: Job, selectedStatus: "Assigned" | "En Route" | "On-Site") {
     const token = localStorage.getItem("diverge_token")
     if (!token || !job.id) return
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/technician/jobs/${job.id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ status: next === "En Route" ? "EN_ROUTE" : "ON_SITE" }),
+        body: JSON.stringify({ status: selectedStatus === "En Route" ? "EN_ROUTE" : selectedStatus === "On-Site" ? "ON_SITE" : "ASSIGNED" }),
       })
       const payload = await response.json()
       if (!response.ok) throw new Error(payload?.message ?? "Unable to update job status.")
@@ -144,6 +159,16 @@ function Jobs() {
             {technician?.status?.replaceAll("_", " ") ?? (jobs.some((job) => job.status === "On-Site") ? "On-Site" : "Available")}
           </div>
           <span className="text-xs tracking-[0.5px] text-white/75">{jobs.length} active jobs</span>
+          <div className="mt-2 flex items-center gap-2">
+            <select aria-label="Set availability" value={availability} onChange={(event) => setAvailability(event.target.value as typeof availability)} className="h-8 rounded-md border border-white/15 bg-[#202020] px-2 text-xs text-white">
+              <option value="AVAILABLE">Available</option>
+              <option value="UNAVAILABLE">Unavailable</option>
+              <option value="OFF_DUTY">Off Duty</option>
+            </select>
+            <button type="button" disabled={isSavingAvailability} onClick={() => void updateAvailability()} className="h-8 rounded-md border border-white/15 bg-white/10 px-3 text-xs text-white disabled:opacity-50">
+              {isSavingAvailability ? "Saving..." : "Set status"}
+            </button>
+          </div>
         </div>
       </div>
  
@@ -163,7 +188,7 @@ function Jobs() {
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-ubuntu-mono text-sm tracking-[0.5px] text-[#3acf98]">{job.ticketID}</span>
-                    <span className={`flex h-[20px] w-[62px] items-center justify-center rounded-[30px] border text-xs tracking-[0.5px] ${priorityStyles[job.priority]}`}>
+                    <span className={`flex h-[20px] min-w-[62px] items-center justify-center rounded-[30px] border px-2 text-xs tracking-[0.5px] ${priorityStyles[job.priority]}`}>
                       {job.priority}
                     </span>
                     <span className={`flex h-[22px] w-[72px] items-center justify-center rounded-[30px] border text-xs tracking-[0.5px] ${statusStyles[job.status]}`}>
@@ -209,13 +234,24 @@ function Jobs() {
                   <Navigation size={14} className="text-[#3acf98]" />
                   Navigate
                 </a>
-                <button
-                  type="button"
-                  onClick={() => advance(job)}
-                  className={`${actionBtn} min-w-[135px] border-[#197af9] bg-[rgba(34,100,231,0.4)] text-white`}
-                >
-                  {nextLabel[job.status]}
-                </button>
+                <label className={`${actionBtn} min-w-[150px] border-[#197af9] bg-[rgba(34,100,231,0.2)] text-white`}>
+                  Job status
+                  <select
+                    aria-label={`Status for ${job.ticketID}`}
+                    value={job.status === "En Route" ? "EN_ROUTE" : job.status === "On-Site" ? "ON_SITE" : "ASSIGNED"}
+                    onChange={(event) => {
+                      if (event.target.value === "ASSIGNED" || event.target.value === "EN_ROUTE" || event.target.value === "ON_SITE") {
+                        void updateJobStatus(job, event.target.value === "EN_ROUTE" ? "En Route" : event.target.value === "ON_SITE" ? "On-Site" : "Assigned")
+                      }
+                    }}
+                    className="max-w-[115px] bg-transparent text-xs text-white outline-none"
+                  >
+                    <option value="ASSIGNED" className="bg-[#202020]">Assigned</option>
+                    <option value="EN_ROUTE" className="bg-[#202020]">Travelling</option>
+                    <option value="ON_SITE" className="bg-[#202020]">On-site</option>
+                  </select>
+                </label>
+                {job.status === "On-Site" && <button type="button" onClick={() => window.dispatchEvent(new Event("technician-open-field-report"))} className={`${actionBtn} border-[#3acf98] bg-[#3acf98]/20 text-white`}>Field report</button>}
                 <button
                   type="button"
                   onClick={() => void cannotComplete(job)}

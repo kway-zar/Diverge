@@ -1,6 +1,6 @@
-import { Card, CardContent } from '@/components/ui/card';
+import { CardContent } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
-import type { Engineer } from '../../types/engineer';
+import type { Engineer, EngineerStatus } from '../../types/engineer';
 import { useDataRefresh } from '@/hooks/useDataRefresh';
 import Roster from "./Roster.tsx";
 import MapView from "./MapView.tsx";
@@ -11,6 +11,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
 function FieldEngineers() {
     const [engineers, setEngineers] = useState<Engineer[]>([]);
     const [errorMessage, setErrorMessage] = useState("");
+    const [activeStatusFilter, setActiveStatusFilter] = useState<EngineerStatus | null>(null);
 
     async function loadEngineers() {
         const token = localStorage.getItem("diverge_token");
@@ -53,8 +54,9 @@ function FieldEngineers() {
                 </span>
             </div>
             <div className="grid grid-cols-5 gap-3 w-full px-10 max-sm:grid-cols-1 max-sm:gap-4 max-sm:px-2">
-                {statusTracking.map((status, index) => (
-                    <Card key={index} className="w-full h-[135px] bg-white/5 rounded-[15px] !border-0 !ring-0 shadow-glassy-jeri [--glassy-color:58_207_152] inset-shadow-sm inset-ring-black">
+                {statusTracking.map((status, index) => {
+                            const statusValue: EngineerStatus = status.label === "On-site" ? "On-Site" : status.label as EngineerStatus;
+                            return <button key={index} type="button" aria-pressed={activeStatusFilter === statusValue} onClick={() => setActiveStatusFilter((current) => current === statusValue ? null : statusValue)} className={`w-full h-[135px] rounded-[15px] bg-white/5 shadow-glassy-jeri transition ${activeStatusFilter === statusValue ? "ring-2 ring-[#3ACF98]" : "hover:bg-white/10"}`}>
                         <CardContent className="flex flex-col gap-5 items-center justify-center">
                             <h1 className={`text-[48px] font-ubuntu font-bold tracking-[0.05em] leading-[100%] ${status.textColor}`}>
                                 {status.count}
@@ -63,8 +65,8 @@ function FieldEngineers() {
                                 {status.label}
                             </p>
                         </CardContent>
-                    </Card>
-                ))}
+                    </button>;
+                })}
             </div>
             <Tabs defaultValue="roster" className="mt-5 w-full">
                 <TabsList className="rounded-[10px] ml-15 shadow-glassy-jeri gap-3 h-auto p-1 bg-transparent">
@@ -72,7 +74,7 @@ function FieldEngineers() {
                     <TabsTrigger value="map-view" className="px-4 py-1 h-full flex-1 border-0 text-[16px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-[10px] border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Map View</TabsTrigger>
                 </TabsList>
                 <TabsContent value="roster"  className="ml-5">
-                    <Roster engineers={engineers} onUpdated={() => void loadEngineers()} />
+                    <Roster engineers={activeStatusFilter ? engineers.filter((engineer) => engineer.status === activeStatusFilter) : engineers} onUpdated={() => void loadEngineers()} />
                 </TabsContent>
                 <TabsContent value="map-view" className="ml-5">
                     <MapView/>

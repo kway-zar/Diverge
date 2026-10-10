@@ -28,7 +28,7 @@ export async function getBillingSummary(period: string) {
   }
 
   const { start, end } = monthBounds(period);
-  const [payments, invoices, creditNotes, overdueInvoices] = await Promise.all([
+  const [payments, invoices, creditNotes, overdueInvoices, suspendedAccountCount] = await Promise.all([
     prisma.payment.findMany({
       where: {
         status: 'PAID',
@@ -48,6 +48,7 @@ export async function getBillingSummary(period: string) {
       where: { status: { not: 'PAID' }, dueDate: { lt: new Date(Date.now() - 31 * 24 * 60 * 60 * 1000) } },
       select: { customerId: true, amount: true, creditAmount: true },
     }),
+    prisma.customer.count({ where: { status: 'SUSPENDED' } }),
   ]);
 
   const now = new Date();
@@ -80,6 +81,7 @@ export async function getBillingSummary(period: string) {
     overdue31DayAccountCount: new Set(
       overdueInvoices.filter((invoice) => invoice.amount > invoice.creditAmount).map((invoice) => invoice.customerId),
     ).size,
+    suspendedAccountCount,
     creditNotesIssuedThisMonth: creditNotes.reduce((sum, creditNote) => sum + creditNote.amount, 0),
     creditNoteCount: creditNotes.length,
   };
@@ -90,28 +92,40 @@ export async function listBillingInvoices(options: {
   limit: number;
   status?: 'PAID' | 'PENDING' | 'OVERDUE';
   search?: string;
+  dueFrom?: Date;
+  dueTo?: Date;
 }) {
-  const where: Prisma.InvoiceWhereInput = {};
+  const now = new Date();
+  const conditions: Prisma.InvoiceWhereInput[] = [];
+
   if (options.status === 'PAID') {
-    where.status = 'PAID';
+    conditions.push({ status: 'PAID' });
   } else if (options.status === 'OVERDUE') {
-    where.status = { not: 'PAID' };
-    where.dueDate = { lt: new Date() };
+    conditions.push({ status: { not: 'PAID' } }, { dueDate: { lt: now } });
   } else if (options.status === 'PENDING') {
-    where.status = { not: 'PAID' };
-    where.dueDate = { gte: new Date() };
+    conditions.push({ status: { not: 'PAID' } }, { dueDate: { gte: now } });
   }
+
+  if (options.dueFrom || options.dueTo) {
+    const dueDate: Prisma.DateTimeFilter = {};
+    if (options.dueFrom) dueDate.gte = options.dueFrom;
+    if (options.dueTo) dueDate.lte = options.dueTo;
+    conditions.push({ dueDate });
+  }
+
   if (options.search?.trim()) {
     const search = options.search.trim();
-    where.AND = [{
+    conditions.push({
       OR: [
-      { invoiceNumber: { contains: search, mode: 'insensitive' } },
-      { email: { contains: search, mode: 'insensitive' } },
-      { customer: { name: { contains: search, mode: 'insensitive' } } },
-      { customer: { accountId: { contains: search, mode: 'insensitive' } } },
+        { invoiceNumber: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+        { customer: { name: { contains: search, mode: 'insensitive' } } },
+        { customer: { accountId: { contains: search, mode: 'insensitive' } } },
       ],
-    }];
+    });
   }
+
+  const where: Prisma.InvoiceWhereInput = conditions.length ? { AND: conditions } : {};
 
   const [invoices, total] = await Promise.all([
     prisma.invoice.findMany({
@@ -124,7 +138,6 @@ export async function listBillingInvoices(options: {
     prisma.invoice.count({ where }),
   ]);
 
-  const now = new Date();
   return {
     data: invoices.map((invoice) => ({
       id: invoice.id,

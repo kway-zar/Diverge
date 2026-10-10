@@ -89,6 +89,7 @@ function PlanChanges() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {plans.map((plan) => {
             const isCurrent = plan.id === currentPlanId;
+            const isRequestedPlan = pendingRequest?.finalPlan?.id === plan.id;
             return (
               <Card key={plan.id} className="gap-3 rounded-lg border-white/10 bg-white/5 text-white shadow-glassy-jeri ring-0">
                 <CardHeader className="flex-row items-center justify-between">
@@ -101,8 +102,8 @@ function PlanChanges() {
                 <CardContent className="flex flex-col gap-4">
                   <p className="text-3xl font-semibold tabular-nums">₱{((plan.cost ?? 0) / 100).toLocaleString("en-PH", { minimumFractionDigits: 2 })}<span className="ml-1 text-sm font-normal text-white/45">/month</span></p>
                   <p className="text-sm text-white/65">{plan.speed ?? "Speed details unavailable"}</p>
-                  <Button disabled={isCurrent || Boolean(pendingRequest) || Boolean(submittingPlanId)} onClick={() => void requestPlan(plan.id)}>
-                    {isCurrent ? "Current Plan" : submittingPlanId === plan.id ? "Submitting..." : pendingRequest ? "Request Pending" : "Request Plan Change"}
+                  <Button variant={isRequestedPlan ? "outline" : "default"} disabled={isCurrent || Boolean(pendingRequest) || Boolean(submittingPlanId)} onClick={() => void requestPlan(plan.id)}>
+                    {isCurrent ? "Current Plan" : submittingPlanId === plan.id ? "Submitting..." : isRequestedPlan ? "Request Pending" : "Request Plan Change"}
                   </Button>
                 </CardContent>
               </Card>
