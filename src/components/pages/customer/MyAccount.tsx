@@ -87,7 +87,7 @@ function MyAccount() {
       <Card className="flex-1 mr-4 ring-0 shadow-glassy-jeri bg-white/5">
         <CardContent className="w-full flex flex-row ml-4 pb-2">
           <span className="w-full flex flex-row gap-x-5">
-            <div className="w-24 h-24 rounded-full bg-white"></div>
+            <div className="size-24 shrink-0 aspect-square rounded-full bg-white bg-[url(https://scontent.fmnl4-5.fna.fbcdn.net/v/t39.30808-1/387739972_2196338080566990_7509985411661755872_n.jpg?stp=dst-jpg_tt6&cstp=mx952x960&ctp=s200x200&_nc_cat=110&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=1d2534&_nc_eui2=AeHyzQX55AJGBzqXgPmpUCu8MC65AOG8pHEwLrkA4bykcQqvADrREZZPvictG_awIcJvSUmS57e0lZqNqZIYdHuy&_nc_ohc=hvMCGJDLmI4Q7kNvwFdq2IB&_nc_oc=Adq0KOG4WZrgHmZFJQ2Xmfy8AdqgD9GepLe_czqtykR-VJ6Bfal4-yS2x79zNyd7-nyI4mxRulf3W_Fjb2pNyYs9&_nc_zt=24&_nc_ht=scontent.fmnl4-5.fna&_nc_gid=jSZkRW6o0oMU-G4pplPfMQ&_nc_ss=7b2a8&oh=00_AQOv2djt14AktTYcUdPsbQ8bCJdY3ZYFMKwncboa-IOGNw&oe=6AD139CF)]"></div>
             <span className="w-[80%] grid grid-cols-1">
               <p className='opacity-60 tracking-widest font-thin'>Good Evening, </p>
               <h1 className="text-2xl">{account.name}</h1>

@@ -2,7 +2,7 @@ import type { Invoice } from "../types/invoice";
 
 export const invoices: Invoice[] = [
     {
-        invoiceID: "INV-231231-01",
+        invoiceID: "INV-2026-09-001",
         account: "Vanna Hernandez",
         email: "vanna@example.com",
         contact: "+63 912345678",
@@ -13,7 +13,7 @@ export const invoices: Invoice[] = [
         status: "Pending",
     },
     {
-        invoiceID: "INV-231231-02",
+        invoiceID: "INV-2026-09-002",
         account: "Jonathan Landoy",
         email: "jonathan@example.com",
         contact: "+63 912345678",
@@ -24,7 +24,7 @@ export const invoices: Invoice[] = [
         status: "Pending",
     },
     {
-        invoiceID: "INV-231231-03",
+        invoiceID: "INV-2026-09-003",
         account: "Clifford Galvez",
         email: "clifford@example.com",
         contact: "+63 912345678",
@@ -35,7 +35,7 @@ export const invoices: Invoice[] = [
         status: "Pending",
     },
     {
-        invoiceID: "INV-231231-04",
+        invoiceID: "INV-2026-09-004",
         account: "Francis Lasay",
         email: "francis@example.com",
         contact: "+63 912345678",
@@ -46,7 +46,7 @@ export const invoices: Invoice[] = [
         status: "Paid",
     },
     {
-        invoiceID: "INV-231231-05",
+        invoiceID: "INV-2026-09-005",
         account: "Guiller Dela Cruz",
         email: "guiller@example.com",
         contact: "+63 912345678",
@@ -57,7 +57,7 @@ export const invoices: Invoice[] = [
         status: "Paid",
     },
     {
-        invoiceID: "INV-231231-06",
+        invoiceID: "INV-2026-09-006",
         account: "Alex Ogbac",
         email: "alex@example.com",
         contact: "+63 912345678",
@@ -68,7 +68,7 @@ export const invoices: Invoice[] = [
         status: "Pending",
     },
     {
-        invoiceID: "INV-231231-07",
+        invoiceID: "INV-2026-09-007",
         account: "Jeriana Maranguis",
         email: "jeriana@example.com",
         contact: "+63 912345678",
@@ -79,7 +79,7 @@ export const invoices: Invoice[] = [
         status: "Overdue",
     },
     {
-        invoiceID: "INV-231231-08",
+        invoiceID: "INV-2026-09-008",
         account: "Christian Devera",
         email: "christian@example.com",
         contact: "+63 912345678",
@@ -90,7 +90,7 @@ export const invoices: Invoice[] = [
         status: "Paid",
     },
     {
-        invoiceID: "INV-231231-09",
+        invoiceID: "INV-2026-09-009",
         account: "Robi Luna",
         email: "robi@example.com",
         contact: "+63 912345678",
@@ -101,7 +101,7 @@ export const invoices: Invoice[] = [
         status: "Overdue",
     },
     {
-        invoiceID: "INV-231231-10",
+        invoiceID: "INV-2026-08-001",
         account: "Cedrick Millonte",
         email: "cedrick@example.com",
         contact: "+63 912345678",
@@ -112,7 +112,7 @@ export const invoices: Invoice[] = [
         status: "Paid",
     },
     {
-        invoiceID: "INV-231231-11",
+        invoiceID: "INV-2026-08-002",
         account: "Wil Manalang",
         email: "wil@example.com",
         contact: "+63 912345678",

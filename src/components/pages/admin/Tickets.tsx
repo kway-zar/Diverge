@@ -160,18 +160,6 @@ function Tickets() {
     }
   }
 
-  function getPriority(priority: Ticket["priority"]) {
-    switch (priority) {
-      case "High":
-        return "text-[#3ACF98] font-semibold";
-      case "Medium":
-        return "text-[#DE0961] font-semibold";
-      case "Low":
-        return "text-[#FFB800] font-semibold";
-      case "Critical":
-        return "text-red-500 font-semibold";
-    }
-  }
   const openCount = tickets.filter((ticket) => ticket.status === "Open").length;
   const inProgressCount = tickets.filter((ticket) => ticket.status === "In Progress").length;
   const resolvedCount = tickets.filter((ticket) => ticket.status === "Resolved" && new Date(ticket.updated).toDateString() === new Date().toDateString()).length;
@@ -346,9 +334,9 @@ function Tickets() {
                           value={ticket.priority}
                           onClick={(event) => event.stopPropagation()}
                           onChange={(event) => void updatePriority(ticket, event.target.value as Ticket["priority"])}
-                          className={`h-8 rounded-md border border-white/15 bg-[#202020] px-2 text-xs ${getPriority(ticket.priority)}`}
+                          className="h-8 rounded-md border border-white/15 bg-[#202020] px-2 text-xs text-[#C4C4C4]"
                         >
-                          {["Low", "Medium", "High", "Critical"].map((priority) => <option key={priority} value={priority}>{priority}</option>)}
+                          {["Low", "Medium", "High", "Critical"].map((priority) => <option key={priority} value={priority} className="bg-[#202020] text-[#C4C4C4]">{priority}</option>)}
                         </select>
                       </TableCell>
                       <TableCell className="max-w-[180px] truncate text-center whitespace-nowrap text-[#C4C4C4] font-light">

@@ -3,17 +3,15 @@ import { useState } from 'react'
 import Navbar from '../../Navbar.tsx'
 import BillingPage from './BillingPage.tsx'
 import CustomersPage from './CustomersPage.tsx'
-import Dashboard from './Dashboard.tsx'
 import Footer from '../../Footer.tsx'
 import SupportTicket from "./SupportTicket.tsx"
 import Tickets from './Tickets.tsx'
-import AnalyticsPage from './AnalyticsPage.tsx'
 import PlanManagement from './PlanManagement.tsx'
 
 
 
 function AdminLandingPage() {
-  const items = ["Dashboard", "Customers", "Billing", "Tickets", "Analytics", "Plan Management", "Support"]
+  const items = ["Customers", "Billing", "Tickets", "Plan Management", "Support"]
 
   const [activeItem, setActiveItem] = useState(items[0])
   const handleData = (data: string) => {
@@ -22,10 +20,7 @@ function AdminLandingPage() {
   }
 
   const renderContent = () => {
-    if (activeItem == 'Dashboard') {
-      //return dashboard component here
-      return <Dashboard />
-    } if (activeItem == 'Customers') {
+    if (activeItem == 'Customers') {
       return <CustomersPage />
     } if (activeItem == 'Tickets') {
       return <Tickets/>
@@ -33,9 +28,6 @@ function AdminLandingPage() {
     if (activeItem == "Billing") {
       return <BillingPage/>
     
-    }
-    if (activeItem == 'Analytics') {
-      return <AnalyticsPage />
     }
     if (activeItem == 'Plan Management') {
       return <PlanManagement/>

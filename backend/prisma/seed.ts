@@ -305,7 +305,7 @@ async function main() {
     },
     {
       customerEmail: 'vanna.banana@example.com',
-      invoiceNumber: 'INV-2026-08-001',
+      invoiceNumber: 'INV-2026-08-003',
       amount: 499900,
       dueDate: new Date('2026-08-30T00:00:00.000Z'),
       paymentMethod: 'BANK_TRANSFER',
@@ -316,7 +316,7 @@ async function main() {
     },
     {
       customerEmail: 'vanna.banana@example.com',
-      invoiceNumber: 'INV-2026-07-001',
+      invoiceNumber: 'INV-2026-07-003',
       amount: 499900,
       dueDate: new Date('2026-07-30T00:00:00.000Z'),
       paymentMethod: 'GCASH',

@@ -128,7 +128,7 @@ function PayNowModal({ accountNumber, billingPeriod, dueDate, amount, planName, 
             </div>
             <DialogFooter className="grid grid-cols-2 gap-3 border-0 bg-transparent px-5 pb-5 sm:flex-row sm:justify-between sm:px-6 sm:pb-6">
               <Button variant="outline" className="h-9 rounded-[2vw] border-[#DE0961]/40 bg-[#DE0961]/15 font-ubuntu-mono text-[#DE0961] shadow-glassy-jeri hover-glass-rim hover:bg-[#DE0961]/35" disabled={isSubmitting} onClick={closeModal}>Cancel</Button>
-              <Button className="h-9 rounded-md border border-white/10 bg-[#3ACF98]/15 font-ubuntu-mono text-[#3ACF98] shadow-glassy-jeri hover-glass-rim hover:bg-[#3ACF98]/35" disabled={isSubmitting} onClick={() => void confirmPayment()}>
+              <Button className="h-9 rounded-[2vw] border border-white/10 bg-[#3ACF98]/15 font-ubuntu-mono text-[#3ACF98] shadow-glassy-jeri hover-glass-rim hover:bg-[#3ACF98]/35" disabled={isSubmitting} onClick={() => void confirmPayment()}>
                 {isSubmitting ? "Processing..." : `Pay ${amount}`}
               </Button>
             </DialogFooter>
