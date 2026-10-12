@@ -1,0 +1,279 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  password  String
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customer   Customer?
+  technician Technician?
+  admin      Admin?
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+  TECHNICIAN
+}
+
+model Admin {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @unique @db.ObjectId
+  name      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Customer {
+  id        String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String       @unique @db.ObjectId
+  accountId String       @unique
+  name      String
+  email     String
+  type      CustomerType
+  planId    String?      @db.ObjectId
+  usage     String?
+  balance   String?
+  status    PlanStatus
+  area      String?
+  since     DateTime     @default(now())
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  user     User             @relation(fields: [userId], references: [id])
+  plan     Plan?            @relation(fields: [planId], references: [id])
+  tickets  Ticket[]
+  invoices Invoice[]
+  payments Payment[]
+  requests UpgradeRequest[]
+}
+
+enum CustomerType {
+  RESIDENTIAL
+  BUSINESS
+  GOVERNMENT
+  COMMERCIAL
+}
+
+enum PlanStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+  SUSPENDED
+}
+
+model Plan {
+  id         String           @id @default(auto()) @map("_id") @db.ObjectId
+  name       String           @unique
+  type       String
+  speed      String?
+  cost       Int? // stored in smallest currency unit (cents), e.g. ₱499.00 => 49900
+  status     PlanStatus       @default(ACTIVE)
+  customers  Customer[]
+  invoices   Invoice[]
+  requests   UpgradeRequest[] @relation("InitialPlan")
+  finalPlans UpgradeRequest[] @relation("FinalPlan")
+}
+
+model Technician {
+  id                 String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId             String           @unique @db.ObjectId
+  name               String
+  location           String
+  phone              String
+  status             TechnicianStatus
+  rating             Float            @default(0)
+  currentJobId       String?          @db.ObjectId
+  completedJobsCount Int              @default(0)
+  queueCount         Int              @default(0)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  user         User                    @relation(fields: [userId], references: [id])
+  jobs         Job[]
+  tickets      Ticket[]
+  fieldReports TechnicianFieldReport[]
+  reviews      TechnicianReview[]
+  metrics      TechnicianMetric[]
+}
+
+enum TechnicianStatus {
+  ON_SITE
+  TRAVELING
+  AVAILABLE
+  OFF_DUTY
+  UNAVAILABLE
+}
+
+model Ticket {
+  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  customerId   String         @db.ObjectId
+  assignedToId String?        @db.ObjectId
+  ticketNumber String         @unique
+  issue        String
+  category     String
+  priority     TicketPriority
+  status       TicketStatus
+  sla          String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  customer     Customer                @relation(fields: [customerId], references: [id])
+  assignedTo   Technician?             @relation(fields: [assignedToId], references: [id])
+  job          Job?
+  fieldReports TechnicianFieldReport[]
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  PENDING
+  RESOLVED
+}
+
+model Job {
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  ticketId     String      @unique @db.ObjectId
+  technicianId String?     @db.ObjectId
+  subscriber   String
+  address      String
+  phone        String
+  priority     JobPriority
+  status       JobStatus
+  timeLeft     String?
+  issue        String
+  accessNote   String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  ticket     Ticket      @relation(fields: [ticketId], references: [id])
+  technician Technician? @relation(fields: [technicianId], references: [id])
+}
+
+enum JobPriority {
+  HIGH
+  CRITICAL
+}
+
+enum JobStatus {
+  ASSIGNED
+  EN_ROUTE
+  ON_SITE
+}
+
+model Invoice {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  customerId    String        @db.ObjectId
+  planId        String?       @db.ObjectId
+  invoiceNumber String        @unique
+  email         String
+  contact       String
+  amount        Int // stored in smallest currency unit (cents), e.g. ₱499.00 => 49900
+  dueDate       DateTime
+  paymentMethod String?
+  status        InvoiceStatus
+  createdAt     DateTime      @default(now())
+
+  customer Customer  @relation(fields: [customerId], references: [id])
+  plan     Plan?     @relation(fields: [planId], references: [id])
+  payments Payment[]
+}
+
+enum InvoiceStatus {
+  PAID
+  PENDING
+  OVERDUE
+}
+
+model Payment {
+  id         String        @id @default(auto()) @map("_id") @db.ObjectId
+  customerId String        @db.ObjectId
+  invoiceId  String        @db.ObjectId
+  period     String
+  amount     Int // stored in smallest currency unit (cents), e.g. ₱499.00 => 49900
+  due        DateTime?
+  method     String?
+  status     PaymentStatus
+  createdAt  DateTime      @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id])
+  invoice  Invoice  @relation(fields: [invoiceId], references: [id])
+}
+
+enum PaymentStatus {
+  PAID
+  PENDING
+}
+
+model UpgradeRequest {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  customerId    String        @db.ObjectId
+  initialPlanId String?       @db.ObjectId
+  finalPlanId   String?       @db.ObjectId
+  requestedAt   DateTime      @default(now())
+  status        UpgradeStatus
+
+  customer    Customer @relation(fields: [customerId], references: [id])
+  initialPlan Plan?    @relation("InitialPlan", fields: [initialPlanId], references: [id])
+  finalPlan   Plan?    @relation("FinalPlan", fields: [finalPlanId], references: [id])
+}
+
+enum UpgradeStatus {
+  APPROVED
+  PENDING
+  ON_HOLD
+}
+
+model TechnicianReview {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  technicianId String   @db.ObjectId
+  reviewer     String
+  rating       Int
+  date         DateTime
+  comment      String
+
+  technician Technician @relation(fields: [technicianId], references: [id])
+}
+
+model TechnicianFieldReport {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  technicianId String   @db.ObjectId
+  ticketId     String   @db.ObjectId
+  date         DateTime
+  status       String
+  description  String
+  timeOnSite   String
+  parts        String?
+
+  technician Technician @relation(fields: [technicianId], references: [id])
+  ticket     Ticket     @relation(fields: [ticketId], references: [id])
+}
+
+model TechnicianMetric {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  technicianId String @db.ObjectId
+  label        String
+  benchmark    Float
+  score        Float
+
+  technician Technician @relation(fields: [technicianId], references: [id])
+}

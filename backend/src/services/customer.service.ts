@@ -1,5 +1,8 @@
 import { prisma } from '../db/prisma.js';
 import type { CreateCustomerInput, UpdateCustomerInput } from '../validators/customer.validator.js';
+import { getNextInvoiceNumber } from '../utils/invoice-number.js';
+
+const CENTS_PER_PESO = 100;
 
 export type CustomerRecord = {
   id: string;
@@ -374,6 +377,14 @@ export async function payCustomerInvoice(
     }
 
     const customerState = await transaction.customer.findUnique({ where: { id: customer.id } });
+    const currentBalance = Number(customerState?.balance ?? '0');
+    if (customerState && Number.isFinite(currentBalance)) {
+      const nextBalance = Math.max(0, currentBalance - outstandingAmount / CENTS_PER_PESO);
+      await transaction.customer.update({
+        where: { id: customer.id },
+        data: { balance: nextBalance.toFixed(2) },
+      });
+    }
     if (customerState?.status === 'SUSPENDED') {
       const overdueBefore = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000);
       const overdueInvoices = await transaction.invoice.findMany({
@@ -421,7 +432,7 @@ export async function payCustomerInvoice(
       const billingDay = subscription?.billingDay ?? existingInvoice.dueDate.getUTCDate();
       const nextDueDate = new Date(Date.UTC(nextYear, nextMonthIndex, Math.min(billingDay, lastDay)));
       const nextPeriod = `${nextDueDate.getUTCFullYear()}-${String(nextDueDate.getUTCMonth() + 1).padStart(2, '0')}`;
-      upcomingInvoiceNumber = `INV-${nextPeriod.replace('-', '')}-${(subscription?.id ?? customer.id).toUpperCase()}`;
+      upcomingInvoiceNumber = await getNextInvoiceNumber(transaction, nextPeriod);
       const alreadyGenerated = await transaction.invoice.findUnique({ where: { invoiceNumber: upcomingInvoiceNumber } });
 
       if (!alreadyGenerated) {

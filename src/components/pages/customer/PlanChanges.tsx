@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { publishDataChange, useDataRefresh } from "@/hooks/useDataRefresh";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
@@ -77,40 +78,68 @@ function PlanChanges() {
   const pendingRequest = requests.find((request) => request.status === "PENDING");
 
   return (
-    <div className="w-full px-4 py-6 text-left text-white lg:px-10">
-      <h1 className="mb-2 text-2xl font-medium">Plans &amp; subscriptions</h1>
-      <p className="mb-6 max-w-3xl text-sm text-white/60">Choose an available service plan. Your current service remains active until an administrator reviews the request.</p>
+    <div className="flex w-full flex-col text-left font-light tracking-wide text-white">
+      <h1 className="text-2xl">Upgrade or Downgrade</h1>
+      <p className="mt-2 text-sm opacity-60">Choose an available service plan. Your current service remains active until an administrator reviews the request.</p>
       {notice && <p role="status" className="mb-4 text-sm text-emerald-300">{notice}</p>}
       {errorMessage && <p role="alert" className="mb-4 text-sm text-red-300">{errorMessage}</p>}
-      {pendingRequest && <p className="mb-5 rounded-md border border-amber-300/20 bg-amber-300/10 p-3 text-sm text-amber-200">A request for {pendingRequest.finalPlan?.name ?? "a plan change"} is awaiting review.</p>}
-      {isLoading ? <p className="text-white/60">Loading plans...</p> : plans.length === 0 ? (
-        <p className="text-white/60">No active plans are available.</p>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {plans.map((plan) => {
-            const isCurrent = plan.id === currentPlanId;
-            const isRequestedPlan = pendingRequest?.finalPlan?.id === plan.id;
-            return (
-              <Card key={plan.id} className="gap-3 rounded-lg border-white/10 bg-white/5 text-white shadow-glassy-jeri ring-0">
-                <CardHeader className="flex-row items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-medium">{plan.name}</h2>
-                    <p className="text-sm text-white/55">{plan.type}</p>
-                  </div>
-                  {isCurrent && <span className="rounded-md border border-blue-400/30 bg-blue-400/10 px-2 py-1 text-xs text-blue-200">Current</span>}
-                </CardHeader>
-                <CardContent className="flex flex-col gap-4">
-                  <p className="text-3xl font-semibold tabular-nums">₱{((plan.cost ?? 0) / 100).toLocaleString("en-PH", { minimumFractionDigits: 2 })}<span className="ml-1 text-sm font-normal text-white/45">/month</span></p>
-                  <p className="text-sm text-white/65">{plan.speed ?? "Speed details unavailable"}</p>
-                  <Button variant={isRequestedPlan ? "outline" : "default"} disabled={isCurrent || Boolean(pendingRequest) || Boolean(submittingPlanId)} onClick={() => void requestPlan(plan.id)}>
-                    {isCurrent ? "Current Plan" : submittingPlanId === plan.id ? "Submitting..." : isRequestedPlan ? "Request Pending" : "Request Plan Change"}
-                  </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
+      <div className="mt-5 flex w-full flex-col gap-10">
+        <div className="flex flex-row gap-3 rounded-2xl bg-amber-400/20 p-3 text-amber-400 shadow-glassy-jeri">
+          <span aria-hidden="true" className="text-xl">⚡</span>
+          <p>{pendingRequest ? `A request for ${pendingRequest.finalPlan?.name ?? "a plan change"} is awaiting review.` : "Upgrades to 200 Mbps or below take effect within 30 minutes - no technician needed. Downgrades have a 30-day lock-in."}</p>
         </div>
-      )}
+        {isLoading ? <p className="text-white/60">Loading plans...</p> : plans.length === 0 ? (
+          <p className="text-white/60">No active plans are available.</p>
+        ) : (
+          <div className="flex flex-row gap-5 max-sm:flex-col max-sm:gap-4">
+            {plans.map((plan) => {
+              const isCurrent = plan.id === currentPlanId;
+              const isRequestedPlan = pendingRequest?.finalPlan?.id === plan.id;
+              return (
+                <Card key={plan.id} className={`ml-2 flex-1 bg-white/5 shadow-glassy-jeri ring-0 max-sm:ml-0 max-sm:w-full ${isCurrent ? "ring-1 ring-blue-500" : ""}`}>
+                  <CardHeader className="flex-row place-content-between">
+                    {isCurrent && <span className="rounded-md bg-blue-500/20 px-4 py-1 text-blue-500 ring-1 ring-blue-500/80">Current Plan</span>}
+                    {isRequestedPlan && <span className="rounded-md bg-emerald-500/20 px-4 py-1 text-emerald-500 ring-1 ring-emerald-500/80">Request Submitted</span>}
+                  </CardHeader>
+                  <CardContent className="flex flex-col gap-y-10">
+                    <span className="flex flex-col gap-y-4">
+                      <p className="text-2xl">{plan.name}</p>
+                      <span className="flex flex-row">
+                        <p className="text-5xl tabular-nums">₱{((plan.cost ?? 0) / 100).toLocaleString("en-PH", { minimumFractionDigits: 2 })}</p>
+                        <p className="self-end text-xl opacity-40">/mo</p>
+                      </span>
+                    </span>
+                    <div className="flex h-40 flex-row rounded-2xl bg-black/30 shadow-glassy-jeri">
+                      <span className="flex w-[50%] flex-col items-center justify-center text-center">
+                        <p className="bg-linear-to-r from-teal-400 from-50% to-blue-600 bg-clip-text text-3xl font-normal text-transparent">{plan.speed ?? "N/A"}</p>
+                        <p className="font-normal opacity-40">Download</p>
+                      </span>
+                      <Separator orientation="vertical" className="my-4 w-[1.5px] bg-white/10" />
+                      <span className="flex w-[50%] flex-col items-center justify-center text-center">
+                        <p className="bg-linear-to-r from-teal-400 from-50% to-blue-600 bg-clip-text text-3xl font-normal text-transparent">{plan.type}</p>
+                        <p className="font-normal opacity-40">Plan type</p>
+                      </span>
+                    </div>
+                    {isCurrent ? (
+                      <div className="flex justify-center rounded-2xl bg-black/30 p-5 shadow-glassy-jeri">
+                        <p className="text-2xl tracking-widest opacity-40">Current Plan</p>
+                      </div>
+                    ) : isRequestedPlan ? (
+                      <div className="flex justify-center rounded-2xl bg-emerald-500/20 p-5 shadow-glassy-jeri ring-1 ring-emerald-500">
+                        <p className="text-2xl font-normal tracking-widest text-emerald-500">Request Submitted</p>
+                      </div>
+                    ) : (
+                      <Button variant="ghost" disabled={Boolean(pendingRequest) || Boolean(submittingPlanId)} onClick={() => void requestPlan(plan.id)} className="h-auto justify-center rounded-2xl bg-blue-500/70 p-5 text-2xl font-normal tracking-widest hover:bg-blue-500/80">
+                        {submittingPlanId === plan.id ? "Submitting..." : "Upgrade to This Plan"}
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </div>
       {requests.length > 0 && (
         <section className="mt-8 border-t border-white/10 pt-5">
           <h2 className="mb-3 text-lg font-medium">Request history</h2>

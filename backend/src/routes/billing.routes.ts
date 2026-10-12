@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { requireAuth, requireRole } from '../middleware/authMiddleware.js';
-import { getBillingSummary, issueCreditNote, listBillingInvoices, runBillingCycle } from '../services/billing.service.js';
+import { deleteBillingInvoice, getBillingSummary, issueCreditNote, listBillingInvoices, runBillingCycle } from '../services/billing.service.js';
 import { enqueuePastDueSuspensions } from '../services/billing.worker.js';
 
 export const billingRouter = Router();
@@ -88,6 +88,20 @@ billingRouter.post('/invoices/:invoiceId/credit-notes', async (req, res, next) =
     }
     if (error instanceof Error && error.message.startsWith('Credit amount')) {
       res.status(409).json({ message: error.message });
+      return;
+    }
+    next(error);
+  }
+});
+
+billingRouter.delete('/invoices/:invoiceId', async (req, res, next) => {
+  try {
+    const invoiceId = Array.isArray(req.params.invoiceId) ? req.params.invoiceId[0] : req.params.invoiceId;
+    const data = await deleteBillingInvoice(invoiceId);
+    res.status(200).json({ data, message: 'Invoice removed' });
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Invoice not found') {
+      res.status(404).json({ message: error.message });
       return;
     }
     next(error);

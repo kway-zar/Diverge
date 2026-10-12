@@ -11,6 +11,7 @@
     "prisma:push": "prisma db push",
     "prisma:studio": "prisma studio",
     "prisma:validate": "prisma validate",
+    "invoices:normalize": "tsx prisma/normalize-invoice-numbers.ts",
     "prisma:seed": "prisma db seed"
   },
   "prisma": {

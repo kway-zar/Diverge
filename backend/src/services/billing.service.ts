@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 
 import { prisma } from '../db/prisma.js';
+import { getNextInvoiceNumber } from '../utils/invoice-number.js';
 
 const CENTS_PER_PESO = 100;
 
@@ -160,6 +161,28 @@ export async function listBillingInvoices(options: {
   };
 }
 
+export async function deleteBillingInvoice(invoiceKey: string) {
+  const lookup = /^[0-9a-fA-F]{24}$/.test(invoiceKey.trim())
+    ? { id: invoiceKey.trim() }
+    : { invoiceNumber: invoiceKey.trim() };
+
+  return prisma.$transaction(async (transaction) => {
+    const invoice = await transaction.invoice.findFirst({ where: lookup });
+    if (!invoice) throw new Error('Invoice not found');
+
+    await transaction.payment.deleteMany({ where: { invoiceId: invoice.id } });
+    await transaction.invoiceLineItem.deleteMany({ where: { invoiceId: invoice.id } });
+    await transaction.creditNote.deleteMany({ where: { invoiceId: invoice.id } });
+    await transaction.billingRunItem.updateMany({
+      where: { invoiceId: invoice.id },
+      data: { invoiceId: null },
+    });
+    await transaction.invoice.delete({ where: { id: invoice.id } });
+
+    return { id: invoice.id, invoiceNumber: invoice.invoiceNumber };
+  });
+}
+
 export async function issueCreditNote(invoiceKey: string, amount: number, reason: string, createdById: string) {
   const trimmedKey = invoiceKey.trim();
   const lookup = /^[0-9a-fA-F]{24}$/.test(trimmedKey)
@@ -291,10 +314,9 @@ export async function runBillingCycle(period: string, requestedByUserId: string)
     }
 
     const dueDate = dueDateForMonth(year, month - 1, subscription.billingDay);
-    const invoiceNumber = `INV-${period.replace('-', '')}-${subscription.id.toUpperCase()}`;
-
     try {
       const invoice = await prisma.$transaction(async (transaction) => {
+        const invoiceNumber = await getNextInvoiceNumber(transaction, period);
         const createdInvoice = await transaction.invoice.create({
           data: {
             customerId: subscription.customerId,

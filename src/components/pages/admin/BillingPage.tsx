@@ -1,9 +1,19 @@
 import { useEffect, useState } from "react";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import BillingStatus from "../../modals/BillingStatus";
 import type { Invoice } from "../../types/invoice";
 import { publishDataChange, useDataRefresh } from "@/hooks/useDataRefresh";
@@ -55,6 +65,8 @@ function BillingPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [notice, setNotice] = useState("");
   const [isRunningSuspension, setIsRunningSuspension] = useState(false);
+  const [removingInvoiceID, setRemovingInvoiceID] = useState("");
+  const [invoiceToRemove, setInvoiceToRemove] = useState<string | null>(null);
 
   const loadBillingData = async () => {
     const token = localStorage.getItem("diverge_token");
@@ -170,6 +182,32 @@ function BillingPage() {
       setErrorMessage(error instanceof Error ? error.message : "BR-01 suspension scan failed.");
     } finally {
       setIsRunningSuspension(false);
+    }
+  };
+
+  const handleRemoveInvoice = async (invoiceID: string) => {
+    const token = localStorage.getItem("diverge_token");
+    if (!token) return;
+
+    setRemovingInvoiceID(invoiceID);
+    setErrorMessage("");
+    setNotice("");
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/admin/billing/invoices/${encodeURIComponent(invoiceID)}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.message ?? "Unable to remove invoice.");
+      setSelectedInvoice(null);
+      setIsModalOpen(false);
+      setNotice(payload?.message ?? "Invoice removed.");
+      publishDataChange();
+      await loadBillingData();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Unable to remove invoice.");
+    } finally {
+      setRemovingInvoiceID("");
     }
   };
 
@@ -309,7 +347,7 @@ function BillingPage() {
           <Table className="w-full text-xs">
             <TableHeader>
               <TableRow className="border-b border-white/10 hover:bg-transparent">
-                {["INVOICE ID", "ACCOUNT", "PLAN", "AMOUNT", "DUE DATE", "PAYMENT METHOD", "STATUS"].map((heading) => (
+                {["INVOICE ID", "ACCOUNT", "PLAN", "AMOUNT", "DUE DATE", "PAYMENT METHOD", "STATUS", "ACTION"].map((heading) => (
                   <TableHead key={heading} className="text-center text-[16px] font-light leading-[100%] tracking-[0.05em] text-white opacity-40">{heading}</TableHead>
                 ))}
               </TableRow>
@@ -335,11 +373,26 @@ function BillingPage() {
                       {invoice.status}
                     </span>
                   </TableCell>
+                  <TableCell className="py-3 text-center">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      disabled={Boolean(removingInvoiceID)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setInvoiceToRemove(invoice.invoiceID);
+                      }}
+                      title="Remove invoice"
+                      aria-label={`Remove invoice ${invoice.invoiceID}`}
+                    >
+                      <Trash2 aria-hidden="true" className="size-4" />
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
               {!invoices.length && (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-10 text-center text-white/50">
+                  <TableCell colSpan={8} className="py-10 text-center text-white/50">
                     {isLoading ? "Loading invoices..." : "No invoices found for this page."}
                   </TableCell>
                 </TableRow>
@@ -362,6 +415,29 @@ function BillingPage() {
         onClose={() => setIsModalOpen(false)}
         onIssueCreditNote={handleIssueCreditNote}
       />
+      <AlertDialog open={invoiceToRemove !== null} onOpenChange={(open) => !open && setInvoiceToRemove(null)}>
+        <AlertDialogContent className="border border-white/10 bg-[#121212] text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove invoice?</AlertDialogTitle>
+            <AlertDialogDescription className="text-white/60">
+              This will remove invoice {invoiceToRemove ?? ""} and its payment and credit records. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setInvoiceToRemove(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 text-white hover:bg-red-700"
+              onClick={() => {
+                const invoiceID = invoiceToRemove;
+                setInvoiceToRemove(null);
+                if (invoiceID) void handleRemoveInvoice(invoiceID);
+              }}
+            >
+              Remove invoice
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
