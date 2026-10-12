@@ -47,8 +47,8 @@ function Maps() {
       {isLoading ? <p className="text-white/60">Loading assigned jobs...</p> : jobs.length === 0 ? (
         <p className="rounded-lg border border-white/10 bg-white/5 p-5 text-white/60">No assigned jobs have an address to navigate to.</p>
       ) : (
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.8fr)]">
-          <div className="flex flex-col gap-3">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.8fr)] ">
+          <div className="flex flex-col gap-3 ">
             {jobs.map((job) => (
               <button key={job.id} type="button" onClick={() => setSelected(job)} className={`rounded-lg border p-4 text-left transition ${selected?.id === job.id ? "border-[#3acf98]/60 bg-[#3acf98]/10" : "border-white/10 bg-white/5 hover:bg-white/10"}`}>
                 <span className="font-mono text-sm text-[#3acf98]">{job.ticketID}</span>
@@ -59,7 +59,7 @@ function Maps() {
             ))}
           </div>
           {selected && (
-            <section className="flex flex-col justify-between gap-5 rounded-lg border border-white/10 bg-white/5 p-5">
+            <section className="flex flex-col justify-between gap-5 rounded-lg border border-white/10 bg-white/5 shadow-glassy-jeri p-5">
               <div>
                 <p className="font-mono text-sm text-[#3acf98]">{selected.ticketID} · {selected.priority}</p>
                 <h2 className="mt-2 text-xl font-medium">{selected.subscriber}</h2>

@@ -58,7 +58,7 @@ function Evaluation() {
       {errorMessage && <p role="alert" className="mb-4 text-sm text-red-300">{errorMessage}</p>}
       {isLoading ? <p className="text-white/60">Loading evaluations...</p> : evaluation && (
         <>
-          <section className="flex flex-col gap-5 rounded-lg border border-white/10 bg-white/5 p-5 lg:flex-row lg:items-center lg:p-8">
+          <section className="flex flex-col gap-5 rounded-lg border border-white/10 bg-white/5 shadow-glassy-jeri p-5 lg:flex-row lg:items-center lg:p-8">
             <div className="flex shrink-0 flex-col items-center gap-1 lg:items-start">
               <span className="text-4xl font-medium">{evaluation.reviewCount ? evaluation.averageRating.toFixed(1) : "—"}</span>
               <Stars count={Math.round(evaluation.averageRating)} size={18} />
@@ -77,7 +77,7 @@ function Evaluation() {
             </div>
           </section>
 
-          <section className="mt-5 rounded-lg border border-white/10 bg-white/5 p-5">
+          <section className="mt-5 rounded-lg border border-white/10 bg-white/5 shadow-glassy-jeri p-5">
             <h2 className="mb-4 text-lg font-medium">Performance</h2>
             <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3">
               <div><dt className="text-xs text-white/50">Resolved jobs</dt><dd className="mt-1 text-2xl font-semibold">{evaluation.completedJobsCount}</dd></div>
@@ -90,7 +90,7 @@ function Evaluation() {
             <h2 className="mb-3 text-lg font-medium">Customer Feedback</h2>
             <div className="flex flex-col gap-3">
               {evaluation.reviews.map((review) => (
-                <article key={review.id} className="rounded-lg border border-white/10 bg-white/5 p-4">
+                <article key={review.id} className="rounded-lg border border-white/10 bg-white/5 shadow-glassy-jeri p-4">
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-sm font-medium">{review.reviewer}</span>
                     <time className="text-xs text-white/50">{new Date(review.date).toLocaleDateString()}</time>

@@ -136,14 +136,14 @@ function Jobs() {
   }
  
   return (
-    <div className="w-full px-4 pb-10 text-left text-white lg:px-10">
+    <div className="w-full px-4 pb-10 text-left text-white lg:px-10   ">
       <div className="mb-4 mt-2">
         <h1 className="text-xl font-bold tracking-wider text-white">My Jobs</h1>
         <p className="font-mono text-xs italic text-white opacity-30">{today}</p>
       </div>
  
       {/* Technician profile */}
-      <div className="flex min-h-[110px] items-center justify-between rounded-[14px] border border-[#7e7e7e] bg-white/20 px-5 lg:px-8">
+      <div className="flex min-h-[110px] items-center justify-between rounded-[14px] border  border-white/10 bg-white/5 shadow-glassy-jeri px-5 lg:px-8">
         <div className="flex items-center gap-4">
           <div className="size-[60px] shrink-0 rounded-full bg-[#D9D9D9]" />
           <div>
@@ -177,13 +177,13 @@ function Jobs() {
       <h2 className="mb-3 mt-4 text-lg font-medium tracking-[1px] text-[#fffefe] lg:text-xl">
         Active({jobs.length})
       </h2>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 ">
         {isLoading && <p className="text-white/60">Loading assigned jobs...</p>}
         {!isLoading && jobs.length === 0 && <p className="text-white/60">No active jobs right now.</p>}
         {jobs.map((job) => {
           const breached = job.timeLeft === "BREACHED"
           return (
-            <div key={job.ticketID} className="rounded-[14px] border border-[#7e7e7e] bg-white/20 px-5 py-5 lg:px-8">
+            <div key={job.ticketID} className="rounded-[14px] border border-white/10 bg-white/5 shadow-glassy-jeri px-5 py-5 lg:px-8">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -266,14 +266,14 @@ function Jobs() {
       </div>
  
       {/* Completed today */}
-      <h2 className="mb-3 mt-6 text-lg font-medium tracking-[1px] text-[#fffefe] lg:text-xl">
+      <h2 className="mb-3 mt-6 text-lg font-medium tracking-[1px] text-[#fffefe] lg:text-xl ">
         Completed Today ({completed.length})
       </h2>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 ">
         {completed.map((job) => (
           <div
             key={job.ticketID}
-            className="flex items-center gap-5 rounded-[14px] border border-[#7e7e7e] bg-white/20 px-5 py-3 opacity-70"
+            className="flex items-center gap-5 rounded-[14px] border border-white/10 bg-white/5 shadow-glassy-jeri px-5 py-3 opacity-70"
           >
             <div className="flex w-[120px] shrink-0 justify-center">
               <span
