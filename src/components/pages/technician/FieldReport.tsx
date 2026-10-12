@@ -107,9 +107,9 @@ function FieldReport() {
       <h1 className="mb-4 text-xl font-bold tracking-wider">Field Report</h1>
       {errorMessage && <p role="alert" className="mb-3 text-sm text-red-300">{errorMessage}</p>}
       {isLoading ? <p className="text-white/60">Loading assigned jobs...</p> : jobs.length === 0 ? (
-        <p className="rounded-lg border border-white/10 bg-white/5 p-5 text-white/60">There are no assigned jobs to report.</p>
+        <p className="rounded-lg border border-white/10 bg-white/5 shadow-glassy-jeri p-5 text-white/60">There are no assigned jobs to report.</p>
       ) : (
-        <div className="flex max-w-3xl flex-col gap-4 rounded-xl border border-white/10 bg-white/5 p-5 lg:p-8">
+        <div className="flex max-w-3xl flex-col gap-4 rounded-xl border border-white/10 bg-white/5 shadow-glassy-jeri p-5 lg:p-8">
           <label className="flex flex-col gap-2 text-sm text-white/70">
             Assigned job
             <select value={ticketID} onChange={(event) => setTicketID(event.target.value)} className="h-10 rounded-md border border-white/15 bg-[#202020] px-3 text-white">
