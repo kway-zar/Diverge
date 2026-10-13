@@ -44,14 +44,14 @@ function TechnicianEvaluation({ ticket, onSubmitted }: { ticket: Tickets; onSubm
 
   return (
     <form onSubmit={submitEvaluation} className="mt-4 flex flex-col gap-3 border-t border-white/10 pt-4">
-      <h3 className="text-sm font-medium">Evaluate {ticket.assignedTo}</h3>
+      <h3 className="text-sm font-medium text-left">Evaluate {ticket.assignedTo}</h3>
       <label className="flex items-center gap-2 text-sm text-white/70">
         Rating
         <select value={rating} onChange={(event) => setRating(Number(event.target.value))} className="h-9 rounded-md border border-white/15 bg-[#202020] px-2 text-white">
           {[5, 4, 3, 2, 1].map((value) => <option key={value} value={value}>{value} star{value === 1 ? "" : "s"}</option>)}
         </select>
       </label>
-      <label className="flex flex-col gap-1 text-sm text-white/70">
+      <label className="flex flex-col gap-1 text-sm text-white/70 text-left">
         Comment
         <textarea value={comment} onChange={(event) => setComment(event.target.value)} required minLength={5} maxLength={1000} rows={2} className="rounded-md border border-white/15 bg-white/5 p-2 text-white" placeholder="Describe your service experience" />
       </label>
@@ -138,7 +138,7 @@ function CustomerTickets() {
               >
                 <h1 className="font-mono text-emerald-400 text-start">{ticket.ticketID}</h1>
                 <div className="justify-between items-center w-full flex gap-4">
-                  <h2 className="min-w-0 flex-1 truncate font-bold text-[20px]">{ticket.issue}</h2>
+                  <h2 className="min-w-0 flex-1 truncate font-bold text-[20px] text-left">{ticket.issue}</h2>
                   <span className={`h-8 flex items-center justify-center px-3 font-ubuntu border-2 text-[12px] whitespace-nowrap rounded-[12px] shadow-glassy-jeri ${getStatusBadge(ticket.status)}`}>
                     {ticket.status}
                   </span>

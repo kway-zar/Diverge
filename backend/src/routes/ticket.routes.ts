@@ -25,6 +25,7 @@ function toTicketResponse(ticket: {
 }) {
   return {
     id: ticket.id,
+    ticketID: ticket.ticketNumber,
     customerId: ticket.customer.id,
     subscriber: ticket.customer.name,
     issue: ticket.issue,

@@ -85,7 +85,8 @@ function Technicians() {
             title: "TOP PERFORMER",
             value: topPerformer?.name ?? "-",
             description: "Highest current rating",
-            valueColor: "#3ACF98"
+            valueColor: "#3ACF98",
+
         }
     ]
     const statusStyles: Record<EngineerStatus, {
@@ -253,10 +254,10 @@ function Technicians() {
                                 </div>
                             </div>
                             <Tabs defaultValue="overview" className="mt-5 w-full">
-                                <TabsList className="rounded-[10px] ml-15 shadow-glassy-jeri gap-5 h-auto p-1 bg-transparent">
-                                    <TabsTrigger value="overview" className="px-4 py-1.5 h-full flex-1 border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em ] cursor-pointer data-active:rounded-[10px] border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Overview</TabsTrigger>
-                                    <TabsTrigger value="field-reports" className="px-4 py-1.5 h-full flex-1 border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-[10px] border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Field Reports</TabsTrigger>
-                                    <TabsTrigger value="reviews" className="px-4 py-1.5 h-full flex-1 border- text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-[10px] border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Reviews</TabsTrigger>
+                                <TabsList className="ml-15 h-auto bg-transparent">
+                                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                                    <TabsTrigger value="field-reports">Field Reports</TabsTrigger>
+                                    <TabsTrigger value="reviews">Reviews</TabsTrigger>
                                 </TabsList>
                                 <TabsContent value="overview"   className="ml-5">
                                 <TechnicianOverview engineer={selectedEngineer}/>

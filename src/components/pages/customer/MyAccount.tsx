@@ -106,7 +106,7 @@ function MyAccount() {
         <Card className="w-[60%] font-ubuntu-mono mr-4 ring-0 shadow-glassy-jeri bg-white/5 max-sm:w-full max-sm:mr-0">
           <CardHeader className="flex flex-row place-content-between mx-5 text-2xl">
             <p>Current Plan</p>
-            <div className='p-2 text-base bg-linear-to-b from-emerald-500/40 from-0% to-emerald-500/10 ring-emerald-500 ring-1 rounded-md px-5 text-emerald-500'>{account.planStatus}</div>
+            <div className='p-2 text-base whitespace-nowrap rounded-[12px] shadow-glassy-jeri bg-emerald-500/10 text-emerald-400 border-emerald-500/60 border-1'>{account.planStatus}</div>
           </CardHeader>
           <CardContent className="ml-5 flex flex-col gap-4">
             <div className="flex flex-row w-full place-content-between">

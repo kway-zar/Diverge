@@ -15,9 +15,9 @@ function SupportTicket() {
                 </p>
             </div>
             <Tabs defaultValue="technicians" className="w-full mt-10 ">
-                <TabsList className="shadow-glassy-jeri p-1 rounded-4xl w-[386px] h-[55px] rounded-full bg-transparent">
-                    <TabsTrigger value="technicians" className="h-full flex-1 rounded-full border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em ] cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">TECHNICIANS</TabsTrigger>
-                    <TabsTrigger value="field-engineers" className="h-full flex-1 rounded-full border-0 text-[20px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-full data-active:p-3 border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">FIELD ENGINEERS</TabsTrigger>
+                <TabsList className="w-[386px] h-[55px] bg-transparent">
+                    <TabsTrigger value="technicians">TECHNICIANS</TabsTrigger>
+                    <TabsTrigger value="field-engineers">FIELD ENGINEERS</TabsTrigger>
                 </TabsList>
                 <TabsContent value="technicians" className="flex flex-col left-0">
                     <Technicians/>

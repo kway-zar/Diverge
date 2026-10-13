@@ -95,8 +95,8 @@ function UpgradeReqTab() {
                 </TableCell>
                 <TableCell className="whitespace-nowrap text-center font-mono font-light text-[#C4C4C4]">
                   {request.status === "PENDING" ? <div className="flex justify-center gap-2">
-                    <Button size="sm" disabled={Boolean(loadingId)} onClick={() => void reviewRequest(request.id, "APPROVED")} className="bg-linear-to-b from-emerald-300/40 from-10% to-emerald-300/10 text-emerald-500 shadow-glassy-jeri">{loadingId === request.id ? "Saving..." : "Approve"}</Button>
-                    <Button size="sm" variant="outline" disabled={Boolean(loadingId)} onClick={() => void reviewRequest(request.id, "ON_HOLD")} className="bg-linear-to-b from-rose-400/20 from-10% to-rose-300/10 shadow-glassy-jeri">Hold</Button>
+                    <Button disabled={Boolean(loadingId)} onClick={() => void reviewRequest(request.id, "APPROVED")} className="mr-5 h-8 rounded-md bg-emerald-900 px-2 shadow-glassy-jeri">{loadingId === request.id ? "Saving..." : "Approve"}</Button>
+                    <Button disabled={Boolean(loadingId)} onClick={() => void reviewRequest(request.id, "ON_HOLD")} className="mr-5 h-8 rounded-md bg-red-900 px-2 shadow-glassy-jeri">Hold</Button>
                   </div> : "-"}
                 </TableCell>
               </TableRow>

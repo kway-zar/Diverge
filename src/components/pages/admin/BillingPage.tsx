@@ -343,7 +343,7 @@ function BillingPage() {
         <h2 className="mb-3 text-left text-[24px] font-medium italic leading-[100%] tracking-[0.05em] text-white opacity-40">
           Invoices
         </h2>
-        <div className="w-full overflow-x-auto rounded-[16px] border border-white/10 bg-[#121212] px-6 py-3 shadow-2xl">
+        <div className="w-full overflow-x-auto rounded-[16px] border border-white/10 bg-white/5 px-6 py-3 shadow-glassy-jeri">
           <Table className="w-full text-xs">
             <TableHeader>
               <TableRow className="border-b border-white/10 hover:bg-transparent">

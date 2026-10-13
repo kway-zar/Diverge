@@ -69,9 +69,9 @@ function FieldEngineers() {
                 })}
             </div>
             <Tabs defaultValue="roster" className="mt-5 w-full">
-                <TabsList className="rounded-[10px] ml-15 shadow-glassy-jeri gap-3 h-auto p-1 bg-transparent">
-                    <TabsTrigger value="roster" className="px-4 py-1 h-full flex-1 border-0 text-[16px] font-regular text-[#FFFFFF] tracking-[0.05em ] cursor-pointer data-active:rounded-[10px] border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Roster</TabsTrigger>
-                    <TabsTrigger value="map-view" className="px-4 py-1 h-full flex-1 border-0 text-[16px] font-regular text-[#FFFFFF] tracking-[0.05em] cursor-pointer data-active:rounded-[10px] border-0 data-active:bg-linear-to-b from-neutral-500 from-40% to-transparent data-active:shadow-glassy-jeri">Map View</TabsTrigger>
+                <TabsList className="ml-15 h-auto bg-transparent">
+                    <TabsTrigger value="roster">Roster</TabsTrigger>
+                    <TabsTrigger value="map-view">Map View</TabsTrigger>
                 </TabsList>
                 <TabsContent value="roster"  className="ml-5">
                     <Roster engineers={activeStatusFilter ? engineers.filter((engineer) => engineer.status === activeStatusFilter) : engineers} onUpdated={() => void loadEngineers()} />

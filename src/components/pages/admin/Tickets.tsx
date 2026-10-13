@@ -160,6 +160,21 @@ function Tickets() {
     }
   }
 
+  function getPrioritySelectStyles(priority: Ticket["priority"]) {
+    switch (priority) {
+      case "Low":
+        return "border-emerald-500/60 bg-emerald-500/10 text-emerald-300";
+      case "Medium":
+        return "border-amber-500/60 bg-amber-500/10 text-amber-300";
+      case "High":
+        return "border-orange-500/60 bg-orange-500/10 text-orange-300";
+      case "Critical":
+        return "border-red-500/60 bg-red-500/10 text-red-300";
+      default:
+        return "border-white/15 bg-[#202020] text-[#C4C4C4]";
+    }
+  }
+
   const openCount = tickets.filter((ticket) => ticket.status === "Open").length;
   const inProgressCount = tickets.filter((ticket) => ticket.status === "In Progress").length;
   const resolvedCount = tickets.filter((ticket) => ticket.status === "Resolved" && new Date(ticket.updated).toDateString() === new Date().toDateString()).length;
@@ -334,7 +349,7 @@ function Tickets() {
                           value={ticket.priority}
                           onClick={(event) => event.stopPropagation()}
                           onChange={(event) => void updatePriority(ticket, event.target.value as Ticket["priority"])}
-                          className="h-8 rounded-md border border-white/15 bg-[#202020] px-2 text-xs text-[#C4C4C4]"
+                          className={`h-8 cursor-pointer rounded-md border px-2 text-xs transition-colors ${getPrioritySelectStyles(ticket.priority)}`}
                         >
                           {["Low", "Medium", "High", "Critical"].map((priority) => <option key={priority} value={priority} className="bg-[#202020] text-[#C4C4C4]">{priority}</option>)}
                         </select>
