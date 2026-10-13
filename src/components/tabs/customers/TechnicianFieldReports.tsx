@@ -26,7 +26,7 @@ function TechnicianFieldReports({engineer}: TechnicianFieldReportsProps) {
                             <p className="text-[16px] font-regular text-[#FFFFFF]/60 tracking-[0.05em] leading-[100%]">
                                 {report.date}
                             </p>
-                            <span className="w-[100px] h-[30px] rounded-[10px] border-[1px] border-[#3ACF98] bg-[#4BE0A9]/20 flex items-center justify-center text-[13px] text-[#3ACF98] font-regular ">
+                            <span className="w-[100px] h-[30px] rounded-[10px] border-[1px] border-[#3ACF98] bg-[#4BE0A9]/20 flex items-center justify-center text-[8px] px-2 text-[#3ACF98] font-regular ">
                                 {report.status}
                             </span>
                         </div>

@@ -253,8 +253,8 @@ function Technicians() {
                                     </span>
                                 </div>
                             </div>
-                            <Tabs defaultValue="overview" className="mt-5 w-full">
-                                <TabsList className="ml-15 h-auto bg-transparent">
+                            <Tabs defaultValue="overview" className="mt-5">
+                                <TabsList className="ml-15 w-100 h-auto bg-transparent">
                                     <TabsTrigger value="overview">Overview</TabsTrigger>
                                     <TabsTrigger value="field-reports">Field Reports</TabsTrigger>
                                     <TabsTrigger value="reviews">Reviews</TabsTrigger>
